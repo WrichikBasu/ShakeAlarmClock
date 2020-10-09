@@ -1,0 +1,159 @@
+<resources>
+    <string name="app_name">Shake Alarm Clock</string>
+
+    <!-- Activity_AlarmsList -->
+    <string name="no_alarm">No alarms to show!</string>
+    <string name="addAlarm">Add</string>
+    <string name="settingsMenuItem">Settings</string>
+
+    <!-- Activity_AlarmDetails -->
+    <string name="actionBarTitle_newAlarm">New alarm</string>
+    <string name="actionBarTitle_snoozeOptions">Snooze options</string>
+    <string name="actionBarTitle_repeatOptions">Repeat options</string>
+    <string name="actionBarTitle_dateOptions">Alarm date</string>
+
+    <!-- Fragment_AlarmDetails_Main -->
+    <string name="saveButton">SAVE</string>
+    <string name="cancelButton">Cancel</string>
+
+    <string name="repeatButton">Repeat:</string>
+    <string name="repeatNone">Off</string>
+    <string name="alarmType">Alarm type:</string>
+    <string name="alarmVolumeLabel">Alarm Volume:</string>
+    <string name="snoozeLabel">Snooze:</string>
+    <string name="snoozeOffLabel">Off</string>
+    <string name="alarmDateLabel">Alarm date:</string>
+    <string name="alarmDate">%te\u0020%tm,\u0020%tY</string>
+
+    <string-array name="alarmTypeSpinnerEntries">
+        <item>Sound</item>
+        <item>Vibrate</item>
+        <item>Sound &amp; Vibrate</item>
+    </string-array>
+
+    <string name="snoozeOptionsTV_snoozeOn">%d mins, %d times</string>
+    <string name="alarmToneLabel">Alarm tone:</string>
+
+    <!-- Fragment_AlarmDetails_Snooze-->
+    <string name="switchOn">On</string>
+    <string name="switchOff">Off</string>
+
+    <string name="snoozeFrequencyLabel">Snooze frequency:</string>
+    <string name="snoozeFreq_three">3 times</string>
+    <string name="snoozeFreq_five">5 times</string>
+    <string name="snoozeFreq_ten">10 times</string>
+    <string name="snoozeFreq_custom">Custom frequency:</string>
+    <string name="snoozeFreq_customHint">Enter a number</string>
+
+    <string name="snoozeIntervalLabel">Snooze interval:</string>
+    <string name="snoozeInterval_five">5 minutes</string>
+    <string name="snoozeInterval_ten">10 minutes</string>
+    <string name="snoozeInterval_fifteen">15 minutes</string>
+    <string name="snoozeInterval_custom">Custom interval (in mins):</string>
+    <string name="snoozeInterval_customHint">Enter interval</string>
+
+    <!-- AlarmAdapter -->
+    <string name="sound">Sound</string>
+    <string name="vibrate">Vibrate</string>
+    <string name="sound_and_vibrate">Sound &amp; Vibrate</string>
+
+    <string name="time_24hour">%02d:%02d</string>
+    <string name="time_12hour">%d:%02d\u0020%s</string>
+    <string name="date">%s,\u0020%02d\u0020%s</string>
+
+    <!-- Activity_RingAlarm-->
+    <string name="alarmMessage">Alarm</string>
+    <string name="alarmTime_24hour">%02d:%02d</string>
+    <string name="snoozeAlarm">Snooze</string>
+
+    <!-- Fragment_AlarmDetails_DatePicker-->
+    <string name="pickDateLabel">Pick a date:</string>
+
+    <!-- Fragment_AlarmDetails_RepeatOptions-->
+    <string name="sunday">Sunday</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+
+    <!-- Service_RingAlarm -->
+    <string name="notifContent_ring">Alarm ringing. Tap to launch alarm screen.</string>
+    <string name="notifContent_snooze">Alarm snoozed. Tap to dismiss it.</string>
+
+    <!-- Activity_RingtonePicker -->
+    <string name="chooseCustomTone">Choose from storage</string>
+    <string name="defaultTone">Default</string>
+    <string name="silentTone">Silent</string>
+
+    <!-- AlertDialog_DiscardChanges -->
+    <string name="cancelDialogMessage">Discard changes?</string>
+    <string name="cancelDialog_positive">Yes</string>
+    <string name="cancelDialog_negative">No</string>
+
+    <!-- AlertDialog_PermissionReason -->
+    <string name="permissionReasonExp_normal">This app needs permission to read your device storage so that
+    it can read and play the alarm sound. Without this permission, the app may fail to ring the alarm. Give the permission?</string>
+
+    <string name="permissionReasonExp_ringtonePicker">This app needs permission to read your device storage
+        so that it can read the tones. Without this permission, the app will not work. Give the permission?</string>
+
+    <!-- Activity_Settings -->
+    <string name="shakeOp">If I <b>shake</b> the phone when an alarm rings,</string>
+    <string name="powerBtnOp">If I press the <b>power button</b> when an alarm rings,</string>
+    <string-array name="shakeAndPowerOptions">
+        <item>Snooze the alarm.</item>
+        <item>Dismiss the alarm.</item>
+        <item>Do nothing.</item>
+    </string-array>
+    <string name="settings_snoozeOps"><b>Default snooze options</b>\n(These will be the default snooze options
+        when you create a new alarm.)</string>
+    <string name="settings_snoozeInterval">Snooze interval in minutes:</string>
+    <string name="settings_snoozeFreq">Snooze frequency:</string>
+
+    <string name="settings_theme">Choose the theme:</string>
+    <string-array name="themeOptions_noSystem">
+        <item>According to time</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+    <string-array name="themeOptions_all">
+        <item>According to time</item>
+        <item>Light</item>
+        <item>Dark</item>
+        <item>Set by system</item>
+    </string-array>
+
+    <string name="settings_toneUri">Default alarm tone:</string>
+    <string name="settings_volume">Default alarm volume:</string>
+    <string name="settings_toneCheckbox">Automatically set new tones I select as default tones</string>
+
+    <!-- Service_UpdateAlarm -->
+    <string name="updateAlarm_notifMessage">Activating alarms. This may take a while…</string>
+
+    <!-- Activity_Plugin -->
+    <string name="actionBarTitle_pluginAct">Install plugin</string>
+    <string name="plugin_explanation">You have installed this app in the SD card. After each reboot, Android deletes
+        all alarms set by an app. If your device reboots when you have already set alarms, this app will fail to
+        set the alarms again, because Android will not notify the app that the device has rebooted. Therefore,
+    please move this app to the internal storage, or install the following plugin:</string>
+
+    <string name="downloadPlugin">Shake Alarm Clock Plugin</string>
+
+    <string name="plugin_explanation2">Once you have downloaded and installed the plugin, or if you already
+    the plugin installed, please click on the following button to let the app detect the plugin.</string>
+
+    <string name="detectPlugin">Detect plugin</string>
+
+    <string name="plugin_available">Plugin is available on your device, and has been successfully initialized.</string>
+    <string name="plugin_unavailable">The plugin is not available on your device. If you have installed it, try
+    uninstalling and re-installing it.</string>
+
+    <!-- Permission -->
+    <string name="permissionlabel">start Shake Alarm Clock</string>
+    <string name="permissionDesc">Allows the Shake Alarm Clock Plugin to start the main Shake Alarm Clock app
+    when it detects that boot has been completed.</string>
+    <string name="play_tone">Play tone</string>
+
+</resources>

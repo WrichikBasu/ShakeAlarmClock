@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="in.basulabs.shakealarmclock"
+    android:installLocation="auto">
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.SET_ALARM" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <permission
+        android:name="in.basulabs.shakealarmclock.PLUGIN_PERMISSION"
+        android:description="@string/permissionDesc"
+        android:label="@string/permissionlabel"
+        android:protectionLevel="normal" />
+
+    <application
+        android:name=".MyApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="AllowBackup">
+
+        <service
+            android:name=".Service_SnoozeAlarm"
+            android:enabled="true"
+            android:exported="false"
+            android:process=":RingAlarm"/>
+
+        <service
+            android:name=".Service_AlarmActivater"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":AlarmActivater"
+            android:stopWithTask="false"
+            tools:ignore="ExportedService" />
+
+        <activity
+            android:name=".Activity_Plugin"
+            android:configChanges="orientation|keyboard|uiMode" />
+
+        <service
+            android:name=".Service_RingAlarm"
+            android:enabled="true"
+            android:exported="false"
+            android:process=":RingAlarm"/>
+
+        <receiver
+            android:name=".AlarmBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="in.basulabs.shakealarmclock.DELIVER_ALARM" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.DATE_CHANGED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_SET" />
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".Activity_AlarmsList">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SHOW_ALARMS"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".Activity_AlarmDetails"
+            android:parentActivityName=".Activity_AlarmsList" />
+
+        <activity
+            android:name=".Activity_RingAlarm"
+            android:configChanges="orientation|keyboard"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:screenOrientation="sensorPortrait"
+            android:showOnLockScreen="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <activity
+            android:name=".Activity_RingtonePicker"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.RINGTONE_PICKER" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".Activity_Settings"
+            android:parentActivityName=".Activity_AlarmsList" />
+
+        <service
+            android:name=".Service_UpdateAlarm"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="in.basulabs.shakealarmclock.PLUGIN_PERMISSION" />
+    </application>
+
+</manifest>

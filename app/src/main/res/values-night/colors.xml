@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorBackgroundFragment">@android:color/transparent</color>
+    <color name="colorBackgroundButton">@android:color/transparent</color>
+    <color name="defaultLabelColor">#FFFFFF</color>
+</resources>
