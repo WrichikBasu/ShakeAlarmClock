@@ -15,7 +15,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
-import android.os.Process;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -66,20 +65,12 @@ public class Service_SnoozeAlarm extends Service {
 		}
 		isThisServiceRunning = true;
 
-		if (Service_AlarmActivater.isThisServiceRunning) {
-			Intent intent1 = new Intent(this, Service_AlarmActivater.class);
-			stopService(intent1);
-		}
-		if (Service_AlarmActivater.pid != - 1) {
-			Process.killProcess(Service_AlarmActivater.pid);
-		}
+		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
 		Bundle data = Objects.requireNonNull(intent.getExtras());
 		alarmDetails = data.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
 		assert alarmDetails != null;
 		alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
-
-		//Log.e(this.getClass().getSimpleName(), "alarmID = " + alarmID);
 
 		numberOfTimesTheAlarmhasBeenSnoozed =
 				intent.getExtras().getInt(Service_RingAlarm.BUNDLE_KEY_NO_OF_TIMES_SNOOZED);
@@ -98,13 +89,12 @@ public class Service_SnoozeAlarm extends Service {
 				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE), 0, 0),
 				ZoneId.systemDefault());
 
-		ZonedDateTime newAlarmDateTime =
-				alarmDateTime
-						.plusMinutes(numberOfTimesTheAlarmhasBeenSnoozed * alarmDetails
+		ZonedDateTime newAlarmDateTime = alarmDateTime.plusMinutes(numberOfTimesTheAlarmhasBeenSnoozed * alarmDetails
 								.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS));
 
-		snoozeTimer = new CountDownTimer(
-				Math.abs(Duration.between(ZonedDateTime.now(), newAlarmDateTime).toMillis()), 500) {
+		snoozeTimer = new CountDownTimer(Math.abs(Duration.between(ZonedDateTime.now(),
+				newAlarmDateTime).toMillis()),	500) {
+
 			@Override
 			public void onTick(long l) {
 			}
@@ -113,8 +103,7 @@ public class Service_SnoozeAlarm extends Service {
 			public void onFinish() {
 				Intent intent1 = new Intent(myInstance, Service_RingAlarm.class);
 				intent1.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
-				intent1.putExtra(Service_RingAlarm.BUNDLE_KEY_NO_OF_TIMES_SNOOZED,
-						numberOfTimesTheAlarmhasBeenSnoozed);
+				intent1.putExtra(Service_RingAlarm.BUNDLE_KEY_NO_OF_TIMES_SNOOZED, numberOfTimesTheAlarmhasBeenSnoozed);
 				ContextCompat.startForegroundService(myInstance, intent1);
 				myInstance.stopSelf();
 			}
@@ -178,10 +167,8 @@ public class Service_SnoozeAlarm extends Service {
 		AlarmDatabase alarmDatabase = AlarmDatabase.getInstance(this);
 		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-		Thread thread_toggleAlarm = new Thread(
-				() -> alarmDatabase.alarmDAO()
-						.toggleAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
-								0));
+		Thread thread_toggleAlarm = new Thread(() ->
+				alarmDatabase.alarmDAO().toggleAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),0));
 
 		/////////////////////////////////////
 		// Dismiss the snoozed alarm
@@ -190,10 +177,8 @@ public class Service_SnoozeAlarm extends Service {
 		intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
 		intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
-		PendingIntent pendingIntent = PendingIntent
-				.getBroadcast(this, alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
-						intent,
-						PendingIntent.FLAG_NO_CREATE);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
+						intent,	PendingIntent.FLAG_NO_CREATE);
 
 		if (pendingIntent != null) {
 			alarmManager.cancel(pendingIntent);
@@ -210,12 +195,10 @@ public class Service_SnoozeAlarm extends Service {
 			} catch (InterruptedException ignored) {
 			}
 		} else {
-			LocalTime alarmTime = LocalTime
-					.of(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+			LocalTime alarmTime = LocalTime.of(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
 							alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
 
-			ArrayList<Integer> repeatDays = alarmDetails
-					.getIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS);
+			ArrayList<Integer> repeatDays = alarmDetails.getIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS);
 
 			assert repeatDays != null;
 			Collections.sort(repeatDays);
@@ -232,31 +215,26 @@ public class Service_SnoozeAlarm extends Service {
 				} else if (repeatDays.get(i) > dayOfWeek) {
 					// There is a day available in the same week for the alarm to ring; select that day and
 					// break from loop.
-					alarmDateTime = alarmDateTime
-							.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(i))));
+					alarmDateTime = alarmDateTime.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(i))));
 					break;
 				}
 				if (i == repeatDays.size() - 1) {
 					// No day possible in this week. Select the first available date from next week.
-					alarmDateTime = alarmDateTime
-							.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(0))));
+					alarmDateTime = alarmDateTime.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(0))));
 				}
 			}
 
 			intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
-			PendingIntent pendingIntent2 = PendingIntent
-					.getBroadcast(this,
-							alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), intent,
-							0);
+			PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this,
+							alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), intent, 0);
 
-			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0),
-					ZoneId.systemDefault());
+			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0),	ZoneId.systemDefault());
 
-			alarmManager.setAlarmClock(
-					new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
+			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
 							pendingIntent2), pendingIntent2);
 		}
+		ConstantsAndStatics.schedulePeriodicWork(this);
 		stopSelf();
 
 	}
@@ -271,8 +249,7 @@ public class Service_SnoozeAlarm extends Service {
 		intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 		intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
-		PendingIntent pendingIntent = PendingIntent
-				.getBroadcast(this, alarmID, intent, PendingIntent.FLAG_NO_CREATE);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmID, intent, PendingIntent.FLAG_NO_CREATE);
 
 		if (pendingIntent != null) {
 			alarmManager.cancel(pendingIntent);

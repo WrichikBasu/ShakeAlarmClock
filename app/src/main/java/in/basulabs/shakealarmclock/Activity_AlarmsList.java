@@ -14,7 +14,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -86,21 +85,10 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		viewModel.init(alarmDatabase);
 
-		int defaultTheme;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			defaultTheme = ConstantsAndStatics.THEME_SYSTEM;
-		} else {
-			defaultTheme = ConstantsAndStatics.THEME_TIME;
-		}
+		int defaultTheme = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? ConstantsAndStatics.THEME_SYSTEM : ConstantsAndStatics.THEME_AUTO_TIME;
 
-		checkForPlugin();
-
-		/*Log.e(this.getClass().toString(), "default theme: " + defaultTheme +
-				" received theme: " + ConstantsAndStatics
-				.getTheme(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme)));*/
-
-		AppCompatDelegate.setDefaultNightMode(
-				ConstantsAndStatics.getTheme(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme)));
+		AppCompatDelegate.setDefaultNightMode(ConstantsAndStatics
+				.getTheme(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme)));
 
 		myInstance = this;
 
@@ -116,14 +104,11 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		viewStub = findViewById(R.id.viewStub);
 
-		Intent intent = new Intent(getApplicationContext(), Service_AlarmActivater.class);
-		getApplicationContext().startService(intent);
-
-		SharedPreferences.Editor prefEditor = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
-				MODE_PRIVATE)
-				.edit()
-				.remove(ConstantsAndStatics.SHARED_PREF_KEY_WAS_APP_RECENTLY_ACTIVE)
-				.putBoolean(ConstantsAndStatics.SHARED_PREF_KEY_WAS_APP_RECENTLY_ACTIVE, true);
+		SharedPreferences.Editor prefEditor =
+				getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
+						.edit()
+						.remove(ConstantsAndStatics.SHARED_PREF_KEY_WAS_APP_RECENTLY_ACTIVE)
+						.putBoolean(ConstantsAndStatics.SHARED_PREF_KEY_WAS_APP_RECENTLY_ACTIVE, true);
 		prefEditor.commit();
 
 		initAdapter();
@@ -156,12 +141,14 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		return super.onOptionsItemSelected(item);
 	}
 
+
 	//--------------------------------------------------------------------------------------------------
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		myInstance = null;
+		ConstantsAndStatics.schedulePeriodicWork(this);
 	}
 
 
@@ -179,7 +166,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	public static void onDateChanged() {
 		if (myInstance != null) {
-			//Log.e(myInstance.getClass().getSimpleName(), "Inside onDateChanged()");
 			myInstance.viewModel.forceInit(myInstance.alarmDatabase);
 			myInstance.alarmAdapter = new AlarmAdapter(myInstance.viewModel.getAlarmDataArrayList(),
 					myInstance,
@@ -193,7 +179,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	@Override
 	protected void onResume() {
 		super.onResume();
-		//Log.e(this.getClass().getSimpleName(), "Inside onResume().");
 		if (showPermissionDialog) {
 			showPermissionDialog = false;
 			showPermissionDialog();
@@ -219,8 +204,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		if (! viewModel.getHasPermissionBeenRequested()) {
 			viewModel.setHasPermissionBeenRequested(true);
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-				if (ContextCompat.checkSelfPermission(this,
-						Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+				if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+						== PackageManager.PERMISSION_GRANTED) {
 				} else if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
 					showPermissionDialog();
 				} else {
@@ -261,17 +246,16 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Adds an alarm to the database, updates {@link #alarmAdapter}, and activates it via {@link
-	 * AlarmManager}.
+	 * Adds an alarm to the database, updates {@link #alarmAdapter}, and activates it via {@link AlarmManager}.
 	 *
-	 * @param mode The mode. Can be either {@link #MODE_ADD_NEW_ALARM} or {@link
-	 *        #MODE_ACTIVATE_EXISTING_ALARM}.
+	 * @param mode The mode. Can be either {@link #MODE_ADD_NEW_ALARM} or {@link #MODE_ACTIVATE_EXISTING_ALARM}.
 	 * @param alarmEntity The {@link AlarmEntity} object representing the alarm.
 	 * @param repeatDays The days in which the alarm is to repeat. Can be {@code null} is repeat is OFF.
 	 */
 	private void addOrActivateAlarm(int mode, AlarmEntity alarmEntity,
 	                                @Nullable ArrayList<Integer> repeatDays) {
-		//Log.e(this.getClass().getSimpleName(), "addOrActivateAlarm() method called.");
+
+		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
 		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
@@ -331,14 +315,12 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 			alarmID = result[0];
 
-			//alarmAdapter.add(alarmDateTime, alarmEntity.isRepeatOn, repeatDays, alarmEntity.alarmType);
 			alarmAdapter = new AlarmAdapter(viewModel.getAlarmDataArrayList(), this, this);
 			alarmsRecyclerView.swapAdapter(alarmAdapter, false);
 			alarmsRecyclerView.scrollToPosition(result[1]);
 
 		} else {
 			viewModel.toggleAlarmState(alarmDatabase, alarmEntity.alarmHour, alarmEntity.alarmMinutes, 1);
-			//alarmAdapter.toggleAlarmState(alarmEntity.alarmHour, alarmEntity.alarmMinutes, 1);
 			alarmAdapter = new AlarmAdapter(viewModel.getAlarmDataArrayList(), this, this);
 			alarmsRecyclerView.swapAdapter(alarmAdapter, false);
 			alarmID = alarmEntity.alarmID;
@@ -359,34 +341,10 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
 
-		/*Calendar calendar = Calendar.getInstance();
-		calendar.set(Calendar.YEAR, alarmDateTime.getYear());
-		calendar.set(Calendar.MONTH, alarmDateTime.getMonthValue() - 1);
-		calendar.set(Calendar.DAY_OF_MONTH, alarmDateTime.getDayOfMonth());
-		calendar.set(Calendar.HOUR_OF_DAY, alarmDateTime.getHour());
-		calendar.set(Calendar.MINUTE, alarmDateTime.getMinute());
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);*/
-
 		alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
 				pendingIntent), pendingIntent);
 
-		/*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-					pendingIntent);
-		} else {
-			alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-		}*/
-
-		Log.e(this.getClass().getSimpleName(), "alarmID = " + alarmID);
-
-		/*PendingIntent pi = PendingIntent.getBroadcast(Activity_AlarmsList.this, alarmID, intent,
-				PendingIntent.FLAG_NO_CREATE);
-		if (pi == null) {
-			Log.e(this.getClass().getSimpleName(), "addOrActivateAlarm() pending intent not found.");
-		} else {
-			Log.e(this.getClass().getSimpleName(), "addOrActivateAlarm() pending intent found.");
-		}*/
+		ConstantsAndStatics.schedulePeriodicWork(this);
 	}
 
 	//------------------------------------------------------------------------------------------------------
@@ -399,7 +357,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	 * @param mins The alarm minutes.
 	 */
 	private void deleteOrDeactivateAlarm(int mode, int hour, int mins) {
-		//Log.e(this.getClass().getSimpleName(), "deleteOrDeactivateAlarm() called");
+
+		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
 		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
@@ -409,41 +368,25 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		int alarmID = viewModel.getAlarmId(alarmDatabase, hour, mins);
 
-		//Log.e(this.getClass().getSimpleName(), "id = " + alarmID);
-
-		PendingIntent pendingIntent = PendingIntent
-				.getBroadcast(Activity_AlarmsList.this, alarmID, intent,
-						PendingIntent.FLAG_NO_CREATE);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(Activity_AlarmsList.this, alarmID, intent,
+				PendingIntent.FLAG_NO_CREATE);
 
 		if (pendingIntent != null) {
 			alarmManager.cancel(pendingIntent);
-			//Log.e(this.getClass().getSimpleName(), "Alarm cancelled.");
-		} /*else {
-			Log.e(this.getClass().getSimpleName(), "Alarm not found.");
-		}*/
+		}
+
 		if (mode == MODE_DELETE_ALARM) {
 			viewModel.removeAlarm(alarmDatabase, hour, mins);
 			alarmAdapter = new AlarmAdapter(viewModel.getAlarmDataArrayList(), this, this);
 			alarmsRecyclerView.swapAdapter(alarmAdapter, false);
-			//alarmAdapter.remove(hour, mins);
 		} else {
 			viewModel.toggleAlarmState(alarmDatabase, hour, mins, 0);
-			//alarmAdapter.toggleAlarmState(hour, mins, 0);
-			//No need to swap adapter again.
 		}
 
-
-		//////////////////////////////////////////////////////////
-		// Kill any foreground service based on this alarm
-		/////////////////////////////////////////////////////////
-		/*if (Service_RingAlarm.isThisServiceRunning) {
-			if (Service_RingAlarm.alarmHour == hour && Service_RingAlarm.alarmMinute == mins) {
-				Intent intent1 = new Intent(this, Service_RingAlarm.class);
-				stopService(intent1);
-			}
-		}*/
+		// Kill any foreground service based on this alarm:
 		ConstantsAndStatics.killServices(this, alarmID);
 
+		ConstantsAndStatics.schedulePeriodicWork(this);
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -471,17 +414,17 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, @Nullable Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
+
 		if (requestCode == NEW_ALARM_REQUEST_CODE) {
-			/*if (resultCode == RESULT_CANCELED) {
-				Log.e(this.getClass().getSimpleName(), "No new alarm.");
-			}*/
 
 			if (resultCode == RESULT_OK) {
+
 				if (intent != null) {
-					//Log.e(this.getClass().getSimpleName(), "Received new alarm.");
+
 					Bundle data = Objects.requireNonNull(intent.getExtras())
 							.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
 					assert data != null;
+
 					AlarmEntity alarmEntity = new AlarmEntity(data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE),
 							true,
@@ -502,13 +445,9 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 				}
 			}
 		} else if (requestCode == EXISTING_ALARM_REQUEST_CODE) {
-			/*if (resultCode == RESULT_CANCELED) {
-				Log.e(this.getClass().getSimpleName(), "No changes made in existing alarm.");
-			}*/
 
 			if (resultCode == RESULT_OK) {
 				if (intent != null) {
-					//Log.e(this.getClass().getSimpleName(), "Changes were made in existing alarm.");
 					Bundle data = Objects.requireNonNull(intent.getExtras())
 							.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
 					assert data != null;
@@ -545,7 +484,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	@Override
 	public void onOnOffButtonClick(int rowNumber, int hour, int mins, int currentAlarmState) {
-		//Log.e(this.getClass().getSimpleName(), "OnOff Btn clicked.");
 		toggleAlarmState(hour, mins, currentAlarmState);
 	}
 
@@ -553,7 +491,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	@Override
 	public void onDeleteButtonClicked(int rowNumber, int hour, int mins) {
-		//Log.e(this.getClass().getSimpleName(), "Delete button clicked.");
 		deleteOrDeactivateAlarm(MODE_DELETE_ALARM, hour, mins);
 	}
 
@@ -561,7 +498,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	@Override
 	public void onItemClicked(int rowNumber, int hour, int mins) {
-		//Log.e(this.getClass().getSimpleName(), "Row clicked. Row number: " + rowNumber);
 		Intent intent = new Intent(this, Activity_AlarmDetails.class);
 		intent.setAction(ConstantsAndStatics.ACTION_EXISTING_ALARM);
 
@@ -636,7 +572,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	//--------------------------------------------------------------------------------------------------
 
 	private void checkForPlugin() {
-		//Log.e(this.getClass().getSimpleName(), "Checking for plugin");
 		if (! isInstalledOnInternalStorage()) {
 			try {
 				getPackageManager().getApplicationInfo("in.basulabs.shakealarmclockplugin", 0);

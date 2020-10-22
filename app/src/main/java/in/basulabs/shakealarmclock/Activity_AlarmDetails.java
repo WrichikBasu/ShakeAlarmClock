@@ -65,7 +65,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			defaultTheme = ConstantsAndStatics.THEME_SYSTEM;
 		} else {
-			defaultTheme = ConstantsAndStatics.THEME_TIME;
+			defaultTheme = ConstantsAndStatics.THEME_AUTO_TIME;
 		}
 		AppCompatDelegate.setDefaultNightMode(
 				ConstantsAndStatics.getTheme(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme)));

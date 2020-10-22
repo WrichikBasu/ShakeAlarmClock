@@ -42,33 +42,16 @@ public class Service_UpdateAlarm extends Service {
 		startForeground(NOTIFICATION_ID, buildNotification());
 		isThisServiceRunning = true;
 
+		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
+
 		alarmDatabase = AlarmDatabase.getInstance(this);
 
 		ArrayList<AlarmEntity> alarmEntityArrayList = getActiveAlarms();
 
-		//Log.e(this.getClass().toString(), "Started.");
-
 		if (alarmEntityArrayList != null && alarmEntityArrayList.size() > 0) {
-
-			//Log.e(this.getClass().toString(), "We have active alarms.");
-
-			try {
-				if (Service_AlarmActivater.isThisServiceRunning) {
-					Intent intent1 = new Intent(this, Service_AlarmActivater.class);
-					stopService(intent1);
-				}
-				if (Service_AlarmActivater.pid != - 1) {
-					android.os.Process.killProcess(Service_AlarmActivater.pid);
-				}
-
-			} catch (Exception ignored) {
-			}
 
 			cancelActiveAlarms(alarmEntityArrayList);
 			activateAlarms(alarmEntityArrayList);
-
-			Intent intent1 = new Intent(this, Service_AlarmActivater.class);
-			startService(intent1);
 		}
 
 		stopSelf();
@@ -82,6 +65,7 @@ public class Service_UpdateAlarm extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		isThisServiceRunning = false;
+		ConstantsAndStatics.schedulePeriodicWork(this);
 	}
 
 
@@ -95,8 +79,7 @@ public class Service_UpdateAlarm extends Service {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
 			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID),
 					"in.basulabs.shakealarmclock Notification", importance);
-			NotificationManager notificationManager = (NotificationManager) getSystemService(
-					NOTIFICATION_SERVICE);
+			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
 			assert notificationManager != null;
 			notificationManager.createNotificationChannel(channel);
@@ -118,8 +101,8 @@ public class Service_UpdateAlarm extends Service {
 		Intent contentIntent = new Intent(this, Activity_AlarmsList.class);
 		contentIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		contentIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		PendingIntent contentPendingIntent = PendingIntent
-				.getActivity(this, 5701, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent contentPendingIntent = PendingIntent.getActivity(this, 5701,
+				contentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
 				Integer.toString(NOTIFICATION_ID))
@@ -143,8 +126,7 @@ public class Service_UpdateAlarm extends Service {
 	@Nullable
 	private ArrayList<AlarmEntity> getActiveAlarms() {
 
-		AtomicReference<ArrayList<AlarmEntity>> alarmEntityArrayList = new AtomicReference<>(
-				new ArrayList<>());
+		AtomicReference<ArrayList<AlarmEntity>> alarmEntityArrayList = new AtomicReference<>(new ArrayList<>());
 
 		Thread thread = new Thread(
 				() -> alarmEntityArrayList.set(new ArrayList<>(alarmDatabase.alarmDAO().getActiveAlarms())));
@@ -172,38 +154,18 @@ public class Service_UpdateAlarm extends Service {
 
 		for (AlarmEntity alarmEntity : alarmEntityArrayList) {
 
-			/*if (Service_RingAlarm.isThisServiceRunning) {
-				if (Service_RingAlarm.alarmHour == alarmEntity.alarmHour && Service_RingAlarm.alarmMinute == alarmEntity.alarmMinutes) {
-					Intent intent1 = new Intent(this, Service_RingAlarm.class);
-					stopService(intent1);
-				}
-			}*/
-
 			ConstantsAndStatics.killServices(this, alarmEntity.alarmID);
-
-			/*LocalDateTime localDateTime = LocalDateTime.of(alarmEntity.alarmYear, alarmEntity.alarmMonth,
-					alarmEntity.alarmDay, alarmEntity.alarmHour, alarmEntity.alarmMinutes);
-
-			ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime,
-					ZoneId.of(sharedPreferences.getString(ConstantsAndStatics.SHARED_PREF_KEY_ZONE_ID,
-							ZoneId.systemDefault().getId())));
-
-			zonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault());*/
 
 			Intent intent = new Intent(Service_UpdateAlarm.this, AlarmBroadcastReceiver.class);
 			intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
 			intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
-			PendingIntent pendingIntent = PendingIntent
-					.getBroadcast(Service_UpdateAlarm.this, alarmEntity.alarmID, intent,
-							PendingIntent.FLAG_NO_CREATE);
+			PendingIntent pendingIntent = PendingIntent.getBroadcast(Service_UpdateAlarm.this,
+					alarmEntity.alarmID, intent, PendingIntent.FLAG_NO_CREATE);
 
 			if (pendingIntent != null) {
 				alarmManager.cancel(pendingIntent);
-				//Log.e(this.getClass().toString(), "Alarm cancelled.");
-			} /*else {
-				//Log.e(this.getClass().toString(), "Alarm not found.");
-			}*/
+			}
 
 		}
 	}
@@ -214,9 +176,8 @@ public class Service_UpdateAlarm extends Service {
 
 		AtomicReference<ArrayList<Integer>> repeatDays = new AtomicReference<>();
 
-		Thread thread =
-				new Thread(() -> repeatDays
-						.set(new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(alarmID))));
+		Thread thread =	new Thread(
+				() -> repeatDays.set(new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(alarmID))));
 		thread.start();
 		try {
 			thread.join();
@@ -238,8 +199,7 @@ public class Service_UpdateAlarm extends Service {
 			ArrayList<Integer> repeatDays = getRepeatDays(alarmEntity.alarmID);
 
 			LocalDateTime alarmDateTime;
-			LocalDate alarmDate = LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth,
-					alarmEntity.alarmDay);
+			LocalDate alarmDate = LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth, alarmEntity.alarmDay);
 			LocalTime alarmTime = LocalTime.of(alarmEntity.alarmHour, alarmEntity.alarmMinutes);
 
 			if (alarmEntity.isRepeatOn && repeatDays != null && repeatDays.size() > 0) {
@@ -294,24 +254,8 @@ public class Service_UpdateAlarm extends Service {
 
 			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime, ZoneId.systemDefault());
 
-			/*Calendar calendar = Calendar.getInstance();
-			calendar.set(Calendar.YEAR, alarmDateTime.getYear());
-			calendar.set(Calendar.MONTH, alarmDateTime.getMonthValue() - 1);
-			calendar.set(Calendar.DAY_OF_MONTH, alarmDateTime.getDayOfMonth());
-			calendar.set(Calendar.HOUR_OF_DAY, alarmDateTime.getHour());
-			calendar.set(Calendar.MINUTE, alarmDateTime.getMinute());
-			calendar.set(Calendar.SECOND, 0);
-			calendar.set(Calendar.MILLISECOND, 0);*/
-
 			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
 					pendingIntent), pendingIntent);
-			/*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-				alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-						pendingIntent);
-			} else {
-				alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-			}*/
-
 
 		}
 

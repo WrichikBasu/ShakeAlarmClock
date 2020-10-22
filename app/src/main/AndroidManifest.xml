@@ -29,19 +29,23 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup">
 
+        <provider
+            android:name="androidx.work.impl.WorkManagerInitializer"
+            android:authorities="in.basulabs.shakealarmclock.workmanager-init"
+            android:enabled="false"
+            android:exported="false"
+            tools:node="remove"/>
+
+        <provider
+            android:name=".MyWorkManagerInitializer"
+            android:authorities="in.basulabs.shakealarmclock.MyWorkManagerInitializer"
+            android:exported="false" />
+
         <service
             android:name=".Service_SnoozeAlarm"
             android:enabled="true"
             android:exported="false"
             android:process=":RingAlarm"/>
-
-        <service
-            android:name=".Service_AlarmActivater"
-            android:enabled="true"
-            android:exported="true"
-            android:process=":AlarmActivater"
-            android:stopWithTask="false"
-            tools:ignore="ExportedService" />
 
         <activity
             android:name=".Activity_Plugin"
