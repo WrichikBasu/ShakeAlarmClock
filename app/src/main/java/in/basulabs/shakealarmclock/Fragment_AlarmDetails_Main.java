@@ -83,15 +83,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		//Log.e(this.getClass().getSimpleName(), "INSIDE ONCREATE()");
 		savedInstanceStateIsNull = savedInstanceState == null;
-		/*if (savedInstanceState == null) {
-			//Log.e(this.getClass().getSimpleName(), "Saved instance is null.");
-			savedInstanceStateIsNull = true;
-		} else {
-			//Log.e(this.getClass().getSimpleName(), "Saved instance NOT null.");
-			savedInstanceStateIsNull = false;
-		}*/
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -100,8 +92,6 @@ public class Fragment_AlarmDetails_Main extends Fragment
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
 	                         @Nullable Bundle savedInstanceState) {
-
-		//Log.e(this.getClass().getSimpleName(), "Inside onCreateView; setView = " + savedInstanceStateIsNull);
 
 		View view = inflater.inflate(R.layout.frag_alarm_details_main, container, false);
 
@@ -305,8 +295,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 	 * Updates {@link #currentRepeatOptionsTV}.
 	 */
 	private void displayRepeatOptions() {
-		/*Log.e(this.getClass().getSimpleName(),
-				"contents = " + Arrays.toString(viewModel.getRepeatDays().toArray()));*/
+
 		if (viewModel.getIsRepeatOn()) {
 			StringBuilder str = new StringBuilder();
 			for (int i = 0; i < viewModel.getRepeatDays().size(); i++) {
@@ -359,7 +348,6 @@ public class Fragment_AlarmDetails_Main extends Fragment
 	public void onClick(View view) {
 		switch (view.getId()) {
 			case R.id.saveButton:
-				//Log.e(this.getClass().toString(), "save button clicked.");
 				saveButtonClicked();
 				break;
 			case R.id.cancelButton:

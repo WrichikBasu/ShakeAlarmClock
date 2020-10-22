@@ -25,7 +25,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 
@@ -78,8 +77,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 	private boolean isShakeActive;
 
-	public static final String BUNDLE_KEY_NO_OF_TIMES_SNOOZED = "in.basulabs.shakealarmclock" +
-			".NO_OF_TIMES_SNOOZED";
+	public static final String BUNDLE_KEY_NO_OF_TIMES_SNOOZED = "in.basulabs.shakealarmclock.NO_OF_TIMES_SNOOZED";
 
 	//--------------------------------------------------------------------------------------------------
 
@@ -87,11 +85,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_SNOOZE_ALARM)) {
-				//Log.e(this.getClass().toString(), "Received broadcast to snooze alarm.");
 				snoozeAlarm();
-			} else if (Objects
-					.equals(intent.getAction(), ConstantsAndStatics.ACTION_CANCEL_ALARM)) {
-				//Log.e(this.getClass().toString(), "Received broadcast to cancel alarm.");
+			} else if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_CANCEL_ALARM)) {
 				dismissAlarm();
 			}
 		}
@@ -101,46 +96,32 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		//Log.e(this.getClass().toString(), "Inside onStartCommand");
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(NOTIFICATION_ID, buildRingNotification(),
-					ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+			startForeground(NOTIFICATION_ID, buildRingNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
 		} else {
 			startForeground(NOTIFICATION_ID, buildRingNotification());
 		}
 		isThisServiceRunning = true;
 
-		if (Service_AlarmActivater.isThisServiceRunning) {
-			Intent intent1 = new Intent(this, Service_AlarmActivater.class);
-			stopService(intent1);
-		}
-		if (Service_AlarmActivater.pid != - 1) {
-			Process.killProcess(Service_AlarmActivater.pid);
-		}
+		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
-		alarmDetails = Objects.requireNonNull(intent.getExtras())
-				.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
+		alarmDetails = Objects.requireNonNull(intent.getExtras()).getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
 
-		numberOfTimesTheAlarmHasBeenSnoozed = intent.getExtras()
-				.getInt(BUNDLE_KEY_NO_OF_TIMES_SNOOZED, 0);
+		numberOfTimesTheAlarmHasBeenSnoozed = intent.getExtras().getInt(BUNDLE_KEY_NO_OF_TIMES_SNOOZED, 0);
 
 		assert alarmDetails != null;
 
-		sharedPreferences = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
-				MODE_PRIVATE);
+		sharedPreferences = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
 
-		isShakeActive = sharedPreferences
-				.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
-						ConstantsAndStatics.SNOOZE) != ConstantsAndStatics.DO_NOTHING;
+		isShakeActive = sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
+				ConstantsAndStatics.SNOOZE) != ConstantsAndStatics.DO_NOTHING;
 
 		assert alarmDetails != null;
 		alarmToneUri = alarmDetails.getParcelable(ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI);
-		//Log.e(this.getClass().toString(), "Received Uri: " + alarmToneUri.toString());
 
 		alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
 
-		//Log.e(this.getClass().getSimpleName(), "alarmID = " + alarmID);
 
 		ringTimer = new CountDownTimer(60000, 1000) {
 
@@ -183,7 +164,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		//Log.e(this.getClass().getSimpleName(), "onDestroy() called.");
 		isThisServiceRunning = false;
 		try {
 			ringTimer.cancel();
@@ -209,8 +189,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	private void initialiseShakeSensor() {
 		if (isShakeActive) {
 			Sensor accelerometer = snsMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-			snsMgr.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI,
-					new Handler());
+			snsMgr.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI, new Handler());
 			lastShakeTime = System.currentTimeMillis();
 		}
 	}
@@ -225,8 +204,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
 			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID),
 					"in.basulabs.shakealarmclock Notifications", importance);
-			NotificationManager notificationManager = (NotificationManager) getSystemService(
-					NOTIFICATION_SERVICE);
+			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
 			assert notificationManager != null;
 			notificationManager.createNotificationChannel(channel);
@@ -236,11 +214,11 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Creates a notification that can be shown when the alarm is ringing. Has a full screen intent
-	 * to {@link Activity_RingAlarm}. The content intent points to {@link Activity_AlarmsList}.
+	 * Creates a notification that can be shown when the alarm is ringing. Has a full screen intent to {@link
+	 * Activity_RingAlarm}. The content intent points to {@link Activity_AlarmsList}.
 	 *
-	 * @return A {@link Notification} that can be used with {@link #startForeground(int,
-	 *        Notification)} or displayed with {@link NotificationManager#notify(int, Notification)}.
+	 * @return A {@link Notification} that can be used with {@link #startForeground(int, Notification)} or displayed
+	 * 		with {@link NotificationManager#notify(int, Notification)}.
 	 */
 	private Notification buildRingNotification() {
 		createNotificationChannel();
@@ -272,13 +250,12 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	 */
 	private void ringAlarm() {
 
-		//Log.e(this.getClass().getSimpleName(), "Ring Alarm called.");
 
 		notificationManager.notify(NOTIFICATION_ID, buildRingNotification());
 		initialiseShakeSensor();
 
-		if (! (alarmDetails
-				.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) == ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY)) {
+		if (! (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE)
+				== ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY)) {
 
 			mediaPlayer = new MediaPlayer();
 			AudioAttributes attributes = new AudioAttributes.Builder()
@@ -297,8 +274,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			} catch (IOException ignored) {
 			}
 
-			if (alarmDetails
-					.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) == ConstantsAndStatics.ALARM_TYPE_SOUND_AND_VIBRATE) {
+			if (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE)
+					== ConstantsAndStatics.ALARM_TYPE_SOUND_AND_VIBRATE) {
 				alarmVibration();
 			}
 			mediaPlayer.start();
@@ -323,9 +300,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		if (vibrator.hasVibrator()) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 				if (vibrator.hasAmplitudeControl()) {
-					vibrator.vibrate(
-							VibrationEffect
-									.createWaveform(vibrationPattern, vibrationAmplitudes, 0));
+					vibrator.vibrate(VibrationEffect.createWaveform(vibrationPattern, vibrationAmplitudes, 0));
 				}
 			} else {
 				vibrator.vibrate(vibrationPattern, 0);
@@ -336,8 +311,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Snoozes the alarm. If snooze is off, or the snoze frequency has been reached, the alarm will
-	 * be cancelled by calling {@link #dismissAlarm()}.
+	 * Snoozes the alarm. If snooze is off, or the snoze frequency has been reached, the alarm will be cancelled by
+	 * calling {@link #dismissAlarm()}.
 	 */
 	private void snoozeAlarm() {
 
@@ -352,8 +327,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 				Intent intent = new Intent(this, Service_SnoozeAlarm.class);
 				intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
-				intent.putExtra(BUNDLE_KEY_NO_OF_TIMES_SNOOZED,
-						numberOfTimesTheAlarmHasBeenSnoozed);
+				intent.putExtra(BUNDLE_KEY_NO_OF_TIMES_SNOOZED, numberOfTimesTheAlarmHasBeenSnoozed);
 				ContextCompat.startForegroundService(this, intent);
 
 				stopSelf();
@@ -377,8 +351,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		Thread thread_toggleAlarm = new Thread(
 				() -> alarmDatabase.alarmDAO()
-						.toggleAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
-								0));
+						.toggleAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), 0));
 
 		//////////////////////////////////////////////////////
 		// If repeat is on, set another alarm. Otherwise
@@ -391,9 +364,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			} catch (InterruptedException ignored) {
 			}
 		} else {
-			LocalTime alarmTime = LocalTime
-					.of(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
-							alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+			LocalTime alarmTime = LocalTime.of(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+					alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
 
 			ArrayList<Integer> repeatDays = alarmDetails
 					.getIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS);
@@ -413,18 +385,18 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				} else if (repeatDays.get(i) > dayOfWeek) {
 					// There is a day available in the same week for the alarm to ring; select that day and
 					// break from loop.
-					alarmDateTime = alarmDateTime
-							.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(i))));
+					alarmDateTime = alarmDateTime.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(i))));
 					break;
 				}
 				if (i == repeatDays.size() - 1) {
 					// No day possible in this week. Select the first available date from next week.
-					alarmDateTime = alarmDateTime
-							.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(0))));
+					alarmDateTime = alarmDateTime.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(0))));
 				}
 			}
 			setAlarm(alarmDateTime);
 		}
+
+		ConstantsAndStatics.schedulePeriodicWork(this);
 		stopSelf();
 
 	}
@@ -432,13 +404,12 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Stops the ringing alarm. Also sends a broadcast to {@link Activity_RingAlarm} to finish
-	 * itsef.
+	 * Stops the ringing alarm. Also sends a broadcast to {@link Activity_RingAlarm} to finish itsef.
 	 */
 	private void stopRinging() {
 		try {
 			ringTimer.cancel();
-			//snoozeTimer.cancel();
+
 			if ((alarmDetails
 					.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) == ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY) || (alarmDetails
 					.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) == ConstantsAndStatics.ALARM_TYPE_SOUND_AND_VIBRATE)) {
@@ -469,12 +440,10 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmID, intent, 0);
 
-		ZonedDateTime zonedDateTime = ZonedDateTime
-				.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
+		ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
 
 		alarmManager.setAlarmClock(
-				new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
-						pendingIntent), pendingIntent);
+				new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent), pendingIntent);
 	}
 
 	//---------------------------------------------------------------------------------------------------
@@ -487,8 +456,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 		intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
-		PendingIntent pendingIntent = PendingIntent
-				.getBroadcast(this, alarmID, intent, PendingIntent.FLAG_NO_CREATE);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmID, intent, PendingIntent.FLAG_NO_CREATE);
 
 		if (pendingIntent != null) {
 			alarmManager.cancel(pendingIntent);
@@ -516,20 +484,16 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			float gZ = z / SensorManager.GRAVITY_EARTH;
 
 			float gForce = (float) Math.sqrt(gX * gX + gY * gY + gZ * gZ);
-			//Log.e(this.getClass().getSimpleName(), "gForce: " + gForce);
 			// gForce will be close to 1 when there is no movement.
 
 			if (gForce >= 3.8f) {
 				long currTime = System.currentTimeMillis();
 				if (Math.abs(currTime - lastShakeTime) > MINIMUM_MILLIS_BETWEEN_SHAKES) {
-					//Log.e(this.getClass().getSimpleName(), "Event detected, ");
 					lastShakeTime = currTime;
 					shakeVibration();
-					if (sharedPreferences
-							.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
-									ConstantsAndStatics.SNOOZE) == ConstantsAndStatics.SNOOZE
-							&& alarmDetails
-							.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
+					if (sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
+							ConstantsAndStatics.SNOOZE) == ConstantsAndStatics.SNOOZE
+							&& alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
 						snoozeAlarm();
 					} else {
 						dismissAlarm();
@@ -543,14 +507,12 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Creates a vibration for a small period of time, indicating that the app has registered a
-	 * shake event.
+	 * Creates a vibration for a small period of time, indicating that the app has registered a shake event.
 	 */
 	private void shakeVibration() {
 		if (vibrator.hasVibrator()) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-				vibrator.vibrate(
-						VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+				vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
 			} else {
 				vibrator.vibrate(200);
 			}

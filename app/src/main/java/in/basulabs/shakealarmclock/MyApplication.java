@@ -19,7 +19,6 @@ public class MyApplication extends Application {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (Objects.equals(intent.getAction(), Intent.ACTION_DATE_CHANGED)) {
-				//Log.e(this.getClass().getSimpleName(), "Received broadcast.");
 				Activity_AlarmsList.onDateChanged();
 			}
 		}
@@ -30,8 +29,6 @@ public class MyApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-
-		//Log.e(this.getClass().getSimpleName(), "Inside onCreate()........");
 
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(Intent.ACTION_DATE_CHANGED);

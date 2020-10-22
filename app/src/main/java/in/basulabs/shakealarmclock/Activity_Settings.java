@@ -79,7 +79,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			defaultTheme = ConstantsAndStatics.THEME_SYSTEM;
 		} else {
-			defaultTheme = ConstantsAndStatics.THEME_TIME;
+			defaultTheme = ConstantsAndStatics.THEME_AUTO_TIME;
 		}
 
 		applyTheme();
