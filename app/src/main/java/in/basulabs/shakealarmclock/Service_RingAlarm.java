@@ -250,7 +250,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	 */
 	private void ringAlarm() {
 
-
 		notificationManager.notify(NOTIFICATION_ID, buildRingNotification());
 		initialiseShakeSensor();
 
@@ -330,6 +329,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				intent.putExtra(BUNDLE_KEY_NO_OF_TIMES_SNOOZED, numberOfTimesTheAlarmHasBeenSnoozed);
 				ContextCompat.startForegroundService(this, intent);
 
+				stopForeground(true);
 				stopSelf();
 			} else {
 				dismissAlarm();
@@ -367,8 +367,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			LocalTime alarmTime = LocalTime.of(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
 					alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
 
-			ArrayList<Integer> repeatDays = alarmDetails
-					.getIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS);
+			ArrayList<Integer> repeatDays = alarmDetails.getIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS);
 
 			assert repeatDays != null;
 			Collections.sort(repeatDays);
@@ -397,6 +396,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		}
 
 		ConstantsAndStatics.schedulePeriodicWork(this);
+		stopForeground(true);
 		stopSelf();
 
 	}
@@ -438,12 +438,12 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 		intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmID, intent, 0);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmID, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
 		ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
 
-		alarmManager.setAlarmClock(
-				new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent), pendingIntent);
+		alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
+				pendingIntent), pendingIntent);
 	}
 
 	//---------------------------------------------------------------------------------------------------
