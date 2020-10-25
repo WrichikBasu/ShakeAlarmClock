@@ -19,13 +19,12 @@ import androidx.lifecycle.ViewModelProvider;
 public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 		implements RadioGroup.OnCheckedChangeListener, CompoundButton.OnCheckedChangeListener {
 
+	private View view;
+	private RadioGroup freqRadioGroup, intervalRadioGroup;
 	private SwitchCompat onOffSwitch;
 	private EditText snoozeFreqEditText, snoozeIntervalEditText;
 
 	private ViewModel_AlarmDetails viewModel;
-
-	private View view;
-	private RadioGroup freqRadioGroup, intervalRadioGroup;
 
 	//----------------------------------------------------------------------------------------------------
 
@@ -37,7 +36,6 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 		view = inflater.inflate(R.layout.frag_alarmdetails_snooze, container, false);
 
 		viewModel = new ViewModelProvider(requireActivity()).get(ViewModel_AlarmDetails.class);
-
 
 		onOffSwitch = view.findViewById(R.id.snoozeOnOffSwitch);
 		freqRadioGroup = view.findViewById(R.id.snoozeFreqRadioGroup);
@@ -83,10 +81,9 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 				snoozeIntervalEditText.setEnabled(false);
 				break;
 			default:
-				intervalRadioGroup.check(R.id.freqRadioButton_custom);
+				intervalRadioGroup.check(R.id.intervalRadioButton_custom);
 				snoozeIntervalEditText.setEnabled(true);
-				snoozeIntervalEditText
-						.setText(String.valueOf(viewModel.getSnoozeIntervalInMins()));
+				snoozeIntervalEditText.setText(String.valueOf(viewModel.getSnoozeIntervalInMins()));
 				break;
 		}
 
@@ -144,8 +141,12 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 
 	//----------------------------------------------------------------------------------------------------
 
+	/**
+	 * Makes necessary changes in UI when the snooze switch is turned on or off.
+	 */
 	private void onSwitchCheckedChanged() {
 		if (viewModel.getIsSnoozeOn()) {
+
 			onOffSwitch.setText(requireContext().getResources().getString(R.string.switchOn));
 
 			view.findViewById(R.id.freqRadioButton_three).setEnabled(true);
@@ -158,11 +159,12 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 			view.findViewById(R.id.intervalRadioButton_fifteen).setEnabled(true);
 			view.findViewById(R.id.intervalRadioButton_custom).setEnabled(true);
 
-			snoozeFreqEditText
-					.setEnabled(freqRadioGroup.getCheckedRadioButtonId() == R.id.freqRadioButton_custom);
-			snoozeIntervalEditText.setEnabled(
-					intervalRadioGroup.getCheckedRadioButtonId() == R.id.intervalRadioButton_custom);
+			snoozeFreqEditText.setEnabled(freqRadioGroup.getCheckedRadioButtonId()
+					== R.id.freqRadioButton_custom);
+			snoozeIntervalEditText.setEnabled(intervalRadioGroup.getCheckedRadioButtonId()
+					== R.id.intervalRadioButton_custom);
 		} else {
+
 			onOffSwitch.setText(requireContext().getResources().getString(R.string.switchOff));
 
 			view.findViewById(R.id.freqRadioButton_three).setEnabled(false);
@@ -185,8 +187,9 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 
 	@Override
 	public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
+
 		if (radioGroup.getId() == R.id.snoozeFreqRadioGroup) {
-			//Log.e(this.getClass().getSimpleName(), "Frequency readio group registered callback.");
+
 			switch (checkedId) {
 				case R.id.freqRadioButton_three:
 					viewModel.setSnoozeFreq(3);
@@ -204,8 +207,9 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 					snoozeFreqEditText.setEnabled(true);
 					break;
 			}
+
 		} else if (radioGroup.getId() == R.id.snoozeIntervalRadioGroup) {
-			//Log.e(this.getClass().getSimpleName(), "Interval radio group registered callback.");
+
 			switch (checkedId) {
 				case R.id.intervalRadioButton_five:
 					viewModel.setSnoozeIntervalInMins(5);

@@ -48,6 +48,9 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	private SwitchCompat snoozeStateSwitch;
 	private CheckBox autoSelectToneCheckBox;
 
+	private static final String SAVE_INSTANCE_KEY_LAYOUT_EXPANDED =
+			"in.basulabs.shakealarmclock.Activity_Settings.LAYOUT_EXPANDED";
+
 	private int defaultTheme;
 
 	private static final int RINGTONE_REQUEST_CODE = 834;
@@ -69,8 +72,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		//////////////////////////////////////////////////
 		// Get SharedPreferences and its editor:
 		/////////////////////////////////////////////////
-		sharedPreferences = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
-				MODE_PRIVATE);
+		sharedPreferences = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
 		prefEditor = sharedPreferences.edit();
 
 		/////////////////////////////////////////////////
@@ -104,8 +106,8 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 				R.array.shakeAndPowerOptions, android.R.layout.simple_spinner_item);
 		arrayAdapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		powerBtnOpSpinner.setAdapter(arrayAdapter2);
-		powerBtnOpSpinner.setSelection(sharedPreferences
-				.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION, ConstantsAndStatics.DISMISS));
+		powerBtnOpSpinner.setSelection(sharedPreferences.getInt(
+				ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION, ConstantsAndStatics.DISMISS));
 		powerBtnOpSpinner.setOnItemSelectedListener(this);
 
 		////////////////////////////////////////////////////
@@ -114,11 +116,11 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		Spinner themeSpinner = findViewById(R.id.themeSpinner);
 		ArrayAdapter<CharSequence> arrayAdapter3;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			arrayAdapter3 = ArrayAdapter.createFromResource(this,
-					R.array.themeOptions_all, android.R.layout.simple_spinner_item);
+			arrayAdapter3 = ArrayAdapter.createFromResource(this, R.array.themeOptions_all,
+					android.R.layout.simple_spinner_item);
 		} else {
-			arrayAdapter3 = ArrayAdapter.createFromResource(this,
-					R.array.themeOptions_noSystem, android.R.layout.simple_spinner_item);
+			arrayAdapter3 = ArrayAdapter.createFromResource(this, R.array.themeOptions_noSystem,
+					android.R.layout.simple_spinner_item);
 		}
 		arrayAdapter3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		themeSpinner.setAdapter(arrayAdapter3);
@@ -132,10 +134,14 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		// Initialise expandable layout for snooze options:
 		//////////////////////////////////////////////////////////
 		snoozeOptionsExpandableLayout = findViewById(R.id.expandable_layout);
+		if (savedInstanceState == null){
+			snoozeOptionsExpandableLayout.setExpanded(false);
+		} else {
+			snoozeOptionsExpandableLayout.setExpanded(savedInstanceState.getBoolean(SAVE_INSTANCE_KEY_LAYOUT_EXPANDED));
+		}
 		snoozeOptionsExpandableLayout.setOnExpansionUpdateListener(this);
 
-		ConstraintLayout snoozeOptionsConstraintLayout =
-				findViewById(R.id.settings_snoozeOptionsConstraintLayout);
+		ConstraintLayout snoozeOptionsConstraintLayout = findViewById(R.id.settings_snoozeOptionsConstraintLayout);
 		snoozeOptionsConstraintLayout.setOnClickListener(this);
 
 		//////////////////////////////////////////////
@@ -147,18 +153,15 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		setSwitchText();
 		snoozeStateSwitch.setOnCheckedChangeListener(this);
 
-
 		snoozeIntvLabel = findViewById(R.id.settings_snoozeIntervalLabel);
 		snoozeFreqLabel = findViewById(R.id.settings_snoozeFreqLabel);
 		snoozeIntvEditText = findViewById(R.id.settings_snoozeIntervalEditText);
 		snoozeFreqEditText = findViewById(R.id.settings_snoozeFreqEditText2);
 
-		snoozeIntvEditText
-				.setText(String.valueOf(
-						sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL, 5)));
-		snoozeFreqEditText
-				.setText(String.valueOf(
-						sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ, 3)));
+		snoozeIntvEditText.setText(String.valueOf(
+				sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL, 5)));
+		snoozeFreqEditText.setText(String.valueOf(
+				sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ, 3)));
 
 		activateOrDeactivateSnoozeOptions(
 				sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_IS_ON, true));
@@ -250,6 +253,15 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 
 	//-----------------------------------------------------------------------------------------------------
 
+	@Override
+	protected void onSaveInstanceState(@NonNull Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putBoolean(SAVE_INSTANCE_KEY_LAYOUT_EXPANDED, snoozeOptionsExpandableLayout.isExpanded());
+	}
+
+
+	//-----------------------------------------------------------------------------------------------------
+
 	/**
 	 * Finds whether a file exists or not.
 	 *
@@ -290,15 +302,12 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	 */
 	private Uri getCurrentToneUri() {
 		Uri uri = Uri.parse(sharedPreferences.getString(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI,
-				RingtoneManager
-						.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM).toString()));
+				RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM).toString()));
 		if (doesFileExist(uri)) {
 			return uri;
 		} else {
-			setDefaultTone(RingtoneManager
-					.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM));
-			return RingtoneManager
-					.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM);
+			setDefaultTone(RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM));
+			return RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM);
 		}
 	}
 
@@ -310,9 +319,9 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	 * @param uri The new default alarm tone Uri.
 	 */
 	private void setDefaultTone(Uri uri) {
-		prefEditor.remove(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI);
-		prefEditor.putString(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, uri.toString());
-		prefEditor.commit();
+		prefEditor.remove(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI)
+				.putString(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, uri.toString())
+				.commit();
 	}
 
 	//-----------------------------------------------------------------------------------------------------
@@ -388,8 +397,8 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	 * Applies the appropriate theme. Gets the theme using {@link ConstantsAndStatics#getTheme(int)}.
 	 */
 	private void applyTheme() {
-		AppCompatDelegate.setDefaultNightMode(
-				ConstantsAndStatics.getTheme(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme)));
+		AppCompatDelegate.setDefaultNightMode(ConstantsAndStatics.getTheme(
+				sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme)));
 	}
 
 	//-----------------------------------------------------------------------------------------------------
@@ -413,7 +422,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 			prefEditor.commit();
 			setSwitchText();
 			activateOrDeactivateSnoozeOptions(checkedState);
-		} else if (compoundButton.getId() == R.id.autoToneSelectionCheckBox){
+		} else if (compoundButton.getId() == R.id.autoToneSelectionCheckBox) {
 			prefEditor.remove(ConstantsAndStatics.SHARED_PREF_KEY_AUTO_SET_TONE);
 			prefEditor.putBoolean(ConstantsAndStatics.SHARED_PREF_KEY_AUTO_SET_TONE, checkedState);
 			prefEditor.commit();
@@ -463,13 +472,13 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 			}
 		} else if (view.getId() == R.id.settings_toneConstraintLayout) {
 			Intent intent = new Intent(this, Activity_RingtonePicker.class);
-			intent.setAction(RingtoneManager.ACTION_RINGTONE_PICKER);
-			//Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
-			intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
-			intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select alarm tone:");
-			intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, getCurrentToneUri());
-			intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
-			intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+			intent.setAction(RingtoneManager.ACTION_RINGTONE_PICKER)
+					.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
+					.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select alarm tone:")
+					.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, getCurrentToneUri())
+					.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+					.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+					.putExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE, false);
 			startActivityForResult(intent, RINGTONE_REQUEST_CODE);
 		}
 	}
@@ -486,10 +495,10 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 
 				assert data != null;
 
-				setDefaultTone(Objects.requireNonNull(
-						data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)));
-				setToneTextView(Objects.requireNonNull(
-						data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)));
+				setDefaultTone(
+						Objects.requireNonNull(data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)));
+				setToneTextView(
+						Objects.requireNonNull(data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)));
 
 				autoSelectToneCheckBox.setChecked(false);
 			}
@@ -515,8 +524,8 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
-		prefEditor.remove(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME);
-		prefEditor.putInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME, seekBar.getProgress());
-		prefEditor.commit();
+		prefEditor.remove(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME)
+				.putInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME, seekBar.getProgress())
+				.commit();
 	}
 }

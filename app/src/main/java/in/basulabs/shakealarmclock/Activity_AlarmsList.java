@@ -3,10 +3,12 @@ package in.basulabs.shakealarmclock;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -27,6 +29,10 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.github.javiersantos.appupdater.AppUpdater;
+import com.github.javiersantos.appupdater.enums.Display;
+import com.github.javiersantos.appupdater.enums.UpdateFrom;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -62,7 +68,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	private static final int MODE_DELETE_ALARM = 504;
 	private static final int MODE_DEACTIVATE_ONLY = 509;
-
 
 	@SuppressLint("StaticFieldLeak")
 	private static Activity_AlarmsList myInstance;
@@ -112,11 +117,15 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		viewModel.getLiveAlarmsCount().observe(this, this::manageViewStub);
 
+		boolean showAppUpdate = true;
+
 		if (getIntent().getAction() != null) {
 
 			if (getIntent().getAction().equals(ConstantsAndStatics.ACTION_NEW_ALARM_FROM_INTENT)) {
 
 				Log.e(this.getClass().getSimpleName(), "Received intent.");
+
+				showAppUpdate = false;
 
 				Intent intent = new Intent(this, Activity_AlarmDetails.class);
 				intent.setAction(ConstantsAndStatics.ACTION_NEW_ALARM_FROM_INTENT);
@@ -129,6 +138,10 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 				startActivityForResult(intent, NEW_ALARM_REQUEST_CODE);
 
 			}
+		}
+
+		if (savedInstanceState == null && showAppUpdate) {
+			checkForUpdates();
 		}
 	}
 
@@ -211,7 +224,9 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-		if (repeatDays != null) { Collections.sort(repeatDays); }
+		if (repeatDays != null) {
+			Collections.sort(repeatDays);
+		}
 
 		LocalDateTime alarmDateTime = ConstantsAndStatics.getAlarmDateTime(LocalDate.of(alarmEntity.alarmYear,
 				alarmEntity.alarmMonth, alarmEntity.alarmDay), LocalTime.of(alarmEntity.alarmHour,
@@ -458,12 +473,34 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	//--------------------------------------------------------------------------------------------------
 
 	private boolean isInstalledOnInternalStorage() {
-		ApplicationInfo io = getApplicationInfo();
-		return ! io.sourceDir.startsWith("/mnt/") &&
-				! io.sourceDir.startsWith(Environment.getExternalStorageDirectory().getPath());
+		ApplicationInfo applicationInfo = getApplicationInfo();
+		return ! applicationInfo.sourceDir.startsWith("/mnt/") &&
+				! applicationInfo.sourceDir.startsWith(Environment.getExternalStorageDirectory().getPath());
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------------------
+
+	private void checkForUpdates() {
+		Context context = this;
+
+		new AppUpdater(this)
+				.setUpdateFrom(UpdateFrom.GITHUB)
+				.setGitHubUserAndRepo("WrichikBasu", "ShakeAlarmClock")
+				.setDisplay(Display.DIALOG)
+				.setCancelable(false)
+				.setButtonDoNotShowAgain(null)
+				.setButtonUpdateClickListener((dialog, which) -> {
+					dialog.cancel();
+
+					Intent intent = new Intent();
+					intent.setAction(Intent.ACTION_VIEW)
+							.setData(Uri.parse("https://github.com/WrichikBasu/ShakeAlarmClock/releases"));
+					context.startActivity(intent);
+				})
+				.start();
+	}
+
+	//-------------------------------------------------------------------------------------------------------------
 
 	private void checkForPlugin() {
 		if (! isInstalledOnInternalStorage()) {
