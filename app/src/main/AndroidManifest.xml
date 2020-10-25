@@ -79,7 +79,9 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".Activity_AlarmsList">
+        <activity android:name=".Activity_AlarmsList"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -92,10 +94,14 @@
 
         <activity
             android:name=".Activity_AlarmDetails"
+            android:enabled="true"
+            android:exported="false"
             android:parentActivityName=".Activity_AlarmsList" />
 
         <activity
             android:name=".Activity_RingAlarm"
+            android:enabled="true"
+            android:exported="false"
             android:configChanges="orientation|keyboard"
             android:excludeFromRecents="true"
             android:noHistory="true"
@@ -106,17 +112,19 @@
 
         <activity
             android:name=".Activity_RingtonePicker"
+            android:enabled="true"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.RINGTONE_PICKER" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
         <activity
             android:name=".Activity_Settings"
+            android:enabled="true"
+            android:exported="false"
             android:parentActivityName=".Activity_AlarmsList" />
 
         <service
@@ -124,6 +132,22 @@
             android:enabled="true"
             android:exported="true"
             android:permission="in.basulabs.shakealarmclock.PLUGIN_PERMISSION" />
+
+        <activity android:name=".Activity_IntentManager"
+            android:enabled="true"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Translucent"
+            android:configChanges="uiMode|orientation|keyboard|colorMode">
+
+            <intent-filter>
+                <action android:name="android.intent.action.DISMISS_ALARM"/>
+                <action android:name="android.intent.action.SET_ALARM"/>
+                <action android:name="android.intent.action.SNOOZE_ALARM"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+
+        </activity>
     </application>
 
 </manifest>

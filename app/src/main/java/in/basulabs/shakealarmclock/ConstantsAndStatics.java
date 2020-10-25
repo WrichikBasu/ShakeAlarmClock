@@ -4,13 +4,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.work.Configuration;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -147,9 +154,12 @@ final class ConstantsAndStatics {
 	 */
 	static final String ACTION_EXISTING_ALARM = "in.basulabs.shakealarmclock.ACTION_EXISTING_ALARM";
 
+	static final String ACTION_NEW_ALARM_FROM_INTENT =
+			"in.basulabs.shakealarmclock.ACTION_NEW_ALARM_FROM_INTENT";
+
 	/**
-	 * Indicates whether {@link Activity_RingtonePicker} should play the ringtone when the user clicks on a
-	 * {@link android.widget.RadioButton}. Default: {@code true}.
+	 * Indicates whether {@link Activity_RingtonePicker} should play the ringtone when the user clicks on a {@link
+	 * android.widget.RadioButton}. Default: {@code true}.
 	 */
 	static final String EXTRA_PLAY_RINGTONE = "in.basulabs.shakealarmclock.EXTRA_PLAY_RINGTONE";
 
@@ -288,6 +298,8 @@ final class ConstantsAndStatics {
 	 */
 	static final String WORK_NAME_ACTIVATE_ALARMS = "in.basulabs.WORK_ACTIVATE_ALARMS";
 
+	//---------------------------------------------------------------------------------------------------------
+
 	/**
 	 * Creates a {@link PeriodicWorkRequest} and enqueues a unique work using {@link
 	 * WorkManager#enqueueUniquePeriodicWork(String, ExistingPeriodicWorkPolicy, PeriodicWorkRequest)}.
@@ -307,6 +319,8 @@ final class ConstantsAndStatics {
 				ExistingPeriodicWorkPolicy.REPLACE, periodicWorkRequest);
 	}
 
+	//---------------------------------------------------------------------------------------------------------
+
 	/**
 	 * Cancels a scheduled work using {@link WorkManager#cancelUniqueWork(String)}.
 	 *
@@ -320,6 +334,8 @@ final class ConstantsAndStatics {
 
 		WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME_ACTIVATE_ALARMS);
 	}
+
+	//---------------------------------------------------------------------------------------------------------
 
 	/**
 	 * Get the theme that can be applied using {@link AppCompatDelegate#setDefaultNightMode(int)}.
@@ -339,7 +355,7 @@ final class ConstantsAndStatics {
 			case THEME_DARK:
 				return AppCompatDelegate.MODE_NIGHT_YES;
 			default:
-				if (LocalTime.now().isAfter(LocalTime.of(22, 0))
+				if (LocalTime.now().isAfter(LocalTime.of(21, 59))
 						|| LocalTime.now().isBefore(LocalTime.of(6, 0))) {
 					return AppCompatDelegate.MODE_NIGHT_YES;
 				} else {
@@ -347,6 +363,8 @@ final class ConstantsAndStatics {
 				}
 		}
 	}
+
+	//---------------------------------------------------------------------------------------------------------
 
 	static void killServices(Context context, int alarmID) {
 		if (Service_RingAlarm.isThisServiceRunning && Service_RingAlarm.alarmID == alarmID) {
@@ -357,6 +375,63 @@ final class ConstantsAndStatics {
 			Intent intent = new Intent(context, Service_SnoozeAlarm.class);
 			context.stopService(intent);
 		}
+	}
+
+	//---------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Get the date and time when the alarm should ring.
+	 *
+	 * @param alarmDate The alarm date as chosen by the user.
+	 * @param alarmTime The alarm time as chosen by the user.
+	 * @param isRepeatOn Whether repeat is on or off.
+	 * @param repeatDays The days when the alarm should be repeated. Should follow {@link DayOfWeek} enum.
+	 *
+	 * @return A {@link LocalDateTime} object representing when the alarm should ring. This should be transformed into a
+	 *        {@link java.time.ZonedDateTime} object and then passed to {@link android.app.AlarmManager}.
+	 */
+	static LocalDateTime getAlarmDateTime(LocalDate alarmDate, LocalTime alarmTime, boolean isRepeatOn,
+	                                      @Nullable ArrayList<Integer> repeatDays) {
+
+		LocalDateTime alarmDateTime;
+
+		if (isRepeatOn && repeatDays != null && repeatDays.size() > 0) {
+
+			Collections.sort(repeatDays);
+
+			alarmDateTime = LocalDateTime.of(LocalDate.now(), alarmTime);
+			int dayOfWeek = alarmDateTime.getDayOfWeek().getValue();
+
+			for (int i = 0; i < repeatDays.size(); i++) {
+				if (repeatDays.get(i) == dayOfWeek) {
+					if (alarmTime.isAfter(LocalTime.now())) {
+						// Alarm possible today, nothing more to do, break out of loop.
+						break;
+					}
+				} else if (repeatDays.get(i) > dayOfWeek) {
+					/////////////////////////////////////////////////////////////////////////
+					// There is a day available in the same week for the alarm to ring;
+					// select that day and break from loop.
+					////////////////////////////////////////////////////////////////////////
+					alarmDateTime = alarmDateTime.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(i))));
+					break;
+				}
+				if (i == repeatDays.size() - 1) {
+					// No day possible in this week. Select the first available date from next week.
+					alarmDateTime = alarmDateTime.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(0))));
+				}
+			}
+
+		} else {
+
+			alarmDateTime = LocalDateTime.of(alarmDate, alarmTime);
+
+			if (! alarmDateTime.isAfter(LocalDateTime.now())) {
+				alarmDateTime = alarmDateTime.plusDays(1);
+			}
+		}
+
+		return alarmDateTime;
 	}
 
 }

@@ -106,7 +106,7 @@ public interface AlarmDAO {
 	 *
 	 * @return The alarms that are currently active, i.e., in ON state.
 	 */
-	@Query("SELECT * FROM alarm_entity WHERE isAlarmOn = 1")
+	@Query("SELECT * FROM alarm_entity WHERE isAlarmOn = 1 ORDER BY alarmHour, alarmMinutes")
 	List<AlarmEntity> getActiveAlarms();
 
 	/**

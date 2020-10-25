@@ -235,6 +235,7 @@ public class Service_SnoozeAlarm extends Service {
 							pendingIntent2), pendingIntent2);
 		}
 		ConstantsAndStatics.schedulePeriodicWork(this);
+		stopForeground(true);
 		stopSelf();
 
 	}
