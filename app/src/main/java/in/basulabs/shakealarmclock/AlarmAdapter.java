@@ -29,9 +29,6 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 
 	//----------------------------------------------------------------------------------------------------
 
-	/**
-	 *
-	 */
 	public interface AdapterInterface {
 
 		void onOnOffButtonClick(int rowNumber, int hour, int mins, int currentAlarmState);
@@ -79,7 +76,6 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 
 	//----------------------------------------------------------------------------------------------------
 
-	@SuppressWarnings("unused")
 	public void setListener(AdapterInterface listener) {
 		this.listener = listener;
 	}
@@ -212,6 +208,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 	 * @param hour The alarm hour.
 	 * @param minute The alarm minute.
 	 */
+	@Deprecated
 	public void remove(int hour, int minute) {
 		for (int i = 0; i < alarmDataArrayList.size(); i++) {
 			AlarmData alarmData = alarmDataArrayList.get(i);
@@ -237,10 +234,9 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 	 * 		put {@code null}.
 	 * @param alarmType The alarm type.
 	 */
+	@Deprecated
 	public void add(@NonNull LocalDateTime alarmDateTime, boolean isRepeatOn,
 	                @Nullable ArrayList<Integer> repeatDays, int alarmType) {
-
-		//Log.e(this.getClass().getSimpleName(), "size = " + alarmDataArrayList.size());
 
 		AlarmData newAlarmData;
 
@@ -257,35 +253,22 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 			alarmDataArrayList = new ArrayList<>();
 			Objects.requireNonNull(alarmDataArrayList).add(newAlarmData);
 
-			//Log.e(this.getClass().getSimpleName(), "null");
-
 		} else {
-
-			//Log.e(this.getClass().getSimpleName(), "NOT null");
 
 			for (int i = 0; i < Objects.requireNonNull(alarmDataArrayList).size(); i++) {
 
-				//Log.e(this.getClass().getSimpleName(), "Inside loop.");
-
-				if (alarmDataArrayList.get(i).getAlarmDateTime().toLocalTime()
-						.isBefore(alarmDateTime.toLocalTime())) {
-
-					//Log.e(this.getClass().getSimpleName(), "Initial 1.");
+				if (alarmDataArrayList.get(i).getAlarmDateTime().toLocalTime().isBefore(alarmDateTime.toLocalTime())) {
 
 					if ((i + 1) < alarmDataArrayList.size()) {
-
-						//Log.e(this.getClass().getSimpleName(), "Initial 2.");
 
 						if (alarmDataArrayList.get(i + 1).getAlarmDateTime().toLocalTime()
 								.isAfter(alarmDateTime.toLocalTime())) {
 
-							//Log.e(this.getClass().getSimpleName(), "Initial 3.");
 							alarmDataArrayList.add(i + 1, newAlarmData);
 							position = i + 1;
 							break;
 						}
 					} else {
-						//Log.e(this.getClass().getSimpleName(), "Initial 4.");
 						alarmDataArrayList.add(newAlarmData);
 						position = alarmDataArrayList.size() - 1;
 						break;
@@ -293,15 +276,11 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 				}
 
 				if (i == alarmDataArrayList.size() - 1) {
-					//Log.e(this.getClass().getSimpleName(), "Initial 5.");
 					alarmDataArrayList.add(0, newAlarmData);
 					break;
 				}
-
 			}
 		}
-
-		//Log.e(this.getClass().getSimpleName(), "size = " + alarmDataArrayList.size());
 
 		notifyDataSetChanged();
 		notifyItemInserted(position);
@@ -316,6 +295,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 	 * @param mins The alarm minute.
 	 * @param newAlarmState The new alarm state. 0 means alarm is OFF, 1 means ON.
 	 */
+	@Deprecated
 	public void toggleAlarmState(int hour, int mins, int newAlarmState) {
 
 		int position = 0;
