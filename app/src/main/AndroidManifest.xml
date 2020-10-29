@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="in.basulabs.shakealarmclock"
-    android:installLocation="auto">
+    android:installLocation="internalOnly">
 
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -12,12 +12,6 @@
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <permission
-        android:name="in.basulabs.shakealarmclock.PLUGIN_PERMISSION"
-        android:description="@string/permissionDesc"
-        android:label="@string/permissionlabel"
-        android:protectionLevel="normal" />
 
     <application
         android:name=".MyApplication"
@@ -46,10 +40,6 @@
             android:enabled="true"
             android:exported="false"
             android:process=":RingAlarm"/>
-
-        <activity
-            android:name=".Activity_Plugin"
-            android:configChanges="orientation|keyboard|uiMode" />
 
         <service
             android:name=".Service_RingAlarm"

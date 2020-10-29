@@ -6,12 +6,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -58,8 +55,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	private static final int NEW_ALARM_REQUEST_CODE = 2564;
 
 	/**
-	 * Request code: Used when {@link Activity_AlarmDetails} is created for displaying the details of an existing
-	 * alarm.
+	 * Request code: Used when {@link Activity_AlarmDetails} is created for displaying the details of an existing alarm.
 	 */
 	private static final int EXISTING_ALARM_REQUEST_CODE = 3198;
 
@@ -470,61 +466,28 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	}
 
-	//--------------------------------------------------------------------------------------------------
-
-	private boolean isInstalledOnInternalStorage() {
-		ApplicationInfo applicationInfo = getApplicationInfo();
-		return ! applicationInfo.sourceDir.startsWith("/mnt/") &&
-				! applicationInfo.sourceDir.startsWith(Environment.getExternalStorageDirectory().getPath());
-	}
-
 	//-------------------------------------------------------------------------------------------------------------
 
 	private void checkForUpdates() {
 		Context context = this;
 
 		new AppUpdater(this)
-				.setUpdateFrom(UpdateFrom.GITHUB)
-				.setGitHubUserAndRepo("WrichikBasu", "ShakeAlarmClock")
+				.setUpdateFrom(UpdateFrom.GOOGLE_PLAY)
 				.setDisplay(Display.DIALOG)
-				.setCancelable(false)
+				.setCancelable(true)
 				.setButtonDoNotShowAgain(null)
 				.setButtonUpdateClickListener((dialog, which) -> {
 					dialog.cancel();
 
-					Intent intent = new Intent();
-					intent.setAction(Intent.ACTION_VIEW)
-							.setData(Uri.parse("https://github.com/WrichikBasu/ShakeAlarmClock/releases"));
-					context.startActivity(intent);
+					try {
+						context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=in.basulabs" +
+								".shakealarmclock")));
+					} catch (android.content.ActivityNotFoundException exception) {
+						context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google" +
+								".com/store/apps/details?id=in.basulabs.shakealarmclock")));
+					}
 				})
 				.start();
-	}
-
-	//-------------------------------------------------------------------------------------------------------------
-
-	private void checkForPlugin() {
-		if (! isInstalledOnInternalStorage()) {
-			try {
-				getPackageManager().getApplicationInfo("in.basulabs.shakealarmclockplugin", 0);
-				initialisePlugin();
-				// No exception thrown; plugin is available.
-			} catch (PackageManager.NameNotFoundException e) {
-				// Exception thrown; plugin is not available.
-				Intent intent = new Intent(this, Activity_Plugin.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-				startActivity(intent);
-				finish();
-			}
-		}
-	}
-
-	//----------------------------------------------------------------------------------------------------
-
-	private void initialisePlugin() {
-		Intent intent = new Intent();
-		intent.setAction("in.basulabs.shakealarmclock.PLUGIN_ACTIVITY");
-		startActivity(intent);
 	}
 
 }
