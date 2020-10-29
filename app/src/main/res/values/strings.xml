@@ -86,6 +86,7 @@
     <string name="chooseCustomTone">Choose from storage</string>
     <string name="defaultTone">Default</string>
     <string name="silentTone">Silent</string>
+    <string name="play_tone">Play tone</string>
 
     <!-- AlertDialog_DiscardChanges -->
     <string name="cancelDialogMessage">Discard changes?</string>
@@ -105,7 +106,6 @@
     <string-array name="shakeAndPowerOptions">
         <item>Snooze the alarm.</item>
         <item>Dismiss the alarm.</item>
-        <item>Do nothing.</item>
     </string-array>
     <string name="settings_snoozeOps"><b>Default snooze options</b>\n(These will be the default snooze options
         when you create a new alarm.)</string>
@@ -131,29 +131,5 @@
 
     <!-- Service_UpdateAlarm -->
     <string name="updateAlarm_notifMessage">Activating alarms. This may take a while…</string>
-
-    <!-- Activity_Plugin -->
-    <string name="actionBarTitle_pluginAct">Install plugin</string>
-    <string name="plugin_explanation">You have installed this app in the SD card. After each reboot, Android deletes
-        all alarms set by an app. If your device reboots when you have already set alarms, this app will fail to
-        set the alarms again, because Android will not notify the app that the device has rebooted. Therefore,
-    please move this app to the internal storage, or install the following plugin:</string>
-
-    <string name="downloadPlugin">Shake Alarm Clock Plugin</string>
-
-    <string name="plugin_explanation2">Once you have downloaded and installed the plugin, or if you already
-    the plugin installed, please click on the following button to let the app detect the plugin.</string>
-
-    <string name="detectPlugin">Detect plugin</string>
-
-    <string name="plugin_available">Plugin is available on your device, and has been successfully initialized.</string>
-    <string name="plugin_unavailable">The plugin is not available on your device. If you have installed it, try
-    uninstalling and re-installing it.</string>
-
-    <!-- Permission -->
-    <string name="permissionlabel">start Shake Alarm Clock</string>
-    <string name="permissionDesc">Allows the Shake Alarm Clock Plugin to start the main Shake Alarm Clock app
-    when it detects that boot has been completed.</string>
-    <string name="play_tone">Play tone</string>
 
 </resources>
