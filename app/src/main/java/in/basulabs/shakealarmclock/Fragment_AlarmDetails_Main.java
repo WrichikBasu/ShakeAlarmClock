@@ -329,7 +329,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 					.query(viewModel.getAlarmToneUri(), null, null, null, null)) {
 
 				try {
-					if (cursor != null && cursor.moveToFirst()) {
+					if (cursor != null && cursor.getCount() > 0 && cursor.moveToFirst()) {
 
 						int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
 						if (index != - 1) {
@@ -363,35 +363,28 @@ public class Fragment_AlarmDetails_Main extends Fragment
 
 	@Override
 	public void onClick(View view) {
-		switch (view.getId()) {
-			case R.id.saveButton:
-				saveButtonClicked();
-				break;
-			case R.id.cancelButton:
-				listener.onCancelButtonClick();
-				break;
-			case R.id.repeatConstraintLayout:
-				listener.onRequestRepeatFragCreation();
-				break;
-			case R.id.snoozeConstraintLayout:
-				listener.onRequestSnoozeFragCreation();
-				break;
-			case R.id.alarmDateConstraintLayout:
-				listener.onRequestDatePickerFragCreation();
-				break;
-			case R.id.alarmToneConstraintLayout:
-				Intent intent = new Intent(requireContext(), Activity_RingtonePicker.class)
-						.setAction(RingtoneManager.ACTION_RINGTONE_PICKER)
-						.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
-						.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select alarm tone:")
-						.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
-						.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
-						.putExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE, false)
-						.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_ALARM_ALERT_URI)
-						.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, viewModel.getAlarmToneUri());
-				startActivityForResult(intent, RINGTONE_REQUEST_CODE);
-				break;
 
+		if (view.getId() == R.id.saveButton){
+			saveButtonClicked();
+		} else if (view.getId() == R.id.cancelButton){
+			listener.onCancelButtonClick();
+		} else if (view.getId() == R.id.repeatConstraintLayout){
+			listener.onRequestRepeatFragCreation();
+		} else if (view.getId() == R.id.snoozeConstraintLayout){
+			listener.onRequestSnoozeFragCreation();
+		} else if (view.getId() == R.id.alarmDateConstraintLayout){
+			listener.onRequestDatePickerFragCreation();
+		} else if (view.getId() == R.id.alarmToneConstraintLayout){
+			Intent intent = new Intent(requireContext(), Activity_RingtonePicker.class)
+					.setAction(RingtoneManager.ACTION_RINGTONE_PICKER)
+					.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
+					.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select alarm tone:")
+					.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+					.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+					.putExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE, false)
+					.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_ALARM_ALERT_URI)
+					.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, viewModel.getAlarmToneUri());
+			startActivityForResult(intent, RINGTONE_REQUEST_CODE);
 		}
 	}
 

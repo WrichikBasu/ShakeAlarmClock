@@ -176,8 +176,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 				}
 
 				if (intent.hasExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE)) {
-					playTone = Objects.requireNonNull(intent.getExtras())
-							.getBoolean(ConstantsAndStatics.EXTRA_PLAY_RINGTONE);
+					playTone = Objects.requireNonNull(intent.getExtras()).getBoolean(ConstantsAndStatics.EXTRA_PLAY_RINGTONE);
 				} else {
 					playTone = true;
 				}

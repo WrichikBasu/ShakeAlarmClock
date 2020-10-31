@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.os.Process;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -33,8 +34,7 @@ import java.util.Objects;
 
 public class Service_SnoozeAlarm extends Service {
 
-	public static boolean isThisServiceRunning = false;
-	public static int alarmID;
+	private int alarmID;
 	private Bundle alarmDetails;
 	private static final int NOTIFICATION_ID = 651;
 	private int numberOfTimesTheAlarmhasBeenSnoozed;
@@ -43,11 +43,17 @@ public class Service_SnoozeAlarm extends Service {
 
 	//--------------------------------------------------------------------------------------------------
 
-	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_CANCEL_ALARM)) {
 				dismissAlarm();
+			} else if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_STOP_IMMEDIATELY)){
+				if (Objects.requireNonNull(intent.getExtras()).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID) == alarmID){
+					stopForeground(true);
+					stopSelf();
+					Process.killProcess(Process.myPid());
+				}
 			}
 		}
 	};
@@ -63,7 +69,6 @@ public class Service_SnoozeAlarm extends Service {
 		} else {
 			startForeground(NOTIFICATION_ID, buildSnoozeNotification());
 		}
-		isThisServiceRunning = true;
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
@@ -77,6 +82,7 @@ public class Service_SnoozeAlarm extends Service {
 
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
+		intentFilter.addAction(ConstantsAndStatics.ACTION_STOP_IMMEDIATELY);
 		registerReceiver(broadcastReceiver, intentFilter);
 
 		Service_SnoozeAlarm myInstance = this;
@@ -270,7 +276,6 @@ public class Service_SnoozeAlarm extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		unregisterReceiver(broadcastReceiver);
-		isThisServiceRunning = false;
 	}
 
 

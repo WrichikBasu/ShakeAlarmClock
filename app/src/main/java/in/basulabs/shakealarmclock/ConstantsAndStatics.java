@@ -2,6 +2,7 @@ package in.basulabs.shakealarmclock;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Process;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -156,6 +157,8 @@ final class ConstantsAndStatics {
 
 	static final String ACTION_NEW_ALARM_FROM_INTENT =
 			"in.basulabs.shakealarmclock.ACTION_NEW_ALARM_FROM_INTENT";
+
+	static final String ACTION_STOP_IMMEDIATELY = "in.basulabs.shakealarmclock.STOP_IMMEDIATELY";
 
 	/**
 	 * Indicates whether {@link Activity_RingtonePicker} should play the ringtone when the user clicks on a {@link
@@ -367,14 +370,10 @@ final class ConstantsAndStatics {
 	//---------------------------------------------------------------------------------------------------------
 
 	static void killServices(Context context, int alarmID) {
-		if (Service_RingAlarm.isThisServiceRunning && Service_RingAlarm.alarmID == alarmID) {
-			Intent intent = new Intent(context, Service_RingAlarm.class);
-			context.stopService(intent);
-		}
-		if (Service_SnoozeAlarm.isThisServiceRunning && Service_SnoozeAlarm.alarmID == alarmID) {
-			Intent intent = new Intent(context, Service_SnoozeAlarm.class);
-			context.stopService(intent);
-		}
+		Intent intent = new Intent()
+				.putExtra(BUNDLE_KEY_ALARM_ID, alarmID)
+				.setAction(ACTION_STOP_IMMEDIATELY);
+		context.sendBroadcast(intent);
 	}
 
 	//---------------------------------------------------------------------------------------------------------
