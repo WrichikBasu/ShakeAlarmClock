@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
@@ -134,7 +135,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		// Initialise expandable layout for snooze options:
 		//////////////////////////////////////////////////////////
 		snoozeOptionsExpandableLayout = findViewById(R.id.expandable_layout);
-		if (savedInstanceState == null){
+		if (savedInstanceState == null) {
 			snoozeOptionsExpandableLayout.setExpanded(false);
 		} else {
 			snoozeOptionsExpandableLayout.setExpanded(savedInstanceState.getBoolean(SAVE_INSTANCE_KEY_LAYOUT_EXPANDED));
@@ -282,14 +283,36 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	 *
 	 * @param uri The Uri of the tone.
 	 */
-	private void setToneTextView(Uri uri) {
-		try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-			assert cursor != null;
-			int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-			cursor.moveToFirst();
+	private void setToneTextView(@NonNull Uri uri) {
 
-			String fileNameWithExt = cursor.getString(nameIndex);
-			toneTextView.setText(fileNameWithExt.substring(0, fileNameWithExt.indexOf(".")));
+		if (uri.equals(Settings.System.DEFAULT_ALARM_ALERT_URI)) {
+			toneTextView.setText(R.string.defaultAlarmToneText);
+
+		} else {
+
+			String fileNameWithExt = null;
+
+			try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+
+				try {
+					if (cursor != null && cursor.moveToFirst()) {
+
+						int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+						if (index != - 1) {
+							fileNameWithExt = cursor.getString(index);
+						} else {
+							fileNameWithExt = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
+						}
+					}
+				} catch (Exception ignored) {
+				}
+			}
+
+			if (fileNameWithExt != null) {
+				toneTextView.setText(fileNameWithExt);
+			} else {
+				toneTextView.setText(uri.getLastPathSegment());
+			}
 		}
 	}
 
@@ -301,13 +324,13 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	 * @return The current default alarm tone Uri.
 	 */
 	private Uri getCurrentToneUri() {
-		Uri uri = Uri.parse(sharedPreferences.getString(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI,
-				RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM).toString()));
-		if (doesFileExist(uri)) {
-			return uri;
+		String tone = sharedPreferences.getString(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, null);
+
+		if (tone != null && doesFileExist(Uri.parse(tone))) {
+			return Uri.parse(tone);
 		} else {
-			setDefaultTone(RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM));
-			return RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM);
+			setDefaultTone(Settings.System.DEFAULT_ALARM_ALERT_URI);
+			return Settings.System.DEFAULT_ALARM_ALERT_URI;
 		}
 	}
 
@@ -476,6 +499,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 					.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
 					.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select alarm tone:")
 					.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, getCurrentToneUri())
+					.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_ALARM_ALERT_URI)
 					.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
 					.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
 					.putExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE, false);
@@ -495,10 +519,8 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 
 				assert data != null;
 
-				setDefaultTone(
-						Objects.requireNonNull(data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)));
-				setToneTextView(
-						Objects.requireNonNull(data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)));
+				setDefaultTone(Objects.requireNonNull(data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)));
+				setToneTextView(Objects.requireNonNull(data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)));
 
 				autoSelectToneCheckBox.setChecked(false);
 			}
@@ -528,4 +550,5 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 				.putInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME, seekBar.getProgress())
 				.commit();
 	}
+
 }

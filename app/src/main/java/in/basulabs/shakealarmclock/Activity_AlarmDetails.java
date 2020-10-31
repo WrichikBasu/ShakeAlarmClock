@@ -3,10 +3,8 @@ package in.basulabs.shakealarmclock;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -129,19 +127,13 @@ public class Activity_AlarmDetails extends AppCompatActivity
 
 			} else if (getIntent().getAction().equals(ACTION_NEW_ALARM_FROM_INTENT)) {
 
-				Log.e(this.getClass().getSimpleName(), "Received intent.");
-
 				Bundle data = getIntent().getExtras();
 
 				if (data == null) {
 
-					Log.e(this.getClass().getSimpleName(), "No extras received.");
-
 					setVariablesInViewModel();
 
 				} else {
-
-					Log.e(this.getClass().getSimpleName(), "Extras received.");
 
 					setVariablesInViewModel(MODE_NEW_ALARM,
 							data.getInt(BUNDLE_KEY_ALARM_HOUR),
@@ -187,10 +179,9 @@ public class Activity_AlarmDetails extends AppCompatActivity
 		viewModel.setIsSnoozeOn(sharedPreferences.getBoolean(SHARED_PREF_KEY_DEFAULT_SNOOZE_IS_ON, true));
 		viewModel.setIsRepeatOn(false);
 
-		viewModel.setAlarmToneUri(Uri.parse(sharedPreferences
-				.getString(SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI,
-						RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM)
-								.toString())));
+		String alarmTone = sharedPreferences.getString(SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, null);
+
+		viewModel.setAlarmToneUri(alarmTone != null ? Uri.parse(alarmTone) : null);
 
 		viewModel.setAlarmType(ALARM_TYPE_SOUND_ONLY);
 
@@ -277,8 +268,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 	//----------------------------------------------------------------------------------------------------
 
 	/**
-	 * Sets the ActionBar title as per the created fragment. Uses {@link #whichFragment} to determine the current
-	 * fragment.
+	 * Sets the ActionBar title as per the created fragment. Uses {@link #whichFragment} to determine the current fragment.
 	 */
 	private void setActionBarTitle() {
 		switch (whichFragment) {
@@ -421,4 +411,5 @@ public class Activity_AlarmDetails extends AppCompatActivity
 			this.finish();
 		}
 	}
+
 }
