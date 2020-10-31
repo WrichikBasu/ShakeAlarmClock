@@ -25,8 +25,10 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -70,8 +72,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 	private Uri alarmToneUri;
 
-	public static boolean isThisServiceRunning = false;
-	public static int alarmID;
+	private int alarmID;
 
 	private SharedPreferences sharedPreferences;
 
@@ -81,13 +82,19 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 	//--------------------------------------------------------------------------------------------------
 
-	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_SNOOZE_ALARM)) {
 				snoozeAlarm();
 			} else if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_CANCEL_ALARM)) {
 				dismissAlarm();
+			} else if (intent.getAction().equals(ConstantsAndStatics.ACTION_STOP_IMMEDIATELY)){
+				if (Objects.requireNonNull(intent.getExtras()).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID) == alarmID){
+					stopForeground(true);
+					stopSelf();
+					Process.killProcess(Process.myPid());
+				}
 			}
 		}
 	};
@@ -102,7 +109,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		} else {
 			startForeground(NOTIFICATION_ID, buildRingNotification());
 		}
-		isThisServiceRunning = true;
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
@@ -121,7 +127,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		alarmToneUri = alarmDetails.getParcelable(ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI);
 
 		alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
-
+		Log.e(this.getClass().getSimpleName(), "alarmID = " + alarmID);
 
 		ringTimer = new CountDownTimer(60000, 1000) {
 
@@ -152,6 +158,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ConstantsAndStatics.ACTION_SNOOZE_ALARM);
 		intentFilter.addAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
+		intentFilter.addAction(ConstantsAndStatics.ACTION_STOP_IMMEDIATELY);
 		registerReceiver(broadcastReceiver, intentFilter);
 
 		ringAlarm();
@@ -164,7 +171,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		isThisServiceRunning = false;
 		try {
 			ringTimer.cancel();
 			vibrator.cancel();

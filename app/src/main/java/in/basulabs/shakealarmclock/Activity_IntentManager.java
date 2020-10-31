@@ -129,16 +129,10 @@ public class Activity_IntentManager extends AppCompatActivity {
 
 			case AlarmClock.ACTION_DISMISS_ALARM:
 
-				if (Service_RingAlarm.isThisServiceRunning || Service_SnoozeAlarm.isThisServiceRunning) {
-					Intent intent1 = new Intent();
-					intent1.setAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
-					sendBroadcast(intent1);
-				} else {
-					Intent intent1 = new Intent(this, Activity_AlarmsList.class);
-					intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-							.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-					startActivity(intent1);
-				}
+				Intent intent2 = new Intent(this, Activity_AlarmsList.class);
+				intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+						.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+				startActivity(intent2);
 
 				break;
 

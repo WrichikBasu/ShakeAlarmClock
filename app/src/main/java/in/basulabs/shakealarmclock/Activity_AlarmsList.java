@@ -291,6 +291,9 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		int alarmID = viewModel.getAlarmId(alarmDatabase, hour, mins);
 
+		// Kill any foreground service based on this alarm:
+		ConstantsAndStatics.killServices(this, alarmID);
+
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(Activity_AlarmsList.this, alarmID, intent,
 				PendingIntent.FLAG_NO_CREATE);
 
@@ -306,8 +309,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 			viewModel.toggleAlarmState(alarmDatabase, hour, mins, 0);
 		}
 
-		// Kill any foreground service based on this alarm:
-		ConstantsAndStatics.killServices(this, alarmID);
 
 		ConstantsAndStatics.schedulePeriodicWork(this);
 	}
@@ -324,8 +325,12 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	private void toggleAlarmState(int hour, int mins, final int newAlarmState) {
 
 		if (newAlarmState == 0) {
+			ConstantsAndStatics.killServices(this, viewModel.getAlarmId(alarmDatabase, hour, mins));
+
 			deleteOrDeactivateAlarm(MODE_DEACTIVATE_ONLY, hour, mins);
 		} else {
+			ConstantsAndStatics.killServices(this, viewModel.getAlarmId(alarmDatabase, hour, mins));
+
 			addOrActivateAlarm(MODE_ACTIVATE_EXISTING_ALARM, viewModel.getAlarmEntity(alarmDatabase, hour, mins),
 					viewModel.getRepeatDays(alarmDatabase, hour, mins));
 		}
