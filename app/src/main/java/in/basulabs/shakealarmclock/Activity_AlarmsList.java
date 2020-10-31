@@ -76,8 +76,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		setContentView(R.layout.activity_alarmslist);
 		setSupportActionBar(findViewById(R.id.toolbar));
 
-		Log.e(this.getClass().getSimpleName(), "Inside onCreate()");
-
 		alarmDatabase = AlarmDatabase.getInstance(this);
 		viewModel = new ViewModelProvider(this).get(ViewModel_AlarmsList.class);
 

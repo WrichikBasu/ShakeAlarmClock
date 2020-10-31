@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +36,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -54,6 +56,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 	//----------------------------------------------------------------------------------------------------
 
 	public interface FragmentGUIListener {
+
 		void onSaveButtonClick();
 
 		void onRequestSnoozeFragCreation();
@@ -63,6 +66,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 		void onRequestRepeatFragCreation();
 
 		void onCancelButtonClick();
+
 	}
 
 	//----------------------------------------------------------------------------------------------------
@@ -143,8 +147,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 
 		alarmTypeSpinner.setSelection(viewModel.getAlarmType());
 
-		AudioManager audioManager = (AudioManager) requireContext()
-				.getSystemService(Context.AUDIO_SERVICE);
+		AudioManager audioManager = (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE);
 		alarmVolumeSeekbar.setMax(audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM));
 
 		alarmVolumeSeekbar.setProgress(viewModel.getAlarmVolume());
@@ -153,7 +156,6 @@ public class Fragment_AlarmDetails_Main extends Fragment
 		} else {
 			alarmVolumeImageView.setImageResource(R.drawable.ic_volume_high);
 		}
-
 
 		//////////////////////////////////
 		// Set the listeners
@@ -173,16 +175,14 @@ public class Fragment_AlarmDetails_Main extends Fragment
 				} else {
 					amPmView = (ViewGroup) v2.getChildAt(3);
 				}
-				View.OnClickListener listener = v -> timePicker
-						.setCurrentHour((timePicker.getCurrentHour() + 12) % 24);
+				View.OnClickListener listener = v -> timePicker.setCurrentHour((timePicker.getCurrentHour() + 12) % 24);
 
 				View am = amPmView.getChildAt(0);
 				View pm = amPmView.getChildAt(1);
 
 				am.setOnClickListener(listener);
 				pm.setOnClickListener(listener);
-			} catch (Exception e) {
-				//Log.e(this.getClass().toString(), e.toString());
+			} catch (Exception ignored) {
 			}
 		}
 
@@ -222,8 +222,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 				alarmDateConstarintLayout.setEnabled(true);
 
 				alarmDateLabel.setTextColor(getResources().getColor(R.color.defaultLabelColor));
-				alarmDateLabel
-						.setPaintFlags(alarmDateLabel.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
+				alarmDateLabel.setPaintFlags(alarmDateLabel.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
 
 				alarmDateTV.setTextColor(getResources().getColor(R.color.defaultLabelColor));
 				alarmDateTV.setPaintFlags(alarmDateLabel.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
@@ -250,14 +249,12 @@ public class Fragment_AlarmDetails_Main extends Fragment
 			} else {
 
 				alarmVolumeLabel.setTextColor(getResources().getColor(R.color.defaultLabelColor));
-				alarmVolumeLabel
-						.setPaintFlags(alarmDateLabel.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
+				alarmVolumeLabel.setPaintFlags(alarmDateLabel.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
 
 				alarmVolumeSeekbar.setEnabled(true);
 
 				alarmToneLabel.setTextColor(getResources().getColor(R.color.defaultLabelColor));
-				alarmToneLabel
-						.setPaintFlags(alarmDateLabel.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
+				alarmToneLabel.setPaintFlags(alarmDateLabel.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
 
 				alarmToneTV.setTextColor(getResources().getColor(R.color.defaultLabelColor));
 				alarmToneTV.setPaintFlags(alarmDateLabel.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
@@ -284,8 +281,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 					.getString(R.string.snoozeOptionsTV_snoozeOn,
 							viewModel.getSnoozeIntervalInMins(), viewModel.getSnoozeFreq()));
 		} else {
-			currentSnoozeOptionsTV
-					.setText(requireContext().getResources().getString(R.string.snoozeOffLabel));
+			currentSnoozeOptionsTV.setText(requireContext().getResources().getString(R.string.snoozeOffLabel));
 		}
 	}
 
@@ -299,8 +295,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 		if (viewModel.getIsRepeatOn()) {
 			StringBuilder str = new StringBuilder();
 			for (int i = 0; i < viewModel.getRepeatDays().size(); i++) {
-				int day = (viewModel.getRepeatDays().get(i) + 1) > 7 ? 1 : (viewModel.getRepeatDays()
-						.get(i) + 1);
+				int day = (viewModel.getRepeatDays().get(i) + 1) > 7 ? 1 : (viewModel.getRepeatDays().get(i) + 1);
 				str.append(new DateFormatSymbols().getShortWeekdays()[day]);
 				if (i < viewModel.getRepeatDays().size() - 1) {
 					str.append(", ");
@@ -318,28 +313,50 @@ public class Fragment_AlarmDetails_Main extends Fragment
 	 * Displays the alarm tone in {@link #alarmToneTV}.
 	 */
 	private void displayAlarmTone() {
-		assert viewModel.getAlarmToneUri() != null;
 
-		try (Cursor cursor = requireContext().getContentResolver()
-				.query(viewModel.getAlarmToneUri(), null, null, null, null)) {
-			assert cursor != null;
-			int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-			cursor.moveToFirst();
+		if (viewModel.getAlarmToneUri() == null) {
+			viewModel.setAlarmToneUri(Settings.System.DEFAULT_ALARM_ALERT_URI);
+		}
 
-			String fileNameWithExt = cursor.getString(nameIndex);
-			alarmToneTV.setText(fileNameWithExt.substring(0, fileNameWithExt.indexOf(".")));
+		if (viewModel.getAlarmToneUri().equals(Settings.System.DEFAULT_ALARM_ALERT_URI)) {
+			alarmToneTV.setText(R.string.defaultAlarmToneText);
+
+		} else {
+
+			String fileNameWithExt = null;
+
+			try (Cursor cursor = requireContext().getContentResolver()
+					.query(viewModel.getAlarmToneUri(), null, null, null, null)) {
+
+				try {
+					if (cursor != null && cursor.moveToFirst()) {
+
+						int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+						if (index != - 1) {
+							fileNameWithExt = cursor.getString(index);
+						} else {
+							fileNameWithExt = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
+						}
+					}
+				} catch (Exception ignored) {
+				}
+			}
+
+			if (fileNameWithExt != null) {
+				alarmToneTV.setText(fileNameWithExt);
+			} else {
+				alarmToneTV.setText(viewModel.getAlarmToneUri().getLastPathSegment());
+			}
 		}
 	}
 
 	//----------------------------------------------------------------------------------------------------
 
 	/**
-	 * Sets the date in {@link #alarmDateTV}. Uses {@link ViewModel_AlarmDetails#getAlarmDateTime()} to
-	 * retrieve the date.
+	 * Sets the date in {@link #alarmDateTV}. Uses {@link ViewModel_AlarmDetails#getAlarmDateTime()} to retrieve the date.
 	 */
 	private void setDate() {
-		alarmDateTV
-				.setText(viewModel.getAlarmDateTime().format(DateTimeFormatter.ofPattern("dd MMMM, yyyy")));
+		alarmDateTV.setText(viewModel.getAlarmDateTime().format(DateTimeFormatter.ofPattern("dd MMMM, yyyy")));
 	}
 
 	//-----------------------------------------------------------------------------------------------------
@@ -363,15 +380,15 @@ public class Fragment_AlarmDetails_Main extends Fragment
 				listener.onRequestDatePickerFragCreation();
 				break;
 			case R.id.alarmToneConstraintLayout:
-				Intent intent = new Intent(requireContext(), Activity_RingtonePicker.class);
-				intent.setAction(RingtoneManager.ACTION_RINGTONE_PICKER);
-				//Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
-				intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
-				intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select alarm tone:");
-				intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, viewModel.getAlarmToneUri());
-				intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
-				intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
-				intent.putExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE, false);
+				Intent intent = new Intent(requireContext(), Activity_RingtonePicker.class)
+						.setAction(RingtoneManager.ACTION_RINGTONE_PICKER)
+						.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
+						.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select alarm tone:")
+						.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+						.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+						.putExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE, false)
+						.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_ALARM_ALERT_URI)
+						.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, viewModel.getAlarmToneUri());
 				startActivityForResult(intent, RINGTONE_REQUEST_CODE);
 				break;
 
@@ -383,34 +400,16 @@ public class Fragment_AlarmDetails_Main extends Fragment
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		//Log.e(this.getClass().getSimpleName(), "Inside onActivityResult(...)");
+
 		if (requestCode == RINGTONE_REQUEST_CODE) {
-			//Log.e(this.getClass().getSimpleName(), "Request code matched.");
-			//Log.e(this.getClass().getSimpleName(), "result code: " + resultCode);
+
 			if (resultCode == RESULT_OK) {
-				//Log.e(this.getClass().getSimpleName(), "result OK.");
+
 				assert data != null;
-
-				/*Log.e(this.getClass().getSimpleName(), "Ringtone received: " + data
-						.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI));*/
-
-				Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+				Uri uri = Objects.requireNonNull(data.getExtras()).getParcelable(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+				assert uri != null;
 				viewModel.setAlarmToneUri(uri);
-
-				//Set the default tone to the newly selected tone.
-				SharedPreferences sharedPreferences = requireContext()
-						.getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
-								Context.MODE_PRIVATE);
-				if (sharedPreferences
-						.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_AUTO_SET_TONE, true) && uri != null) {
-					sharedPreferences.edit()
-							.remove(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI)
-							.putString(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, uri.toString())
-							.commit();
-				}
-			} /*else {
-				//Log.e(this.getClass().getSimpleName(), "result NOT OK.");
-			}*/
+			}
 		}
 		displayAlarmTone();
 	}
@@ -420,8 +419,6 @@ public class Fragment_AlarmDetails_Main extends Fragment
 
 	@Override
 	public void onTimeChanged(TimePicker timePicker, int hourOfDay, int minute) {
-
-		//Log.e(this.getClass().getSimpleName(), "Time changed." + hourOfDay + " " + minute);
 
 		viewModel.setAlarmDateTime(viewModel.getAlarmDateTime().withHour(hourOfDay));
 		viewModel.setAlarmDateTime(viewModel.getAlarmDateTime().withMinute(minute));
@@ -452,8 +449,8 @@ public class Fragment_AlarmDetails_Main extends Fragment
 			//
 			// If the user has chosen a date deliberately, we do nothing.
 			/////////////////////////////////////////////////////////////////////////////////////
-			if (! viewModel.getHasUserChosenDate()){
-				if (viewModel.getAlarmDateTime().toLocalTime().isAfter(LocalTime.now())){
+			if (! viewModel.getHasUserChosenDate()) {
+				if (viewModel.getAlarmDateTime().toLocalTime().isAfter(LocalTime.now())) {
 					// Date today possible.
 					viewModel.setAlarmDateTime(LocalDateTime.of(LocalDate.now(),
 							viewModel.getAlarmDateTime().toLocalTime()));
@@ -510,6 +507,20 @@ public class Fragment_AlarmDetails_Main extends Fragment
 	 * Handles {@code saveButton} clicks.
 	 */
 	private void saveButtonClicked() {
+		SharedPreferences sharedPreferences = requireContext()
+				.getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
+						Context.MODE_PRIVATE);
+
+		if (sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_AUTO_SET_TONE, true)
+				&& viewModel.getAlarmToneUri() != null) {
+
+			sharedPreferences.edit()
+					.remove(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI)
+					.putString(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI,
+							viewModel.getAlarmToneUri().toString())
+					.commit();
+		}
+
 		listener.onSaveButtonClick();
 	}
 

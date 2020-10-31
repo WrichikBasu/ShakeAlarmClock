@@ -110,8 +110,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 
 				int type;
 				if (intent.hasExtra(EXTRA_RINGTONE_TYPE)) {
-					type = (int) Objects.requireNonNull(intent.getExtras()).get(EXTRA_RINGTONE_TYPE);
-					//Log.e(this.getClass().getSimpleName(), "type found = " + type);
+					type = Objects.requireNonNull(intent.getExtras()).getInt(EXTRA_RINGTONE_TYPE);
 				} else {
 					type = TYPE_ALL;
 				}
@@ -125,7 +124,6 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 							String uri = allTonesCursor.getString(URI_COLUMN_INDEX);
 
 							toneUriList.add(Uri.parse(uri + "/" + id));
-							//toneUriList.add(ringtoneManager.getRingtoneUri(allTonesCursor.getPosition()));
 							toneNameList.add(allTonesCursor.getString(TITLE_COLUMN_INDEX));
 							toneIdList.add(View.generateViewId());
 						} while (allTonesCursor.moveToNext());
@@ -134,35 +132,37 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 				thread.start();
 
 				if (intent.hasExtra(EXTRA_RINGTONE_SHOW_DEFAULT)) {
-					showDefault = (boolean) Objects.requireNonNull(intent.getExtras())
-							.get(EXTRA_RINGTONE_SHOW_DEFAULT);
-					//Log.e(this.getClass().getSimpleName(), "showDefault = " + showDefault);
+					showDefault = Objects.requireNonNull(intent.getExtras()).getBoolean(EXTRA_RINGTONE_SHOW_DEFAULT);
 				} else {
 					showDefault = true;
 				}
 
 				if (intent.hasExtra(EXTRA_RINGTONE_SHOW_SILENT)) {
-					showSilent = (boolean) Objects.requireNonNull(intent.getExtras())
-							.get(EXTRA_RINGTONE_SHOW_SILENT);
+					showSilent = Objects.requireNonNull(intent.getExtras()).getBoolean(EXTRA_RINGTONE_SHOW_SILENT);
 				} else {
 					showSilent = false;
 				}
 
 				if (showDefault) {
 					if (intent.hasExtra(EXTRA_RINGTONE_DEFAULT_URI)) {
-						defaultUri =
-								Objects.requireNonNull(intent.getExtras())
-										.getParcelable(EXTRA_RINGTONE_DEFAULT_URI);
+						defaultUri = Objects.requireNonNull(intent.getExtras()).getParcelable(EXTRA_RINGTONE_DEFAULT_URI);
 					} else {
-						defaultUri = RingtoneManager.getActualDefaultRingtoneUri(this, type);
+						if (type == RingtoneManager.TYPE_ALARM) {
+							defaultUri = Settings.System.DEFAULT_ALARM_ALERT_URI;
+						} else if (type == RingtoneManager.TYPE_NOTIFICATION) {
+							defaultUri = Settings.System.DEFAULT_NOTIFICATION_URI;
+						} else if (type == RingtoneManager.TYPE_RINGTONE) {
+							defaultUri = Settings.System.DEFAULT_RINGTONE_URI;
+						} else {
+							defaultUri = RingtoneManager.getActualDefaultRingtoneUri(this, type);
+						}
 					}
 				} else {
 					defaultUri = null;
 				}
 
 				if (intent.hasExtra(EXTRA_RINGTONE_EXISTING_URI)) {
-					existingUri = Objects.requireNonNull(intent.getExtras())
-							.getParcelable(EXTRA_RINGTONE_EXISTING_URI);
+					existingUri = Objects.requireNonNull(intent.getExtras()).getParcelable(EXTRA_RINGTONE_EXISTING_URI);
 					wasExistingUriGiven = true;
 				} else {
 					existingUri = null;
@@ -170,15 +170,14 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 				}
 
 				if (intent.hasExtra(EXTRA_RINGTONE_TITLE)) {
-					title = (CharSequence) Objects.requireNonNull(intent.getExtras())
-							.get(EXTRA_RINGTONE_TITLE);
+					title = (CharSequence) Objects.requireNonNull(intent.getExtras()).get(EXTRA_RINGTONE_TITLE);
 				} else {
 					title = "Select tone:";
 				}
 
 				if (intent.hasExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE)) {
-					playTone = (boolean) Objects.requireNonNull(intent.getExtras())
-							.get(ConstantsAndStatics.EXTRA_PLAY_RINGTONE);
+					playTone = Objects.requireNonNull(intent.getExtras())
+							.getBoolean(ConstantsAndStatics.EXTRA_PLAY_RINGTONE);
 				} else {
 					playTone = true;
 				}
@@ -221,7 +220,6 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	@Override
 	protected void onResume() {
 		super.onResume();
-		//Log.e(this.getClass().getSimpleName(), "Inside onResume");
 		if (! isPermissionAvailable()) {
 			checkAndRequestPermission();
 		}
@@ -237,7 +235,6 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 		} catch (Exception ignored) {
 		}
 	}
-
 
 	//----------------------------------------------------------------------------------------------------
 
@@ -262,8 +259,6 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 
 		if (existingUri != null) {
 
-			//Log.e(this.getClass().getSimpleName(), "existingUri is NOT null.");
-
 			////////////////////////////////////////////////////////////////////
 			// As existingUri is not null, we are required to pre-select
 			// a specific RadioButton.
@@ -271,34 +266,25 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 
 			if (showDefault && existingUri.equals(defaultUri)) {
 
-				//Log.e(this.getClass().getSimpleName(), "existingUri same as defaultUri.");
-
 				///////////////////////////////////////////////////////////////////////////
 				// The existingUri is same as defaultUri, and showDefault is true.
 				// So, we check the "Default" RadioButton.
 				//////////////////////////////////////////////////////////////////////////
 				((RadioButton) findViewById(DEFAULT_RADIO_BTN_ID)).setChecked(true);
 				setPickedUri(defaultUri);
-				//				pickedUri = defaultUri;
 
 			} else {
-
-				//Log.e(this.getClass().getSimpleName(), "existingUri is NOT same as defaultUri.");
 
 				// Find index of existingUri in toneUriList
 				int index = toneUriList.indexOf(existingUri);
 
 				if (index != - 1) {
 
-					//Log.e(this.getClass().getSimpleName(), "existingUri is available in toneUriList.");
-
 					// toneUriList has existingUri. Check the corresponding RadioButton.
 					((RadioButton) findViewById(toneIdList.get(index))).setChecked(true);
 					setPickedUri(existingUri);
-					//pickedUri = existingUri;
 
 				} else {
-					//Log.e(this.getClass().getSimpleName(), "existingUri is NOT available in toneUriList.");
 					///////////////////////////////////////////////////////////////////////
 					// toneUriList does NOT have existingUri. It is a custom Uri
 					// provided to us. We have to first check whether the file exists
@@ -308,49 +294,42 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 					try (Cursor cursor = getContentResolver()
 							.query(existingUri, null, null, null, null)) {
 
-						if (cursor != null) {
+						if (cursor != null && cursor.getCount() > 0 && cursor.moveToFirst()) {
 							// existingUri is a valid Uri.
 
-							//Log.e(this.getClass().getSimpleName(), "Custom existingUri exists.");
+							String fileNameWithExt;
+							int columnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+							if (columnIndex != - 1) {
+								fileNameWithExt = cursor.getString(columnIndex);
+							} else {
+								fileNameWithExt = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
+							}
 
-							int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-							cursor.moveToFirst();
-
-							String fileNameWithExt = cursor.getString(nameIndex);
-							String fileNameWithoutExt = fileNameWithExt.substring(0,
-									fileNameWithExt.indexOf("."));
 							int toneId = View.generateViewId();
 
-							toneNameList.add(fileNameWithoutExt);
+							toneNameList.add(fileNameWithExt);
 							toneUriList.add(existingUri);
 							toneIdList.add(toneId);
 
-							createOneRadioButton(toneId, fileNameWithoutExt);
+							createOneRadioButton(toneId, fileNameWithExt);
 
 							((RadioButton) findViewById(toneId)).setChecked(true);
 
 							setPickedUri(existingUri);
-							//pickedUri = existingUri;
 
-						} /*else {
-							//Log.e(this.getClass().getSimpleName(), "Custom existingUri does NOT exist.");
-						}*/
+						}
 					}
 				}
 			}
 		} else {
 
-			//Log.e(this.getClass().getSimpleName(), "existingUri is null.");
-
 			if (wasExistingUriGiven) {
-				//Log.e(this.getClass().getSimpleName(), "existingUri was given.");
 				//////////////////////////////////////////////////////////////////////////
 				// existingUri was specifically passed as a null value. If showSilent
 				// is true, we pre-select the "Silent" RadioButton. Otherwise
 				// we do not select any specific RadioButton.
 				/////////////////////////////////////////////////////////////////////////
 				if (showSilent) {
-					//Log.e(this.getClass().getSimpleName(), "showSilent is true.");
 					((RadioButton) findViewById(SILENT_RADIO_BTN_ID)).setChecked(true);
 				}
 			}
@@ -405,17 +384,13 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	@Override
 	public void onClick(View view) {
 		if (view.getId() == DEFAULT_RADIO_BTN_ID) {
-			//Log.e(this.getClass().getSimpleName(), "default button clicked.");
 			pickedUri = defaultUri;
 			playChosenTone();
 		} else if (view.getId() == SILENT_RADIO_BTN_ID) {
-			//Log.e(this.getClass().getSimpleName(), "silent button clicked.");
 			pickedUri = null;
 		} else if (view.getId() == R.id.chooseCustomToneConstarintLayout) {
 			openFileBrowser();
 		} else {
-			/*Log.e(this.getClass().getSimpleName(),
-					"clicked: " + toneUriList.get(toneIdList.indexOf(view.getId())));*/
 			pickedUri = toneUriList.get(toneIdList.indexOf(view.getId()));
 			playChosenTone();
 		}
@@ -428,17 +403,13 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 
 		if (pickedUri == null) {
 			if (showSilent) {
-				Intent intent = new Intent();
-				intent.putExtra(EXTRA_RINGTONE_PICKED_URI, pickedUri);
-
+				Intent intent = new Intent().putExtra(EXTRA_RINGTONE_PICKED_URI, pickedUri);
 				setResult(RESULT_OK, intent);
 			} else {
 				setResult(RESULT_CANCELED);
 			}
 		} else {
-			Intent intent = new Intent();
-			intent.putExtra(EXTRA_RINGTONE_PICKED_URI, pickedUri);
-
+			Intent intent = new Intent().putExtra(EXTRA_RINGTONE_PICKED_URI, pickedUri);
 			setResult(RESULT_OK, intent);
 		}
 		finish();
@@ -476,8 +447,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 
 	private void checkAndRequestPermission() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-					Manifest.permission.READ_EXTERNAL_STORAGE)) {
+			if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
 				/////////////////////////////////////////////////////////////////
 				//User has denied the permission once or more than once, but
 				// never clicked on "Don't ask again" before denying.
@@ -489,9 +459,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 				// 1. We are asking for the permission the first time.
 				// 2. User has clicked on "Don't ask again".
 				///////////////////////////////////////////////////////////////
-				if (! sharedPreferences
-						.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE,
-								false)) {
+				if (! sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE, false)) {
 					// Permission was never asked before.
 					sharedPreferences.edit()
 							.remove(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE)
@@ -499,8 +467,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 							.commit();
 
 					ActivityCompat.requestPermissions(this,
-							new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-							PERMISSIONS_REQUEST_CODE);
+							new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE);
 
 				} else {
 					////////////////////////////////////////////////////////////////////////////////
@@ -508,10 +475,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 					////////////////////////////////////////////////////////////////////////////////
 					showPermissionExplanationDialog();
 				}
-
-
 			}
-
 		}
 	}
 
@@ -553,8 +517,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 				Uri toneUri = data.getData();
 				assert toneUri != null;
 
-				try (Cursor cursor = getContentResolver()
-						.query(toneUri, null, null, null, null)) {
+				try (Cursor cursor = getContentResolver().query(toneUri, null, null, null, null)) {
 
 					if (cursor != null) {
 
@@ -569,8 +532,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 							cursor.moveToFirst();
 
 							String fileNameWithExt = cursor.getString(nameIndex);
-							String fileNameWithoutExt = fileNameWithExt
-									.substring(0, fileNameWithExt.indexOf("."));
+							String fileNameWithoutExt = fileNameWithExt.substring(0, fileNameWithExt.indexOf("."));
 							int toneId = View.generateViewId();
 
 							toneNameList.add(fileNameWithoutExt);
@@ -649,4 +611,5 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 		} catch (Exception ignored) {
 		}
 	}
+
 }
