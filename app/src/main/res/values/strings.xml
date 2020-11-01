@@ -101,6 +101,7 @@
         so that it can read the tones. Without this permission, the app will not work. Give the permission?</string>
 
     <!-- Activity_Settings -->
+    <string name="settings_title">Settings</string>
     <string name="shakeOp">If I <b>shake</b> the phone when an alarm rings,</string>
     <string name="powerBtnOp">If I press the <b>power button</b> when an alarm rings,</string>
     <string-array name="shakeAndPowerOptions">
@@ -131,6 +132,8 @@
 
     <!-- Service_UpdateAlarm -->
     <string name="updateAlarm_notifMessage">Activating alarms. This may take a while…</string>
+
+
     <string name="defaultAlarmToneText">Default alarm tone</string>
 
 </resources>

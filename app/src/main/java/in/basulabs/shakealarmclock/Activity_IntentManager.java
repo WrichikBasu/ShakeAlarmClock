@@ -52,8 +52,7 @@ import static in.basulabs.shakealarmclock.ConstantsAndStatics.SHARED_PREF_KEY_DE
 /**
  * An activity to manage activity actions for this app.
  * <p>
- * This activity has no display and is transparent. It handles incoming intents and finishes itself in {@link
- * #onCreate(Bundle)}.
+ * This activity has no display and is transparent. It handles incoming intents and finishes itself in {@link #onCreate(Bundle)}.
  * <p>
  * The following activity actions are handled:
  * <ul>
@@ -129,10 +128,18 @@ public class Activity_IntentManager extends AppCompatActivity {
 
 			case AlarmClock.ACTION_DISMISS_ALARM:
 
-				Intent intent2 = new Intent(this, Activity_AlarmsList.class);
-				intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-						.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-				startActivity(intent2);
+				if (Service_RingAlarm.isThisServiceRunning && Service_RingAlarm.alarmID != - 1) {
+					Intent intent1 = new Intent(this, Service_RingAlarm.class);
+					stopService(intent1);
+				} else if (Service_SnoozeAlarm.isThisServiceRunning && Service_SnoozeAlarm.alarmID != - 1) {
+					Intent intent1 = new Intent(this, Service_SnoozeAlarm.class);
+					stopService(intent1);
+				} else {
+					Intent intent2 = new Intent(this, Activity_AlarmsList.class)
+							.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+							.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+					startActivity(intent2);
+				}
 
 				break;
 

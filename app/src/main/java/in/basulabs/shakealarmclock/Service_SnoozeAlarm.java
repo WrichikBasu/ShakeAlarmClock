@@ -15,7 +15,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
-import android.os.Process;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -34,12 +33,14 @@ import java.util.Objects;
 
 public class Service_SnoozeAlarm extends Service {
 
-	private int alarmID;
+	public static int alarmID;
 	private Bundle alarmDetails;
 	private static final int NOTIFICATION_ID = 651;
 	private int numberOfTimesTheAlarmhasBeenSnoozed;
 
 	private CountDownTimer snoozeTimer;
+
+	public static boolean isThisServiceRunning = false;
 
 	//--------------------------------------------------------------------------------------------------
 
@@ -48,12 +49,6 @@ public class Service_SnoozeAlarm extends Service {
 		public void onReceive(Context context, Intent intent) {
 			if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_CANCEL_ALARM)) {
 				dismissAlarm();
-			} else if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_STOP_IMMEDIATELY)){
-				if (Objects.requireNonNull(intent.getExtras()).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID) == alarmID){
-					stopForeground(true);
-					stopSelf();
-					Process.killProcess(Process.myPid());
-				}
 			}
 		}
 	};
@@ -64,11 +59,11 @@ public class Service_SnoozeAlarm extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(NOTIFICATION_ID, buildSnoozeNotification(),
-					ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+			startForeground(NOTIFICATION_ID, buildSnoozeNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
 		} else {
 			startForeground(NOTIFICATION_ID, buildSnoozeNotification());
 		}
+		isThisServiceRunning = true;
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
@@ -82,7 +77,6 @@ public class Service_SnoozeAlarm extends Service {
 
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
-		intentFilter.addAction(ConstantsAndStatics.ACTION_STOP_IMMEDIATELY);
 		registerReceiver(broadcastReceiver, intentFilter);
 
 		Service_SnoozeAlarm myInstance = this;
@@ -96,10 +90,10 @@ public class Service_SnoozeAlarm extends Service {
 				ZoneId.systemDefault());
 
 		ZonedDateTime newAlarmDateTime = alarmDateTime.plusMinutes(numberOfTimesTheAlarmhasBeenSnoozed * alarmDetails
-								.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS));
+				.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS));
 
 		snoozeTimer = new CountDownTimer(Math.abs(Duration.between(ZonedDateTime.now(),
-				newAlarmDateTime).toMillis()),	500) {
+				newAlarmDateTime).toMillis()), 500) {
 
 			@Override
 			public void onTick(long l) {
@@ -174,7 +168,7 @@ public class Service_SnoozeAlarm extends Service {
 		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
 		Thread thread_toggleAlarm = new Thread(() ->
-				alarmDatabase.alarmDAO().toggleAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),0));
+				alarmDatabase.alarmDAO().toggleAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), 0));
 
 		/////////////////////////////////////
 		// Dismiss the snoozed alarm
@@ -184,7 +178,7 @@ public class Service_SnoozeAlarm extends Service {
 		intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
-						intent,	PendingIntent.FLAG_NO_CREATE);
+				intent, PendingIntent.FLAG_NO_CREATE);
 
 		if (pendingIntent != null) {
 			alarmManager.cancel(pendingIntent);
@@ -202,7 +196,7 @@ public class Service_SnoozeAlarm extends Service {
 			}
 		} else {
 			LocalTime alarmTime = LocalTime.of(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
-							alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+					alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
 
 			ArrayList<Integer> repeatDays = alarmDetails.getIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS);
 
@@ -233,12 +227,12 @@ public class Service_SnoozeAlarm extends Service {
 			intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
 			PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this,
-							alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), intent, 0);
+					alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), intent, 0);
 
-			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0),	ZoneId.systemDefault());
+			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
 
 			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
-							pendingIntent2), pendingIntent2);
+					pendingIntent2), pendingIntent2);
 		}
 		ConstantsAndStatics.schedulePeriodicWork(this);
 		stopForeground(true);
@@ -276,6 +270,8 @@ public class Service_SnoozeAlarm extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		unregisterReceiver(broadcastReceiver);
+		isThisServiceRunning = false;
+		alarmID = -1;
 	}
 
 

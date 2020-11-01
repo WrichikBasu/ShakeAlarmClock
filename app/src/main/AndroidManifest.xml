@@ -13,6 +13,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <uses-feature android:name="android.hardware.audio.output" android:required="true"/>
+
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -38,14 +40,12 @@
         <service
             android:name=".Service_SnoozeAlarm"
             android:enabled="true"
-            android:exported="false"
-            android:process=":RingAlarm"/>
+            android:exported="false"/>
 
         <service
             android:name=".Service_RingAlarm"
             android:enabled="true"
-            android:exported="false"
-            android:process=":RingAlarm"/>
+            android:exported="false"/>
 
         <receiver
             android:name=".AlarmBroadcastReceiver"

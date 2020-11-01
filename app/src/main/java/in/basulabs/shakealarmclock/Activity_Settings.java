@@ -49,8 +49,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	private SwitchCompat snoozeStateSwitch;
 	private CheckBox autoSelectToneCheckBox;
 
-	private static final String SAVE_INSTANCE_KEY_LAYOUT_EXPANDED =
-			"in.basulabs.shakealarmclock.Activity_Settings.LAYOUT_EXPANDED";
+	private static final String SAVE_INSTANCE_KEY_LAYOUT_EXPANDED =	"in.basulabs.shakealarmclock.Activity_Settings.LAYOUT_EXPANDED";
 
 	private int defaultTheme;
 
@@ -68,7 +67,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		////////////////////////////////////
 		setSupportActionBar(findViewById(R.id.toolbar5));
 		Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-		getSupportActionBar().setTitle("Settings");
+		getSupportActionBar().setTitle(R.string.settings_title);
 
 		//////////////////////////////////////////////////
 		// Get SharedPreferences and its editor:
@@ -134,7 +133,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		///////////////////////////////////////////////////////////
 		// Initialise expandable layout for snooze options:
 		//////////////////////////////////////////////////////////
-		snoozeOptionsExpandableLayout = findViewById(R.id.expandable_layout);
+		snoozeOptionsExpandableLayout = findViewById(R.id.snoozeOptionsExpandableLayout);
 		if (savedInstanceState == null) {
 			snoozeOptionsExpandableLayout.setExpanded(false);
 		} else {
@@ -246,8 +245,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		// Auto select tone enable/disable:
 		//////////////////////////////////////////
 		autoSelectToneCheckBox = findViewById(R.id.autoToneSelectionCheckBox);
-		autoSelectToneCheckBox.setChecked(
-				sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_AUTO_SET_TONE, true));
+		autoSelectToneCheckBox.setChecked(sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_AUTO_SET_TONE, true));
 		autoSelectToneCheckBox.setOnCheckedChangeListener(this);
 
 	}
@@ -287,10 +285,9 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 
 		if (uri.equals(Settings.System.DEFAULT_ALARM_ALERT_URI)) {
 			toneTextView.setText(R.string.defaultAlarmToneText);
-
 		} else {
 
-			String fileNameWithExt = null;
+			String fileName = null;
 
 			try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
 
@@ -299,17 +296,17 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 
 						int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
 						if (index != - 1) {
-							fileNameWithExt = cursor.getString(index);
+							fileName = cursor.getString(index);
 						} else {
-							fileNameWithExt = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
+							fileName = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
 						}
 					}
 				} catch (Exception ignored) {
 				}
 			}
 
-			if (fileNameWithExt != null) {
-				toneTextView.setText(fileNameWithExt);
+			if (fileName != null) {
+				toneTextView.setText(fileName);
 			} else {
 				toneTextView.setText(uri.getLastPathSegment());
 			}

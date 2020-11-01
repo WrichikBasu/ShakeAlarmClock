@@ -25,10 +25,8 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -72,7 +70,9 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 	private Uri alarmToneUri;
 
-	private int alarmID;
+	public static int alarmID = - 1;
+
+	public static boolean isThisServiceRunning = false;
 
 	private SharedPreferences sharedPreferences;
 
@@ -89,12 +89,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				snoozeAlarm();
 			} else if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_CANCEL_ALARM)) {
 				dismissAlarm();
-			} else if (intent.getAction().equals(ConstantsAndStatics.ACTION_STOP_IMMEDIATELY)){
-				if (Objects.requireNonNull(intent.getExtras()).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID) == alarmID){
-					stopForeground(true);
-					stopSelf();
-					Process.killProcess(Process.myPid());
-				}
 			}
 		}
 	};
@@ -109,6 +103,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		} else {
 			startForeground(NOTIFICATION_ID, buildRingNotification());
 		}
+		isThisServiceRunning = true;
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
@@ -127,7 +122,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		alarmToneUri = alarmDetails.getParcelable(ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI);
 
 		alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
-		Log.e(this.getClass().getSimpleName(), "alarmID = " + alarmID);
 
 		ringTimer = new CountDownTimer(60000, 1000) {
 
@@ -158,7 +152,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ConstantsAndStatics.ACTION_SNOOZE_ALARM);
 		intentFilter.addAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
-		intentFilter.addAction(ConstantsAndStatics.ACTION_STOP_IMMEDIATELY);
 		registerReceiver(broadcastReceiver, intentFilter);
 
 		ringAlarm();
@@ -185,6 +178,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		}
 		audioManager.setStreamVolume(AudioManager.STREAM_ALARM, initialAlarmStreamVolume, 0);
 		unregisterReceiver(broadcastReceiver);
+		isThisServiceRunning = false;
+		alarmID = - 1;
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -220,11 +215,11 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Creates a notification that can be shown when the alarm is ringing. Has a full screen intent to {@link
-	 * Activity_RingAlarm}. The content intent points to {@link Activity_AlarmsList}.
+	 * Creates a notification that can be shown when the alarm is ringing. Has a full screen intent to {@link Activity_RingAlarm}. The content intent points to
+	 * {@link Activity_AlarmsList}.
 	 *
-	 * @return A {@link Notification} that can be used with {@link #startForeground(int, Notification)} or displayed
-	 * 		with {@link NotificationManager#notify(int, Notification)}.
+	 * @return A {@link Notification} that can be used with {@link #startForeground(int, Notification)} or displayed with {@link NotificationManager#notify(int,
+	 *        Notification)}.
 	 */
 	private Notification buildRingNotification() {
 		createNotificationChannel();
@@ -316,8 +311,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Snoozes the alarm. If snooze is off, or the snoze frequency has been reached, the alarm will be cancelled by
-	 * calling {@link #dismissAlarm()}.
+	 * Snoozes the alarm. If snooze is off, or the snoze frequency has been reached, the alarm will be cancelled by calling {@link #dismissAlarm()}.
 	 */
 	private void snoozeAlarm() {
 
@@ -541,4 +535,5 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int i) {
 	}
+
 }
