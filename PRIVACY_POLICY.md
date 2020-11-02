@@ -11,6 +11,9 @@ If anyone finds any security vulnerability that has been inadvertently caused by
 As an Android user, I do not like apps collecting my data, and I have made my app such that it collects no sensitive data.
 
 Yours sincerely,
+
 Wrichik Basu.
+
 Kolkata, India.
+
 basulabs.developer@gmail.com
