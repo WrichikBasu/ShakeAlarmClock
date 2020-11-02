@@ -203,8 +203,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	private void createNotificationChannel() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
-			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID),
-					"in.basulabs.shakealarmclock Notifications", importance);
+			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID),"in.basulabs.shakealarmclock Notifications", importance);
 			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
 			assert notificationManager != null;
@@ -228,8 +227,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		fullScreenIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		fullScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-		PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 3054,
-				fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 3054, fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
 				Integer.toString(NOTIFICATION_ID))
@@ -254,8 +252,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		notificationManager.notify(NOTIFICATION_ID, buildRingNotification());
 		initialiseShakeSensor();
 
-		if (! (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE)
-				== ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY)) {
+		if (! (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) == ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY)) {
 
 			mediaPlayer = new MediaPlayer();
 			AudioAttributes attributes = new AudioAttributes.Builder()
@@ -263,8 +260,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 					.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
 					.build();
 
-			audioManager.setStreamVolume(AudioManager.STREAM_ALARM,
-					alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME), 0);
+			audioManager.setStreamVolume(AudioManager.STREAM_ALARM,	alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME), 0);
 
 			try {
 				mediaPlayer.setDataSource(this, alarmToneUri);
@@ -274,8 +270,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			} catch (IOException ignored) {
 			}
 
-			if (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE)
-					== ConstantsAndStatics.ALARM_TYPE_SOUND_AND_VIBRATE) {
+			if (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE)	== ConstantsAndStatics.ALARM_TYPE_SOUND_AND_VIBRATE) {
 				alarmVibration();
 			}
 			mediaPlayer.start();
@@ -319,8 +314,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		if (alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
 
-			if (numberOfTimesTheAlarmHasBeenSnoozed < alarmDetails
-					.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY)) {
+			if (numberOfTimesTheAlarmHasBeenSnoozed < alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY)) {
 
 				numberOfTimesTheAlarmHasBeenSnoozed++;
 
@@ -349,9 +343,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		stopRinging();
 		cancelPendingIntent();
 
-		Thread thread_toggleAlarm = new Thread(
-				() -> alarmDatabase.alarmDAO()
-						.toggleAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), 0));
+		Thread thread_toggleAlarm = new Thread(() -> alarmDatabase.alarmDAO().toggleAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), 0));
 
 		//////////////////////////////////////////////////////
 		// If repeat is on, set another alarm. Otherwise
@@ -433,17 +425,16 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	private void setAlarm(LocalDateTime alarmDateTime) {
 		AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-		Intent intent = new Intent(this, AlarmBroadcastReceiver.class);
-		intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
-		intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-		intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
+		Intent intent = new Intent(this, AlarmBroadcastReceiver.class)
+				.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM)
+				.setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+				.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmID, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
 		ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
 
-		alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
-				pendingIntent), pendingIntent);
+		alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent), pendingIntent);
 	}
 
 	//---------------------------------------------------------------------------------------------------
@@ -486,7 +477,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			float gForce = (float) Math.sqrt(gX * gX + gY * gY + gZ * gZ);
 			// gForce will be close to 1 when there is no movement.
 
-			if (gForce >= 3.8f) {
+			if (gForce >= sharedPreferences.getFloat(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY, ConstantsAndStatics.DEFAULT_SHAKE_SENSITIVITY)) {
 				long currTime = System.currentTimeMillis();
 				if (Math.abs(currTime - lastShakeTime) > MINIMUM_MILLIS_BETWEEN_SHAKES) {
 					lastShakeTime = currTime;
@@ -515,17 +506,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
 			} else {
 				vibrator.vibrate(200);
-			}
-			Thread thread = new Thread(() -> {
-				try {
-					Thread.sleep(200);
-				} catch (InterruptedException ignored) {
-				}
-			});
-			thread.start();
-			try {
-				thread.join();
-			} catch (InterruptedException ignored) {
 			}
 		}
 	}

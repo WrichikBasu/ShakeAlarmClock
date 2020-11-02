@@ -72,8 +72,7 @@ public class Service_SnoozeAlarm extends Service {
 		assert alarmDetails != null;
 		alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
 
-		numberOfTimesTheAlarmhasBeenSnoozed =
-				intent.getExtras().getInt(Service_RingAlarm.BUNDLE_KEY_NO_OF_TIMES_SNOOZED);
+		numberOfTimesTheAlarmhasBeenSnoozed = intent.getExtras().getInt(Service_RingAlarm.BUNDLE_KEY_NO_OF_TIMES_SNOOZED);
 
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
@@ -89,21 +88,20 @@ public class Service_SnoozeAlarm extends Service {
 				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE), 0, 0),
 				ZoneId.systemDefault());
 
-		ZonedDateTime newAlarmDateTime = alarmDateTime.plusMinutes(numberOfTimesTheAlarmhasBeenSnoozed * alarmDetails
-				.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS));
+		ZonedDateTime newAlarmDateTime = alarmDateTime.plusMinutes(numberOfTimesTheAlarmhasBeenSnoozed *
+				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS));
 
-		snoozeTimer = new CountDownTimer(Math.abs(Duration.between(ZonedDateTime.now(),
-				newAlarmDateTime).toMillis()), 500) {
+		snoozeTimer = new CountDownTimer(Math.abs(Duration.between(ZonedDateTime.now(),	newAlarmDateTime).toMillis()), 500) {
 
 			@Override
-			public void onTick(long l) {
+			public void onTick(long millisUntilFinished) {
 			}
 
 			@Override
 			public void onFinish() {
-				Intent intent1 = new Intent(myInstance, Service_RingAlarm.class);
-				intent1.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
-				intent1.putExtra(Service_RingAlarm.BUNDLE_KEY_NO_OF_TIMES_SNOOZED, numberOfTimesTheAlarmhasBeenSnoozed);
+				Intent intent1 = new Intent(myInstance, Service_RingAlarm.class)
+						.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails)
+						.putExtra(Service_RingAlarm.BUNDLE_KEY_NO_OF_TIMES_SNOOZED, numberOfTimesTheAlarmhasBeenSnoozed);
 				ContextCompat.startForegroundService(myInstance, intent1);
 				myInstance.stopSelf();
 			}
@@ -122,10 +120,8 @@ public class Service_SnoozeAlarm extends Service {
 	private void createNotificationChannel() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
-			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID),
-					"in.basulabs.shakealarmclock Notifications", importance);
-			NotificationManager notificationManager = (NotificationManager) getSystemService(
-					NOTIFICATION_SERVICE);
+			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID),"in.basulabs.shakealarmclock Notifications", importance);
+			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
 			assert notificationManager != null;
 			notificationManager.createNotificationChannel(channel);
@@ -139,11 +135,9 @@ public class Service_SnoozeAlarm extends Service {
 
 		Intent intent = new Intent();
 		intent.setAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
-		PendingIntent contentPendingIntent = PendingIntent.getBroadcast(this, 5017, intent,
-				PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent contentPendingIntent = PendingIntent.getBroadcast(this, 5017, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
-				Integer.toString(NOTIFICATION_ID))
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(NOTIFICATION_ID))
 				.setContentTitle(getResources().getString(R.string.app_name))
 				.setContentText(getResources().getString(R.string.notifContent_snooze))
 				.setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -226,13 +220,11 @@ public class Service_SnoozeAlarm extends Service {
 
 			intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
-			PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this,
-					alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), intent, 0);
+			PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this,	alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), intent, 0);
 
 			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
 
-			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
-					pendingIntent2), pendingIntent2);
+			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,	pendingIntent2), pendingIntent2);
 		}
 		ConstantsAndStatics.schedulePeriodicWork(this);
 		stopForeground(true);

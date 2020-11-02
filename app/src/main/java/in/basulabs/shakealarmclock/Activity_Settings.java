@@ -3,15 +3,23 @@ package in.basulabs.shakealarmclock;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -30,30 +38,44 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.DialogFragment;
 
 import net.cachapa.expandablelayout.ExpandableLayout;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
 
-public class Activity_Settings extends AppCompatActivity implements AdapterView.OnItemSelectedListener,
-		ExpandableLayout.OnExpansionUpdateListener, CompoundButton.OnCheckedChangeListener,
-		View.OnClickListener, SeekBar.OnSeekBarChangeListener {
+public class Activity_Settings extends AppCompatActivity implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener,
+		View.OnClickListener, SeekBar.OnSeekBarChangeListener, SensorEventListener, AlertDialog_TestShakeSensitivity.DialogListener {
 
 	private SharedPreferences.Editor prefEditor;
 	private SharedPreferences sharedPreferences;
 
-	private ExpandableLayout snoozeOptionsExpandableLayout;
-	private TextView snoozeIntvLabel, snoozeFreqLabel, toneTextView;
+	private ExpandableLayout snoozeOptionsExpandableLayout, shakeSensitivityExpandableLayout;
+	private TextView snoozeIntvLabel;
+	private TextView snoozeFreqLabel;
+	private TextView toneTextView;
 	private EditText snoozeIntvEditText, snoozeFreqEditText;
-	private ImageView snoozeImageView, volumeImageView;
+	private ImageView snoozeImageView, volumeImageView, shakeImageView;
 	private SwitchCompat snoozeStateSwitch;
 	private CheckBox autoSelectToneCheckBox;
 
-	private static final String SAVE_INSTANCE_KEY_LAYOUT_EXPANDED =	"in.basulabs.shakealarmclock.Activity_Settings.LAYOUT_EXPANDED";
+	private static final String SAVE_INSTANCE_SNOOZE_LAYOUT_EXPANDED = "in.basulabs.shakealarmclock.Activity_Settings.SNOOZE_LAYOUT_EXPANDED",
+			SAVE_INSTANCE_SHAKE_LAYOUT_EXPANDED = "in.basulabs.shakealarmclock.Activity_Settings.SHAKE_LAYOUT_EXPANDED",
+			SAVE_INSTANCE_IS_SHAKE_ONGOING = "in.basulabs.shakealarmclock.Activity_Settings.IS_SHAKE_ONGOING";
 
 	private int defaultTheme;
 
+	private long lastShakeTime;
+
+	private boolean isShakeTestGoingOn;
+
 	private static final int RINGTONE_REQUEST_CODE = 834;
+	static final int MINIMUM_MILLIS_BETWEEN_SHAKES = 400;
+
+	private SensorManager sensorManager;
+	private Sensor acclerometer;
 
 	//-----------------------------------------------------------------------------------------------------
 
@@ -94,8 +116,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 				R.array.shakeAndPowerOptions, android.R.layout.simple_spinner_item);
 		arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		shakeOpSpinner.setAdapter(arrayAdapter);
-		shakeOpSpinner.setSelection(sharedPreferences
-				.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION, ConstantsAndStatics.SNOOZE));
+		shakeOpSpinner.setSelection(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION, ConstantsAndStatics.SNOOZE));
 		shakeOpSpinner.setOnItemSelectedListener(this);
 
 		/////////////////////////////////////////////////////////
@@ -106,8 +127,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 				R.array.shakeAndPowerOptions, android.R.layout.simple_spinner_item);
 		arrayAdapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		powerBtnOpSpinner.setAdapter(arrayAdapter2);
-		powerBtnOpSpinner.setSelection(sharedPreferences.getInt(
-				ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION, ConstantsAndStatics.DISMISS));
+		powerBtnOpSpinner.setSelection(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION, ConstantsAndStatics.DISMISS));
 		powerBtnOpSpinner.setOnItemSelectedListener(this);
 
 		////////////////////////////////////////////////////
@@ -116,18 +136,14 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		Spinner themeSpinner = findViewById(R.id.themeSpinner);
 		ArrayAdapter<CharSequence> arrayAdapter3;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			arrayAdapter3 = ArrayAdapter.createFromResource(this, R.array.themeOptions_all,
-					android.R.layout.simple_spinner_item);
+			arrayAdapter3 = ArrayAdapter.createFromResource(this, R.array.themeOptions_all, android.R.layout.simple_spinner_item);
 		} else {
-			arrayAdapter3 = ArrayAdapter.createFromResource(this, R.array.themeOptions_noSystem,
-					android.R.layout.simple_spinner_item);
+			arrayAdapter3 = ArrayAdapter.createFromResource(this, R.array.themeOptions_noSystem, android.R.layout.simple_spinner_item);
 		}
 		arrayAdapter3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		themeSpinner.setAdapter(arrayAdapter3);
-		themeSpinner.setSelection(sharedPreferences
-				.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, ConstantsAndStatics.THEME_SYSTEM));
-		themeSpinner.setSelection(sharedPreferences
-				.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme));
+		themeSpinner.setSelection(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, ConstantsAndStatics.THEME_SYSTEM));
+		themeSpinner.setSelection(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme));
 		themeSpinner.setOnItemSelectedListener(this);
 
 		///////////////////////////////////////////////////////////
@@ -137,9 +153,9 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		if (savedInstanceState == null) {
 			snoozeOptionsExpandableLayout.setExpanded(false);
 		} else {
-			snoozeOptionsExpandableLayout.setExpanded(savedInstanceState.getBoolean(SAVE_INSTANCE_KEY_LAYOUT_EXPANDED));
+			snoozeOptionsExpandableLayout.setExpanded(savedInstanceState.getBoolean(SAVE_INSTANCE_SNOOZE_LAYOUT_EXPANDED));
 		}
-		snoozeOptionsExpandableLayout.setOnExpansionUpdateListener(this);
+		snoozeOptionsExpandableLayout.setOnExpansionUpdateListener((expansionFraction, state) -> setSnoozeImageView(state));
 
 		ConstraintLayout snoozeOptionsConstraintLayout = findViewById(R.id.settings_snoozeOptionsConstraintLayout);
 		snoozeOptionsConstraintLayout.setOnClickListener(this);
@@ -148,8 +164,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		// Initialise snooze ON/OFF switch:
 		/////////////////////////////////////////////
 		snoozeStateSwitch = findViewById(R.id.settingsSnoozeOnOffSwitch);
-		snoozeStateSwitch.setChecked(
-				sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_IS_ON, true));
+		snoozeStateSwitch.setChecked(sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_IS_ON, true));
 		setSwitchText();
 		snoozeStateSwitch.setOnCheckedChangeListener(this);
 
@@ -158,20 +173,13 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		snoozeIntvEditText = findViewById(R.id.settings_snoozeIntervalEditText);
 		snoozeFreqEditText = findViewById(R.id.settings_snoozeFreqEditText2);
 
-		snoozeIntvEditText.setText(String.valueOf(
-				sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL, 5)));
-		snoozeFreqEditText.setText(String.valueOf(
-				sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ, 3)));
+		snoozeIntvEditText.setText(String.valueOf(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL, 5)));
+		snoozeFreqEditText.setText(String.valueOf(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ, 3)));
 
-		activateOrDeactivateSnoozeOptions(
-				sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_IS_ON, true));
+		activateOrDeactivateSnoozeOptions(sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_IS_ON, true));
 
 		snoozeImageView = findViewById(R.id.snoozeExpColapImage);
-		if (snoozeOptionsExpandableLayout.isExpanded()) {
-			snoozeImageView.setImageResource(R.drawable.ic_collapse);
-		} else {
-			snoozeImageView.setImageResource(R.drawable.ic_expand);
-		}
+		setSnoozeImageView(snoozeOptionsExpandableLayout.getState());
 
 		snoozeFreqEditText.addTextChangedListener(new TextWatcher() {
 			@Override
@@ -248,6 +256,69 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		autoSelectToneCheckBox.setChecked(sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_AUTO_SET_TONE, true));
 		autoSelectToneCheckBox.setOnCheckedChangeListener(this);
 
+		////////////////////////////////////////////////////////
+		// Initialise shakeSencitivityExpandableLayout:
+		///////////////////////////////////////////////////////
+		shakeSensitivityExpandableLayout = findViewById(R.id.shakeSensitivityExpandableLayout);
+		if (savedInstanceState == null) {
+			shakeSensitivityExpandableLayout.setExpanded(false, false);
+		} else {
+			shakeSensitivityExpandableLayout.setExpanded(savedInstanceState.getBoolean(SAVE_INSTANCE_SHAKE_LAYOUT_EXPANDED));
+		}
+		shakeSensitivityExpandableLayout.setOnExpansionUpdateListener((expansionFraction, state) -> setShakeImageView(state));
+
+		////////////////////////////////////////////////////////
+		// Initialise shakeSensitivityConstarintLayout:
+		///////////////////////////////////////////////////////
+		ConstraintLayout shakeOptionsConstraintLayout = findViewById(R.id.shakeSensitivityConstarintLayout);
+		shakeOptionsConstraintLayout.setOnClickListener(this);
+
+		////////////////////////////////////////////////////////
+		// Initialise shakeImageView:
+		///////////////////////////////////////////////////////
+		shakeImageView = findViewById(R.id.shakeExpColImage);
+		setShakeImageView(shakeSensitivityExpandableLayout.getState());
+
+		////////////////////////////////////////////////////////
+		// Initialise sensitivitySeekBar:
+		///////////////////////////////////////////////////////
+		SeekBar shakeSensitivitySeekBar = findViewById(R.id.shakeSensitivitySeekBar);
+
+		double min = 1.5, max = 6.5, stepSize = 0.2;
+		int steps = (int) ((max - min) / stepSize);
+
+		shakeSensitivitySeekBar.setMax(steps);
+		shakeSensitivitySeekBar.setProgress(getStepValue(sharedPreferences.getFloat(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY,
+				ConstantsAndStatics.DEFAULT_SHAKE_SENSITIVITY)));
+		shakeSensitivitySeekBar.setOnSeekBarChangeListener(this);
+
+		TextView testShakeTextView = findViewById(R.id.testShakeSenstivityTextView);
+		testShakeTextView.setOnClickListener(this);
+
+		sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+		acclerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+		if (savedInstanceState == null) {
+			isShakeTestGoingOn = false;
+		} else {
+			isShakeTestGoingOn = savedInstanceState.getBoolean(SAVE_INSTANCE_IS_SHAKE_ONGOING);
+			lastShakeTime = System.currentTimeMillis();
+		}
+
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (isShakeTestGoingOn) {
+			sensorManager.registerListener(this, acclerometer, SensorManager.SENSOR_DELAY_UI, new Handler());
+		}
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		sensorManager.unregisterListener(this, acclerometer);
 	}
 
 	//-----------------------------------------------------------------------------------------------------
@@ -255,7 +326,9 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	@Override
 	protected void onSaveInstanceState(@NonNull Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putBoolean(SAVE_INSTANCE_KEY_LAYOUT_EXPANDED, snoozeOptionsExpandableLayout.isExpanded());
+		outState.putBoolean(SAVE_INSTANCE_SNOOZE_LAYOUT_EXPANDED, snoozeOptionsExpandableLayout.isExpanded());
+		outState.putBoolean(SAVE_INSTANCE_SHAKE_LAYOUT_EXPANDED, shakeSensitivityExpandableLayout.isExpanded());
+		outState.putBoolean(SAVE_INSTANCE_IS_SHAKE_ONGOING, isShakeTestGoingOn);
 	}
 
 
@@ -359,6 +432,26 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		}
 	}
 
+	//----------------------------------------------------------------------------------------------------
+
+	private void setShakeImageView(int state) {
+		if (state == ExpandableLayout.State.EXPANDED) {
+			shakeImageView.setImageResource(R.drawable.ic_collapse);
+		} else if (state == ExpandableLayout.State.COLLAPSED) {
+			shakeImageView.setImageResource(R.drawable.ic_expand);
+		}
+	}
+
+	//----------------------------------------------------------------------------------------------------
+
+	private void setSnoozeImageView(int state) {
+		if (state == ExpandableLayout.State.EXPANDED) {
+			snoozeImageView.setImageResource(R.drawable.ic_collapse);
+		} else if (state == ExpandableLayout.State.COLLAPSED) {
+			snoozeImageView.setImageResource(R.drawable.ic_expand);
+		}
+	}
+
 	//-----------------------------------------------------------------------------------------------------
 
 	@Override
@@ -417,19 +510,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	 * Applies the appropriate theme. Gets the theme using {@link ConstantsAndStatics#getTheme(int)}.
 	 */
 	private void applyTheme() {
-		AppCompatDelegate.setDefaultNightMode(ConstantsAndStatics.getTheme(
-				sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme)));
-	}
-
-	//-----------------------------------------------------------------------------------------------------
-
-	@Override
-	public void onExpansionUpdate(float expansionFraction, int state) {
-		if (state == ExpandableLayout.State.EXPANDED) {
-			snoozeImageView.setImageResource(R.drawable.ic_collapse);
-		} else if (state == ExpandableLayout.State.COLLAPSED) {
-			snoozeImageView.setImageResource(R.drawable.ic_expand);
-		}
+		AppCompatDelegate.setDefaultNightMode(ConstantsAndStatics.getTheme(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme)));
 	}
 
 	//-----------------------------------------------------------------------------------------------------
@@ -501,6 +582,15 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 					.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
 					.putExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE, false);
 			startActivityForResult(intent, RINGTONE_REQUEST_CODE);
+		} else if (view.getId() == R.id.shakeSensitivityConstarintLayout) {
+			shakeSensitivityExpandableLayout.toggle();
+		} else if (view.getId() == R.id.testShakeSenstivityTextView) {
+			sensorManager.registerListener(this, acclerometer, SensorManager.SENSOR_DELAY_UI, new Handler());
+			lastShakeTime = System.currentTimeMillis();
+			DialogFragment dialogFragment = new AlertDialog_TestShakeSensitivity();
+			dialogFragment.setCancelable(false);
+			dialogFragment.show(getSupportFragmentManager(), "");
+			isShakeTestGoingOn = true;
 		}
 	}
 
@@ -543,9 +633,99 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
-		prefEditor.remove(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME)
-				.putInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME, seekBar.getProgress())
-				.commit();
+		if (seekBar.getId() == R.id.settings_volumeSeekbar) {
+			prefEditor.remove(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME)
+					.putInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME, seekBar.getProgress())
+					.commit();
+		} else if (seekBar.getId() == R.id.shakeSensitivitySeekBar) {
+			Log.e(getClass().getSimpleName(), "Sensitivity value = " + getSensitivityValue(seekBar.getProgress()));
+			prefEditor.remove(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY)
+					.putFloat(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY, getSensitivityValue(seekBar.getProgress()))
+					.commit();
+		}
+	}
+
+	//-----------------------------------------------------------------------------------------------------
+
+	/**
+	 * Calculates the steps of seekbar from sensitivity value.
+	 *
+	 * @param sensitivity The value of sensitivity, i.e. the minimum gForce required to trigger the detector.
+	 *
+	 * @return The corresponding progress value that can be set in the seekbar.
+	 */
+	private int getStepValue(float sensitivity) {
+		return (int) ((sensitivity - 1.5f) / .2f);
+	}
+
+	//-----------------------------------------------------------------------------------------------------
+
+	/**
+	 * Given a progress value from the seekbar, this function calculates the sensitivity of shake detector.
+	 *
+	 * @param step The value returned by {@link SeekBar#getProgress()}}.
+	 *
+	 * @return The sensitivity corresponding to the step.
+	 */
+	private float getSensitivityValue(int step) {
+		BigDecimal bigDecimal = new BigDecimal(1.5f + step * .2f).setScale(1, RoundingMode.FLOOR);
+		return bigDecimal.floatValue();
+	}
+
+	//-----------------------------------------------------------------------------------------------------
+
+	@Override
+	public void onSensorChanged(SensorEvent event) {
+		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+			float x = event.values[0];
+			float y = event.values[1];
+			float z = event.values[2];
+
+			float gX = x / SensorManager.GRAVITY_EARTH;
+			float gY = y / SensorManager.GRAVITY_EARTH;
+			float gZ = z / SensorManager.GRAVITY_EARTH;
+
+			float gForce = (float) Math.sqrt(gX * gX + gY * gY + gZ * gZ);
+			// gForce will be close to 1 when there is no movement.
+
+			if (gForce >= sharedPreferences.getFloat(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY, ConstantsAndStatics.DEFAULT_SHAKE_SENSITIVITY)) {
+				long currTime = System.currentTimeMillis();
+				if (Math.abs(currTime - lastShakeTime) > MINIMUM_MILLIS_BETWEEN_SHAKES) {
+					lastShakeTime = currTime;
+					shakeVibration();
+				}
+			}
+		}
+	}
+
+	//-----------------------------------------------------------------------------------------------------
+
+	/**
+	 * Creates a vibration for a small period of time, indicating that the app has registered a shake event.
+	 */
+	private void shakeVibration() {
+		Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+		if (vibrator.hasVibrator()) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+			} else {
+				vibrator.vibrate(200);
+			}
+		}
+	}
+
+	//-----------------------------------------------------------------------------------------------------
+
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+	}
+
+	//-----------------------------------------------------------------------------------------------------
+
+	@Override
+	public void onDialogNegativeClick(DialogFragment dialogFragment) {
+		sensorManager.unregisterListener(this, acclerometer);
+		isShakeTestGoingOn = false;
 	}
 
 }

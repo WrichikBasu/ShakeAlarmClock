@@ -476,11 +476,9 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 					dialog.cancel();
 
 					try {
-						context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=in.basulabs" +
-								".shakealarmclock")));
+						context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=in.basulabs.shakealarmclock")));
 					} catch (android.content.ActivityNotFoundException exception) {
-						context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google" +
-								".com/store/apps/details?id=in.basulabs.shakealarmclock")));
+						context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock")));
 					}
 				})
 				.start();

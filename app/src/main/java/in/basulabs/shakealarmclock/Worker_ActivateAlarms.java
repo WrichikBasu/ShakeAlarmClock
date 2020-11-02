@@ -128,7 +128,7 @@ public class Worker_ActivateAlarms extends Worker {
 
 				}
 
-				if (stopExecuting && ! isStopped()) {
+				if ((stopExecuting && ! isStopped()) || Service_RingAlarm.isThisServiceRunning || Service_SnoozeAlarm.isThisServiceRunning) {
 					break;
 				}
 			}

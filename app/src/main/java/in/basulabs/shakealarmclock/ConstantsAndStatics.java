@@ -206,7 +206,11 @@ final class ConstantsAndStatics {
 	/**
 	 * {@link android.content.SharedPreferences} key to store the default power button operation. Can be either {@link #DISMISS} or {@link #SNOOZE}.
 	 */
-	static final String SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION =	"in.basulabs.shakealarmclock.DEFAULT_POWER_BTN_OPERATION";
+	static final String SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION = "in.basulabs.shakealarmclock.DEFAULT_POWER_BTN_OPERATION";
+
+	static final String SHARED_PREF_KEY_SHAKE_SENSITIVITY = "in.basulabs.shakealarmclock.SHAKE_SENSITIVITY";
+
+	static final float DEFAULT_SHAKE_SENSITIVITY = 3.2f;
 
 	/**
 	 * Indicates that the ringing alarm should be snoozed.

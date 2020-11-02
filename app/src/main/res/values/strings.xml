@@ -130,8 +130,22 @@
     <string name="settings_volume">Default alarm volume:</string>
     <string name="settings_toneCheckbox">Automatically set new tones I select as default tones</string>
 
+    <string name="settings_shakeSensitivityMainLabel"><b>Shake sensitivity settings</b>\nTest the sensitivity of the shake
+    detector, and change it as you wish</string>
+    <string name="shakeSensitivityChangeLabel">Change sensitivity:</string>
+    <string name="leastSensitiveLabel">\u2191\nLeast\nsensitive</string>
+    <string name="mostSensitiveLabel">\u2191\nMost\nsensitive</string>
+    <string name="testShake">Test shake sensitivity\n<i>Tap to enable the shake detector so that you can
+        choose the sensitivity that correctly suits you.</i></string>
+
     <!-- Service_UpdateAlarm -->
     <string name="updateAlarm_notifMessage">Activating alarms. This may take a while…</string>
+
+    <!-- AlertDialog_TestShakeSensitivity -->
+    <string name="title_shakeDetectionTest">Test sensitivity of shake detector</string>
+    <string name="message_shakeDetectionTest">Shake your phone. A vibration will tell you that a shake event has
+    been detected. Change the sensitivity as per your choice.</string>
+    <string name="negative_shakeDetectionTest">Stop</string>
 
 
     <string name="defaultAlarmToneText">Default alarm tone</string>

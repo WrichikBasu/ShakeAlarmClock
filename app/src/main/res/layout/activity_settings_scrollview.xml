@@ -40,7 +40,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         app:el_duration="500"
-        app:el_expanded="true"
+        app:el_expanded="false"
         app:el_parallax="0.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -95,7 +95,7 @@
         android:background="?android:attr/listDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/powerBtnOpSpinner" />
+        app:layout_constraintTop_toBottomOf="@+id/shakeSensitivityExpandableLayout" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/settings_snoozeOptionsConstraintLayout"
@@ -299,5 +299,68 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/divider22" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/shakeSensitivityConstarintLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider23">
+
+        <TextView
+            android:id="@+id/textView11"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/settings_shakeSensitivityMainLabel"
+            android:textColor="@color/defaultLabelColor"
+            android:textSize="17sp"
+            android:textStyle="normal"
+            app:layout_constraintEnd_toStartOf="@+id/shakeExpColImage"
+            app:layout_constraintHorizontal_bias="0.333"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/shakeExpColImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_expand" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/divider23"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/powerBtnOpSpinner" />
+
+    <net.cachapa.expandablelayout.ExpandableLayout
+        android:id="@+id/shakeSensitivityExpandableLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:el_duration="500"
+        app:el_expanded="false"
+        app:el_parallax="0.5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shakeSensitivityConstarintLayout">
+
+    <include layout="@layout/activity_settings_expand_shakeoptions" />
+
+    </net.cachapa.expandablelayout.ExpandableLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -23,8 +23,7 @@ public class AlertDialog_DiscardChanges extends DialogFragment {
 		if (context instanceof DialogListener) {
 			listener = (DialogListener) context;
 		} else {
-			throw new ClassCastException(context.getClass() + " must implement AlertDialog_DiscardChanges" +
-					".DialogListener");
+			throw new ClassCastException(context.getClass() + " must implement AlertDialog_DiscardChanges.DialogListener");
 		}
 	}
 
