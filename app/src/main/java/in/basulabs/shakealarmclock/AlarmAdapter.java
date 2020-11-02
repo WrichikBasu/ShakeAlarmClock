@@ -114,7 +114,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 					alarmData.getAlarmTime().getHour(),
 					alarmData.getAlarmTime().getMinute()));
 		} else {
-			String amPm = alarmData.getAlarmTime().getHour() <= 12 ? "AM" : "PM";
+			String amPm = alarmData.getAlarmTime().getHour() < 12 ? "AM" : "PM";
 
 			if ((alarmData.getAlarmTime().getHour() <= 12) && (alarmData.getAlarmTime().getHour() > 0)) {
 				holder.alarmTimeTextView.setText(context.getResources().getString(R.string.time_12hour,
