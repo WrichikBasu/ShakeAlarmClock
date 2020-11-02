@@ -323,7 +323,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 
 		} else {
 
-			String fileNameWithExt = null;
+			String fileName = null;
 
 			try (Cursor cursor = requireContext().getContentResolver()
 					.query(viewModel.getAlarmToneUri(), null, null, null, null)) {
@@ -333,17 +333,17 @@ public class Fragment_AlarmDetails_Main extends Fragment
 
 						int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
 						if (index != - 1) {
-							fileNameWithExt = cursor.getString(index);
+							fileName = cursor.getString(index);
 						} else {
-							fileNameWithExt = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
+							fileName = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
 						}
 					}
 				} catch (Exception ignored) {
 				}
 			}
 
-			if (fileNameWithExt != null) {
-				alarmToneTV.setText(fileNameWithExt);
+			if (fileName != null) {
+				alarmToneTV.setText(fileName);
 			} else {
 				alarmToneTV.setText(viewModel.getAlarmToneUri().getLastPathSegment());
 			}

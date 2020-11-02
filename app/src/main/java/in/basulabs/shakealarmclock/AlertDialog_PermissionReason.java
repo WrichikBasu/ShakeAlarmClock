@@ -13,7 +13,7 @@ public class AlertDialog_PermissionReason extends DialogFragment {
 
 	private DialogListener listener;
 
-	private String message;
+	private final String message;
 
 	public AlertDialog_PermissionReason(String message) {
 		this.message = message;
@@ -31,8 +31,7 @@ public class AlertDialog_PermissionReason extends DialogFragment {
 		if (context instanceof DialogListener) {
 			listener = (DialogListener) context;
 		} else {
-			throw new ClassCastException(context.getClass() + " must implement AlertDialog_PermissionReason" +
-					".DialogListener");
+			throw new ClassCastException(context.getClass() + " must implement AlertDialog_PermissionReason.DialogListener");
 		}
 	}
 
@@ -43,8 +42,7 @@ public class AlertDialog_PermissionReason extends DialogFragment {
 		AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
 		builder.setMessage(message)
 				.setPositiveButton(getResources().getString(R.string.cancelDialog_positive),
-						(dialogInterface, i) -> listener
-								.onDialogPositiveClick(AlertDialog_PermissionReason.this))
+						(dialogInterface, i) -> listener.onDialogPositiveClick(AlertDialog_PermissionReason.this))
 				.setNegativeButton(getResources().getString(R.string.cancelDialog_negative),
 						(dialogInterface, i) -> {
 							listener.onDialogNegativeClick(AlertDialog_PermissionReason.this);
