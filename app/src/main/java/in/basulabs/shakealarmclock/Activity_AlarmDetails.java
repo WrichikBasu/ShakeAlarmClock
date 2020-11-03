@@ -99,8 +99,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 
 			} else if (getIntent().getAction().equals(ACTION_EXISTING_ALARM)) {
 
-				Bundle data = Objects.requireNonNull(getIntent().getExtras())
-						.getBundle(BUNDLE_KEY_ALARM_DETAILS);
+				Bundle data = Objects.requireNonNull(getIntent().getExtras()).getBundle(BUNDLE_KEY_ALARM_DETAILS);
 
 				assert data != null;
 
@@ -346,8 +345,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 			data.putInt(BUNDLE_KEY_OLD_ALARM_MINUTE, viewModel.getOldAlarmMinute());
 		}
 
-		Intent intent = new Intent();
-		intent.putExtra(BUNDLE_KEY_ALARM_DETAILS, data);
+		Intent intent = new Intent().putExtra(BUNDLE_KEY_ALARM_DETAILS, data);
 		setResult(RESULT_OK, intent);
 		this.finish();
 	}

@@ -18,30 +18,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ViewModel_AlarmsList extends ViewModel {
 
 	private MutableLiveData<ArrayList<AlarmData>> alarmDataArrayList;
-	private MutableLiveData<Boolean> hasPermissionBeenRequested;
-	private MutableLiveData<Boolean> hasPermissionsDialogBeenShownBefore;
 	private MutableLiveData<Integer> alarmsCount;
 
-	//--------------------------------------------------------------------------------------------------
-
-	public boolean getHasPermissionsDialogBeenShownBefore() {
-		if (hasPermissionsDialogBeenShownBefore == null || hasPermissionsDialogBeenShownBefore
-				.getValue() == null) {
-			hasPermissionsDialogBeenShownBefore = new MutableLiveData<>(false);
-			return false;
-		}
-		return hasPermissionsDialogBeenShownBefore.getValue();
-	}
-
-	//--------------------------------------------------------------------------------------------------
-
-	public void setHasPermissionsDialogBeenShownBefore(
-			boolean hasPermissionsDialogBeenShownBefore) {
-		if (this.hasPermissionsDialogBeenShownBefore == null) {
-			this.hasPermissionsDialogBeenShownBefore = new MutableLiveData<>();
-		}
-		this.hasPermissionsDialogBeenShownBefore.setValue(hasPermissionsDialogBeenShownBefore);
-	}
 	//--------------------------------------------------------------------------------------------------
 
 	public LiveData<Integer> getLiveAlarmsCount() {
@@ -89,12 +67,11 @@ public class ViewModel_AlarmsList extends ViewModel {
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Updates the date of the alarm to the next feasible date, and then reads data into {@link
-	 * #alarmDataArrayList}.
+	 * Updates the date of the alarm to the next feasible date, and then reads data into {@link #alarmDataArrayList}.
 	 *
 	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read from/write to the database.
-	 * @param force Whether the operation is to be forced. If this is {@code true}, the method will not
-	 * 		return until the thread has completed execution. Otherwise the thread will run in the background.
+	 * @param force Whether the operation is to be forced. If this is {@code true}, the method will not return until the thread has completed execution.
+	 * 		Otherwise the thread will run in the background.
 	 */
 	private void init(AlarmDatabase alarmDatabase, boolean force) {
 
@@ -197,35 +174,6 @@ public class ViewModel_AlarmsList extends ViewModel {
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Checks whether permission has been requested during the current session.
-	 *
-	 * @return {@code true} if permission has been requested, otherwise {@code false}.
-	 */
-	public boolean getHasPermissionBeenRequested() {
-		if (hasPermissionBeenRequested == null || hasPermissionBeenRequested.getValue() == null) {
-			hasPermissionBeenRequested = new MutableLiveData<>(false);
-			return false;
-		}
-		return hasPermissionBeenRequested.getValue();
-	}
-
-	//--------------------------------------------------------------------------------------------------
-
-	/**
-	 * Sets whether permission has been requested during the current session.
-	 *
-	 * @param hasPermissionBeenRequested As above.
-	 */
-	public void setHasPermissionBeenRequested(boolean hasPermissionBeenRequested) {
-		if (this.hasPermissionBeenRequested == null) {
-			this.hasPermissionBeenRequested = new MutableLiveData<>();
-		}
-		this.hasPermissionBeenRequested.setValue(hasPermissionBeenRequested);
-	}
-
-	//--------------------------------------------------------------------------------------------------
-
-	/**
 	 * Get an {@link ArrayList} of {@link AlarmData} objects that can be used to instantiate the adapter.
 	 *
 	 * @return An {@link ArrayList} of {@link AlarmData} objects
@@ -245,12 +193,10 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 *
 	 * @param alarmDatabase The {@link AlarmDatabase} object.
 	 * @param alarmEntity The {@link AlarmEntity} object that contanins all the alarm details.
-	 * @param repeatDays The days in which the alarm is to be repeated, if repeat is ON. Otherwise, this
-	 * 		value can be null.
+	 * @param repeatDays The days in which the alarm is to be repeated, if repeat is ON. Otherwise, this value can be null.
 	 *
-	 * @return An array consiting of TWO elements: the alarm ID at index 0 and the position at which the alarm
-	 * 		was inserted at index 1. The latter can be used to scroll the {@link
-	 *        androidx.recyclerview.widget.RecyclerView} using {@link androidx.recyclerview.widget.RecyclerView#scrollToPosition(int)}.
+	 * @return An array consiting of TWO elements: the alarm ID at index 0 and the position at which the alarm was inserted at index 1. The latter can be used
+	 * 		to scroll the {@link androidx.recyclerview.widget.RecyclerView} using {@link androidx.recyclerview.widget.RecyclerView#scrollToPosition(int)}.
 	 */
 	public int[] addAlarm(@NonNull AlarmDatabase alarmDatabase, @NonNull AlarmEntity alarmEntity,
 	                      @Nullable ArrayList<Integer> repeatDays) {
@@ -459,12 +405,18 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minute.
 	 *
-	 * @return The unique alarm ID.
+	 * @return The unique alarm ID if the alarm is present in the database, otherwise 0 (zero).
 	 */
 	public int getAlarmId(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
-		AtomicInteger alarmId = new AtomicInteger(5);
+		AtomicInteger alarmId = new AtomicInteger(0);
 
-		Thread thread = new Thread(() -> alarmId.set(alarmDatabase.alarmDAO().getAlarmId(hour, mins)));
+		Thread thread = new Thread(() -> {
+			try {
+				alarmId.set(alarmDatabase.alarmDAO().getAlarmId(hour, mins));
+			} catch (Exception ex) {
+				alarmId.set(0);
+			}
+		});
 		thread.start();
 
 		try {
@@ -484,8 +436,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minute.
 	 *
-	 * @return An {@link ArrayList} containing the days in which the alarm is set to repeat. Will return an
-	 * 		empty {@link ArrayList} if repeat is OFF.
+	 * @return An {@link ArrayList} containing the days in which the alarm is set to repeat. Will return an empty {@link ArrayList} if repeat is OFF.
 	 */
 	public ArrayList<Integer> getRepeatDays(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
 		AtomicReference<ArrayList<Integer>> repeatDays = new AtomicReference<>(new ArrayList<>());
@@ -537,8 +488,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minutes.
 	 *
-	 * @return {@code -1} if the alarm is not present in the list, otherwise the index where the alarm is
-	 * 		present.
+	 * @return {@code -1} if the alarm is not present in the list, otherwise the index where the alarm is present.
 	 */
 	private int isAlarmInTheList(int hour, int mins) {
 
