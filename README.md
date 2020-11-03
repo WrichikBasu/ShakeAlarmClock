@@ -5,7 +5,7 @@
 ![GitHub top language](https://img.shields.io/github/languages/top/WrichikBasu/ShakeAlarmClock)
 ![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/WrichikBasu/ShakeAlarmClock)
 ![GitHub](https://img.shields.io/github/license/WrichikBasu/ShakeAlarmClock)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/WrichikBasu/ShakeAlarmClock)](https://github.com/WrichikBasu/ShakeAlarmClock/releases/tag/v1.2)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/WrichikBasu/ShakeAlarmClock)](https://github.com/WrichikBasu/ShakeAlarmClock/releases)
 ![GitHub Release Date](https://img.shields.io/github/release-date/WrichikBasu/ShakeAlarmClock)
 ![GitHub last commit](https://img.shields.io/github/last-commit/WrichikBasu/ShakeAlarmClock)
 
