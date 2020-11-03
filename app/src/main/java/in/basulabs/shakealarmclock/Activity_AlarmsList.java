@@ -134,7 +134,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		}
 
 		if (savedInstanceState == null && showAppUpdate) {
-			checkForUpdates();
+			checkForUpdatesFromGooglePlay();
 		}
 	}
 
@@ -461,7 +461,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	//-------------------------------------------------------------------------------------------------------------
 
-	private void checkForUpdates() {
+	private void checkForUpdatesFromGooglePlay() {
 		Context context = this;
 
 		new AppUpdater(this)
@@ -477,6 +477,24 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 					} catch (android.content.ActivityNotFoundException exception) {
 						context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock")));
 					}
+				})
+				.start();
+	}
+
+	//-------------------------------------------------------------------------------------------------------------
+
+	private void checkForUpdatesFromGitHub(){
+		Context context = this;
+
+		new AppUpdater(this)
+				.setUpdateFrom(UpdateFrom.GITHUB)
+				.setGitHubUserAndRepo("WrichikBasu", "ShakeAlarmClock")
+				.setDisplay(Display.DIALOG)
+				.setCancelable(true)
+				.setButtonDoNotShowAgain(null)
+				.setButtonUpdateClickListener((dialog, which) -> {
+					dialog.cancel();
+					context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/WrichikBasu/ShakeAlarmClock/releases")));
 				})
 				.start();
 	}
