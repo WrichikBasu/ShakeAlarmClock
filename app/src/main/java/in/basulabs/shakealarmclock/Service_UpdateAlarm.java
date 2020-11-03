@@ -15,15 +15,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Service_UpdateAlarm extends Service {
@@ -89,11 +86,11 @@ public class Service_UpdateAlarm extends Service {
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Creates a notification that can be shown when the alarm is ringing. Has a full screen intent to {@link
-	 * Activity_RingAlarm}. The content intent points to {@link Activity_AlarmsList}.
+	 * Creates a notification that can be shown when the alarm is ringing. Has a full screen intent to {@link Activity_RingAlarm}. The content intent points to
+	 * {@link Activity_AlarmsList}.
 	 *
-	 * @return A {@link Notification} that can be used with {@link #startForeground(int, Notification)} or
-	 * 		displayed with {@link NotificationManager#notify(int, Notification)}.
+	 * @return A {@link Notification} that can be used with {@link #startForeground(int, Notification)} or displayed with {@link NotificationManager#notify(int,
+	 *        Notification)}.
 	 */
 	private Notification buildNotification() {
 		createNotificationChannel();
@@ -101,8 +98,7 @@ public class Service_UpdateAlarm extends Service {
 		Intent contentIntent = new Intent(this, Activity_AlarmsList.class);
 		contentIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		contentIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		PendingIntent contentPendingIntent = PendingIntent.getActivity(this, 5701,
-				contentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent contentPendingIntent = PendingIntent.getActivity(this, 5701, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
 				Integer.toString(NOTIFICATION_ID))
@@ -128,8 +124,7 @@ public class Service_UpdateAlarm extends Service {
 
 		AtomicReference<ArrayList<AlarmEntity>> alarmEntityArrayList = new AtomicReference<>(new ArrayList<>());
 
-		Thread thread = new Thread(
-				() -> alarmEntityArrayList.set(new ArrayList<>(alarmDatabase.alarmDAO().getActiveAlarms())));
+		Thread thread = new Thread(() -> alarmEntityArrayList.set(new ArrayList<>(alarmDatabase.alarmDAO().getActiveAlarms())));
 
 		thread.start();
 		try {
@@ -160,8 +155,7 @@ public class Service_UpdateAlarm extends Service {
 			intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
 			intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(Service_UpdateAlarm.this,
-					alarmEntity.alarmID, intent, PendingIntent.FLAG_NO_CREATE);
+			PendingIntent pendingIntent = PendingIntent.getBroadcast(Service_UpdateAlarm.this, alarmEntity.alarmID, intent, PendingIntent.FLAG_NO_CREATE);
 
 			if (pendingIntent != null) {
 				alarmManager.cancel(pendingIntent);
@@ -176,8 +170,7 @@ public class Service_UpdateAlarm extends Service {
 
 		AtomicReference<ArrayList<Integer>> repeatDays = new AtomicReference<>();
 
-		Thread thread =	new Thread(
-				() -> repeatDays.set(new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(alarmID))));
+		Thread thread = new Thread(() -> repeatDays.set(new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(alarmID))));
 		thread.start();
 		try {
 			thread.join();
@@ -198,8 +191,10 @@ public class Service_UpdateAlarm extends Service {
 
 			ArrayList<Integer> repeatDays = getRepeatDays(alarmEntity.alarmID);
 
-			LocalDateTime alarmDateTime;
-			LocalDate alarmDate = LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth, alarmEntity.alarmDay);
+			LocalDateTime alarmDateTime = ConstantsAndStatics.getAlarmDateTime(LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth,
+					alarmEntity.alarmDay), LocalTime.of(alarmEntity.alarmHour, alarmEntity.alarmMinutes), alarmEntity.isRepeatOn, repeatDays);
+
+			/*LocalDate alarmDate = LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth, alarmEntity.alarmDay);
 			LocalTime alarmTime = LocalTime.of(alarmEntity.alarmHour, alarmEntity.alarmMinutes);
 
 			if (alarmEntity.isRepeatOn && repeatDays != null && repeatDays.size() > 0) {
@@ -239,9 +234,9 @@ public class Service_UpdateAlarm extends Service {
 					alarmDateTime = alarmDateTime.plusDays(1);
 				}
 
-			}
+			}*/
 
-			Intent intent = new Intent(Service_UpdateAlarm.this, AlarmBroadcastReceiver.class);
+			Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class);
 			intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
 			intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
@@ -249,13 +244,11 @@ public class Service_UpdateAlarm extends Service {
 			data.putIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS, repeatDays);
 			intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, data);
 
-			PendingIntent pendingIntent = PendingIntent
-					.getBroadcast(Service_UpdateAlarm.this, alarmEntity.alarmID, intent, 0);
+			PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmEntity.alarmID, intent, 0);
 
 			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime, ZoneId.systemDefault());
 
-			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
-					pendingIntent), pendingIntent);
+			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent), pendingIntent);
 
 		}
 
@@ -268,4 +261,5 @@ public class Service_UpdateAlarm extends Service {
 	public IBinder onBind(Intent intent) {
 		return null;
 	}
+
 }

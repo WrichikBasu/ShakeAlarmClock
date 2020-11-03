@@ -10,15 +10,12 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -42,9 +39,13 @@ public class Worker_ActivateAlarms extends Worker {
 	public Result doWork() {
 
 		stopExecuting = false;
-		activateAlarmsIfInactive();
 
-		return Result.success();
+		if (Service_RingAlarm.isThisServiceRunning || Service_SnoozeAlarm.isThisServiceRunning) {
+			return Result.failure();
+		} else {
+			activateAlarmsIfInactive();
+			return Result.success();
+		}
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -69,7 +70,7 @@ public class Worker_ActivateAlarms extends Worker {
 
 				ArrayList<Integer> repeatDays = repeatDaysAtomic.get();
 
-				Intent intent = new Intent(context, AlarmBroadcastReceiver.class);
+				Intent intent = new Intent(context.getApplicationContext(), AlarmBroadcastReceiver.class);
 				intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
 				intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
@@ -77,13 +78,15 @@ public class Worker_ActivateAlarms extends Worker {
 				data.putIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS, repeatDays);
 				intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, data);
 
-				PendingIntent pendingIntent = PendingIntent.getBroadcast(context, alarmEntity.alarmID, intent,
-						PendingIntent.FLAG_NO_CREATE);
+				PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), alarmEntity.alarmID, intent,	PendingIntent.FLAG_NO_CREATE);
 
 				if (pendingIntent == null) {
 
-					LocalDateTime alarmDateTime;
-					LocalDate alarmDate = LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth, alarmEntity.alarmDay);
+					LocalDateTime alarmDateTime = ConstantsAndStatics.getAlarmDateTime(LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth,
+							alarmEntity.alarmDay), LocalTime.of(alarmEntity.alarmHour, alarmEntity.alarmMinutes), alarmEntity.isRepeatOn, repeatDays);
+
+
+					/*LocalDate alarmDate = LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth, alarmEntity.alarmDay);
 					LocalTime alarmTime = LocalTime.of(alarmEntity.alarmHour, alarmEntity.alarmMinutes);
 
 					if (alarmEntity.isRepeatOn && repeatDays.size() > 0) {
@@ -117,14 +120,13 @@ public class Worker_ActivateAlarms extends Worker {
 						if (! alarmDateTime.isAfter(LocalDateTime.now())) {
 							alarmDateTime.plusDays(1);
 						}
-					}
+					}*/
 
 					ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime, ZoneId.systemDefault());
 
-					PendingIntent pendingIntent1 = PendingIntent.getBroadcast(context, alarmEntity.alarmID, intent, 0);
+					PendingIntent pendingIntent1 = PendingIntent.getBroadcast(context.getApplicationContext(), alarmEntity.alarmID, intent, 0);
 
-					alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
-							pendingIntent1), pendingIntent1);
+					alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent1), pendingIntent1);
 
 				}
 
@@ -142,4 +144,5 @@ public class Worker_ActivateAlarms extends Worker {
 		super.onStopped();
 		stopExecuting = true;
 	}
+
 }
