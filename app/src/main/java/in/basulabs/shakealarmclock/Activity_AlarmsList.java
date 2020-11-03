@@ -248,7 +248,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 			alarmID = alarmEntity.alarmID;
 		}
 
-		Intent intent = new Intent(Activity_AlarmsList.this, AlarmBroadcastReceiver.class);
+		Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class);
 		intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
 		intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
@@ -258,13 +258,11 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		data.putInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID, alarmID);
 		intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, data);
 
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(Activity_AlarmsList.this, alarmID, intent,
-				PendingIntent.FLAG_CANCEL_CURRENT);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID, intent, 0);
 
 		ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
 
-		alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
-				pendingIntent), pendingIntent);
+		alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,	pendingIntent), pendingIntent);
 
 		ConstantsAndStatics.schedulePeriodicWork(this);
 	}
@@ -290,8 +288,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		int alarmID = viewModel.getAlarmId(alarmDatabase, hour, mins);
 
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(Activity_AlarmsList.this, alarmID, intent,
-				PendingIntent.FLAG_NO_CREATE);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID, intent, PendingIntent.FLAG_NO_CREATE);
 
 		if (pendingIntent != null) {
 			alarmManager.cancel(pendingIntent);

@@ -425,12 +425,12 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	private void setAlarm(LocalDateTime alarmDateTime) {
 		AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-		Intent intent = new Intent(this, AlarmBroadcastReceiver.class)
+		Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class)
 				.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM)
 				.setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
 				.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmID, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID, intent, 0);
 
 		ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
 
@@ -442,12 +442,12 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	private void cancelPendingIntent() {
 		AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-		Intent intent = new Intent(this, AlarmBroadcastReceiver.class);
+		Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class);
 		intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
 		intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 		intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmID, intent, PendingIntent.FLAG_NO_CREATE);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID, intent, PendingIntent.FLAG_NO_CREATE);
 
 		if (pendingIntent != null) {
 			alarmManager.cancel(pendingIntent);
@@ -482,9 +482,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				if (Math.abs(currTime - lastShakeTime) > MINIMUM_MILLIS_BETWEEN_SHAKES) {
 					lastShakeTime = currTime;
 					shakeVibration();
-					if (sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
-							ConstantsAndStatics.SNOOZE) == ConstantsAndStatics.SNOOZE
-							&& alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
+					if (sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION, ConstantsAndStatics.SNOOZE)
+							== ConstantsAndStatics.SNOOZE && alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
 						snoozeAlarm();
 					} else {
 						dismissAlarm();

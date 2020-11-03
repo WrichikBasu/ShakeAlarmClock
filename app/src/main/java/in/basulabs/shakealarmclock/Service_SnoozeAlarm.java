@@ -167,11 +167,11 @@ public class Service_SnoozeAlarm extends Service {
 		/////////////////////////////////////
 		// Dismiss the snoozed alarm
 		/////////////////////////////////////
-		Intent intent = new Intent(this, AlarmBroadcastReceiver.class);
+		Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class);
 		intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
 		intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
 				intent, PendingIntent.FLAG_NO_CREATE);
 
 		if (pendingIntent != null) {
