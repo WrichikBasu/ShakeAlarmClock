@@ -416,7 +416,7 @@ final class ConstantsAndStatics {
 			}
 		}
 
-		return alarmDateTime;
+		return alarmDateTime.withSecond(0).withNano(0);
 	}
 
 }
