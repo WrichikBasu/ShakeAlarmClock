@@ -38,6 +38,8 @@ public class Service_SnoozeAlarm extends Service {
 	private static final int NOTIFICATION_ID = 651;
 	private int numberOfTimesTheAlarmhasBeenSnoozed;
 
+	private NotificationManager notificationManager;
+
 	private CountDownTimer snoozeTimer;
 
 	public static boolean isThisServiceRunning = false;
@@ -78,6 +80,8 @@ public class Service_SnoozeAlarm extends Service {
 		intentFilter.addAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
 		registerReceiver(broadcastReceiver, intentFilter);
 
+		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
 		Service_SnoozeAlarm myInstance = this;
 
 		ZonedDateTime alarmDateTime = ZonedDateTime.of(LocalDateTime.of(
@@ -91,10 +95,11 @@ public class Service_SnoozeAlarm extends Service {
 		ZonedDateTime newAlarmDateTime = alarmDateTime.plusMinutes(numberOfTimesTheAlarmhasBeenSnoozed *
 				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS));
 
-		snoozeTimer = new CountDownTimer(Math.abs(Duration.between(ZonedDateTime.now(),	newAlarmDateTime).toMillis()), 500) {
+		snoozeTimer = new CountDownTimer(Math.abs(Duration.between(ZonedDateTime.now(), newAlarmDateTime).toMillis()), 2000) {
 
 			@Override
 			public void onTick(long millisUntilFinished) {
+				updateNotification();
 			}
 
 			@Override
@@ -120,8 +125,8 @@ public class Service_SnoozeAlarm extends Service {
 	private void createNotificationChannel() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
-			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID),"in.basulabs.shakealarmclock Notifications", importance);
-			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID), "in.basulabs.shakealarmclock Notifications", importance);
+			//NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
 			assert notificationManager != null;
 			notificationManager.createNotificationChannel(channel);
@@ -133,8 +138,7 @@ public class Service_SnoozeAlarm extends Service {
 	private Notification buildSnoozeNotification() {
 		createNotificationChannel();
 
-		Intent intent = new Intent();
-		intent.setAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
+		Intent intent = new Intent().setAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
 		PendingIntent contentPendingIntent = PendingIntent.getBroadcast(this, 5017, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(NOTIFICATION_ID))
@@ -146,6 +150,24 @@ public class Service_SnoozeAlarm extends Service {
 				.setContentIntent(contentPendingIntent);
 
 		return builder.build();
+	}
+
+	//-----------------------------------------------------------------------------------------------------
+
+	private void updateNotification() {
+		Intent intent = new Intent()
+				.setAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
+		PendingIntent contentPendingIntent = PendingIntent.getBroadcast(this, 5017, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(NOTIFICATION_ID))
+				.setContentTitle(getResources().getString(R.string.app_name))
+				.setContentText(getResources().getString(R.string.notifContent_snooze))
+				.setPriority(NotificationCompat.PRIORITY_HIGH)
+				.setCategory(NotificationCompat.CATEGORY_STATUS)
+				.setSmallIcon(R.drawable.ic_notif)
+				.setContentIntent(contentPendingIntent);
+
+		notificationManager.notify(NOTIFICATION_ID, builder.build());
 	}
 
 	//-----------------------------------------------------------------------------------------------------
@@ -220,11 +242,11 @@ public class Service_SnoozeAlarm extends Service {
 
 			intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
-			PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this,	alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), intent, 0);
+			PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this, alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), intent, 0);
 
 			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
 
-			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,	pendingIntent2), pendingIntent2);
+			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent2), pendingIntent2);
 		}
 		ConstantsAndStatics.schedulePeriodicWork(this);
 		stopForeground(true);
@@ -261,9 +283,14 @@ public class Service_SnoozeAlarm extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		try{
+			snoozeTimer.cancel();
+		} catch (Exception ignored){
+		}
 		unregisterReceiver(broadcastReceiver);
 		isThisServiceRunning = false;
-		alarmID = -1;
+		alarmID = - 1;
+		notificationManager.cancel(NOTIFICATION_ID);
 	}
 
 
