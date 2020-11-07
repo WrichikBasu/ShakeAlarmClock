@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.AlarmClock;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -68,22 +67,17 @@ public class Activity_IntentManager extends AppCompatActivity {
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		Log.e(this.getClass().getSimpleName(), Objects.requireNonNull(getIntent().getAction()));
-
 		Intent intent = getIntent();
 
 		switch (Objects.requireNonNull(intent.getAction())) {
 
 			case AlarmClock.ACTION_SET_ALARM:
 
-				Log.e(this.getClass().getSimpleName(), "received action SET_ALARM.");
-
 				if (! intent.hasExtra(AlarmClock.EXTRA_HOUR) || ! intent.hasExtra(AlarmClock.EXTRA_MINUTES)) {
 					///////////////////////////////////////////////////////////////////////
 					// These two extras are necessary for an alarm to be set. Without
 					// these, the user will be redirected to Activity_AlarmsList.
 					///////////////////////////////////////////////////////////////////////
-					Log.e(this.getClass().getSimpleName(), "Intent does not have any extras.");
 
 					Intent intent1 = new Intent(this, Activity_AlarmsList.class);
 					intent1.setAction(ACTION_NEW_ALARM_FROM_INTENT)
@@ -94,11 +88,8 @@ public class Activity_IntentManager extends AppCompatActivity {
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 						if (isVoiceInteraction()) {
 
-							Log.e(this.getClass().getSimpleName(), "Voice interaction.");
-
 							Bundle status = new Bundle();
-							VoiceInteractor.Prompt prompt = new VoiceInteractor.Prompt(
-									new String[]{"You can do that in the app."},
+							VoiceInteractor.Prompt prompt = new VoiceInteractor.Prompt(new String[]{"You can do that in the app."},
 									"You can do that in the app.");
 
 							VoiceInteractor.Request request = new VoiceInteractor.CompleteVoiceRequest(prompt, status);
@@ -111,11 +102,8 @@ public class Activity_IntentManager extends AppCompatActivity {
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 						if (isVoiceInteraction()) {
 
-							Log.e(this.getClass().getSimpleName(), "Voice interaction.");
-
 							Bundle status = new Bundle();
-							VoiceInteractor.Prompt prompt = new VoiceInteractor.Prompt(
-									new String[]{"Your alarm has been set by Shake Alarm Clock."},
+							VoiceInteractor.Prompt prompt = new VoiceInteractor.Prompt(new String[]{"Your alarm has been set by Shake Alarm Clock."},
 									"Your alarm has been set by Shake Alarm Clock.");
 
 							VoiceInteractor.Request request = new VoiceInteractor.CompleteVoiceRequest(prompt, status);
@@ -128,12 +116,8 @@ public class Activity_IntentManager extends AppCompatActivity {
 
 			case AlarmClock.ACTION_DISMISS_ALARM:
 
-				if (Service_RingAlarm.isThisServiceRunning && Service_RingAlarm.alarmID != - 1) {
-					Intent intent1 = new Intent(this, Service_RingAlarm.class);
-					stopService(intent1);
-				} else if (Service_SnoozeAlarm.isThisServiceRunning && Service_SnoozeAlarm.alarmID != - 1) {
-					Intent intent1 = new Intent(this, Service_SnoozeAlarm.class);
-					stopService(intent1);
+				if (Service_RingAlarm.isThisServiceRunning || Service_SnoozeAlarm.isThisServiceRunning) {
+					sendBroadcast(new Intent(ConstantsAndStatics.ACTION_CANCEL_ALARM));
 				} else {
 					Intent intent2 = new Intent(this, Activity_AlarmsList.class)
 							.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -206,21 +190,18 @@ public class Activity_IntentManager extends AppCompatActivity {
 
 				if (! doesFileExist(alarmToneUri)) {
 					// Uri invalid or file doesn't exist; fall back to default tone
-					alarmToneUri = Uri.parse(sharedPreferences.getString(SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI,
-							"content://settings/system/alarm_alert"));
+					alarmToneUri = Uri.parse(sharedPreferences.getString(SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, "content://settings/system/alarm_alert"));
 				}
 
 			}
 		} else {
-			alarmToneUri = Uri.parse(sharedPreferences.getString(SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI,
-					"content://settings/system/alarm_alert"));
+			alarmToneUri = Uri.parse(sharedPreferences.getString(SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, "content://settings/system/alarm_alert"));
 		}
 
 		int volume;
 		if (alarmToneUri != null) {
 			AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-			volume = sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME,
-					audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) - 1);
+			volume = sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME, audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) - 1);
 		} else {
 			volume = 0;
 		}
@@ -241,8 +222,7 @@ public class Activity_IntentManager extends AppCompatActivity {
 		////////////////////////////////
 		AlarmDatabase alarmDatabase = AlarmDatabase.getInstance(this);
 
-		LocalDateTime alarmDateTime = ConstantsAndStatics.getAlarmDateTime(LocalDate.now(), alarmTime,
-				isRepeatOn, repeatDays);
+		LocalDateTime alarmDateTime = ConstantsAndStatics.getAlarmDateTime(LocalDate.now(), alarmTime, isRepeatOn, repeatDays);
 
 		if (intent.getExtras().getBoolean(AlarmClock.EXTRA_SKIP_UI, false)) {
 			// We have been asked to skip the UI. Alarm will be set by this activity itself.
@@ -269,8 +249,8 @@ public class Activity_IntentManager extends AppCompatActivity {
 
 			AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-			Intent intent1 = new Intent(this, AlarmBroadcastReceiver.class);
-			intent1.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM)
+			Intent intent1 = new Intent(this, AlarmBroadcastReceiver.class)
+					.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM)
 					.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
 			alarmEntity.alarmID = alarmID.get();
@@ -280,13 +260,11 @@ public class Activity_IntentManager extends AppCompatActivity {
 			data.putInt(BUNDLE_KEY_ALARM_ID, alarmID.get());
 			intent1.putExtra(BUNDLE_KEY_ALARM_DETAILS, data);
 
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmID.get(),
-					intent1, PendingIntent.FLAG_CANCEL_CURRENT);
+			PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID.get(), intent1, 0);
 
-			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
+			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0).withNano(0), ZoneId.systemDefault());
 
-			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
-					pendingIntent), pendingIntent);
+			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent), pendingIntent);
 
 			ConstantsAndStatics.schedulePeriodicWork(this);
 

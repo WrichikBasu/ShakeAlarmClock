@@ -27,7 +27,7 @@ public class Activity_RingAlarm extends AppCompatActivity implements View.OnClic
 
 	private SharedPreferences sharedPreferences;
 
-	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_DESTROY_RING_ALARM_ACTIVITY)) {
@@ -73,7 +73,7 @@ public class Activity_RingAlarm extends AppCompatActivity implements View.OnClic
 			alarmTimeTextView.setText(getResources().getString(R.string.time_24hour,
 					localTime.getHour(), localTime.getMinute()));
 		} else {
-			String amPm = localTime.getHour() <= 12 ? "AM" : "PM";
+			String amPm = localTime.getHour() < 12 ? "AM" : "PM";
 
 			if ((localTime.getHour() <= 12) && (localTime.getHour() > 0)) {
 
