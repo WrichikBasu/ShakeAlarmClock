@@ -60,6 +60,9 @@ public class Service_SnoozeAlarm extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
+		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		assert notificationManager != null;
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			startForeground(NOTIFICATION_ID, buildSnoozeNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
 		} else {
@@ -79,8 +82,6 @@ public class Service_SnoozeAlarm extends Service {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
 		registerReceiver(broadcastReceiver, intentFilter);
-
-		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
 		Service_SnoozeAlarm myInstance = this;
 
@@ -128,7 +129,6 @@ public class Service_SnoozeAlarm extends Service {
 			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID), "in.basulabs.shakealarmclock Notifications", importance);
 			//NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
-			assert notificationManager != null;
 			notificationManager.createNotificationChannel(channel);
 		}
 	}
@@ -155,8 +155,7 @@ public class Service_SnoozeAlarm extends Service {
 	//-----------------------------------------------------------------------------------------------------
 
 	private void updateNotification() {
-		Intent intent = new Intent()
-				.setAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
+		Intent intent = new Intent().setAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
 		PendingIntent contentPendingIntent = PendingIntent.getBroadcast(this, 5017, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(NOTIFICATION_ID))
