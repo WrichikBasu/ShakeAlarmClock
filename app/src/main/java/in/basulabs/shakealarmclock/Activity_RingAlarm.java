@@ -145,8 +145,7 @@ public class Activity_RingAlarm extends AppCompatActivity implements View.OnClic
 
 	private void onPowerButtonPressed() {
 		Intent intent;
-		int powerBtnAction = sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION,
-				ConstantsAndStatics.DISMISS);
+		int powerBtnAction = sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION, ConstantsAndStatics.DISMISS);
 		if (powerBtnAction == ConstantsAndStatics.DISMISS) {
 			intent = new Intent(ConstantsAndStatics.ACTION_CANCEL_ALARM);
 			sendBroadcast(intent);
