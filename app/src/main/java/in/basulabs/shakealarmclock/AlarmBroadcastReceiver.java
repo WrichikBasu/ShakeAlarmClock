@@ -23,14 +23,12 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
 					"in.basulabs.shakealarmclock::AlarmRingServiceWakelockTag");
 			wakeLock.acquire(60000);
 
-			Intent intent1 = new Intent(context, Service_RingAlarm.class);
-			intent1.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS,
+			Intent intent1 = new Intent(context, Service_RingAlarm.class)
+					.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS,
 					Objects.requireNonNull(intent.getExtras()).getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
 			ContextCompat.startForegroundService(context, intent1);
 
-		} else if (Objects.equals(intent.getAction(), Intent.ACTION_BOOT_COMPLETED)
-				|| intent.getAction().equals(Intent.ACTION_TIMEZONE_CHANGED)
-				|| intent.getAction().equals(Intent.ACTION_TIME_CHANGED)) {
+		} else if (Objects.equals(intent.getAction(), Intent.ACTION_BOOT_COMPLETED)) {
 
 			PowerManager powerManager = (PowerManager) context.getSystemService(POWER_SERVICE);
 			PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,

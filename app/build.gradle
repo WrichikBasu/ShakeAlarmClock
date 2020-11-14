@@ -8,8 +8,8 @@ android {
         applicationId "in.basulabs.shakealarmclock"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 13
-        versionName "1.2.10"
+        versionCode 14
+        versionName "1.2.11"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -36,12 +36,12 @@ android {
 
 dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.10'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.1'
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "androidx.work:work-runtime:2.4.0"
     implementation 'com.github.javiersantos:AppUpdater:2.7'
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation "androidx.room:room-runtime:2.2.5"
     annotationProcessor "androidx.room:room-compiler:2.2.5"
     implementation 'androidx.cardview:cardview:1.0.0'
