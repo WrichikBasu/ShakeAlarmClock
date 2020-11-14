@@ -43,8 +43,7 @@ public class Worker_ActivateAlarms extends Worker {
 		if (Service_RingAlarm.isThisServiceRunning || Service_SnoozeAlarm.isThisServiceRunning) {
 			return Result.failure();
 		} else {
-			activateAlarmsIfInactive();
-			return Result.success();
+			return activateAlarmsIfInactive();
 		}
 	}
 
@@ -53,7 +52,7 @@ public class Worker_ActivateAlarms extends Worker {
 	/**
 	 * Activates the alarms that are ON, but inactive because {@link AlarmManager} has cancelled them for no reason.
 	 */
-	private void activateAlarmsIfInactive() {
+	private Result activateAlarmsIfInactive() {
 
 		final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		final AlarmDatabase alarmDatabase = AlarmDatabase.getInstance(context);
@@ -131,10 +130,11 @@ public class Worker_ActivateAlarms extends Worker {
 				}
 
 				if ((stopExecuting && ! isStopped()) || Service_RingAlarm.isThisServiceRunning || Service_SnoozeAlarm.isThisServiceRunning) {
-					break;
+					return Result.failure();
 				}
 			}
 		}
+		return Result.success();
 	}
 
 	//----------------------------------------------------------------------------------------------------

@@ -144,8 +144,8 @@ public class Service_SnoozeAlarm extends Service {
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(NOTIFICATION_ID))
 				.setContentTitle(getResources().getString(R.string.app_name))
 				.setContentText(getResources().getString(R.string.notifContent_snooze))
-				.setPriority(NotificationCompat.PRIORITY_HIGH)
-				.setCategory(NotificationCompat.CATEGORY_STATUS)
+				.setPriority(NotificationCompat.PRIORITY_MAX)
+				.setCategory(NotificationCompat.CATEGORY_ALARM)
 				.setSmallIcon(R.drawable.ic_notif)
 				.setContentIntent(contentPendingIntent);
 
