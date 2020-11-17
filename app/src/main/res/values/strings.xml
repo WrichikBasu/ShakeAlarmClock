@@ -87,6 +87,7 @@
     <string name="defaultTone">Default</string>
     <string name="silentTone">Silent</string>
     <string name="play_tone">Play tone</string>
+    <string name="ringtonePicker_defaultTitle">Select tone:</string>
 
     <!-- AlertDialog_DiscardChanges -->
     <string name="cancelDialogMessage">Discard changes?</string>

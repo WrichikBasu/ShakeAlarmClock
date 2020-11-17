@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 
@@ -506,6 +507,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			} else {
 				vibrator.vibrate(200);
 			}
+			SystemClock.sleep(200);
 		}
 	}
 
