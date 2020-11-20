@@ -29,58 +29,58 @@ final class ConstantsAndStatics {
 	 * Bundle key for the Bundle that is passed with intent from {@link Activity_AlarmDetails} to {@link Activity_AlarmsList} containing the data set by the
 	 * user.
 	 */
-	static final String BUNDLE_KEY_ALARM_DETAILS = "in.basulabs.shakealarmclock.BundleWithAlarmDetails";
+	static final String BUNDLE_KEY_ALARM_DETAILS = "in.basulabs.shakealarmclock.ALARM_DETAILS_BUNDLE";
 
 	/**
 	 * Bundle key for the alarm hour. The value is an integer.
 	 */
-	static final String BUNDLE_KEY_ALARM_HOUR = "in.basulabs.shakealarmclock.HourPickedByUser";
+	static final String BUNDLE_KEY_ALARM_HOUR = "in.basulabs.shakealarmclock.ALARM_HOUR";
 
 	/**
 	 * Bundle key for the alarm minute. The value is an integer.
 	 */
-	static final String BUNDLE_KEY_ALARM_MINUTE = "in.basulabs.shakealarmclock.MinsPickedByUser";
+	static final String BUNDLE_KEY_ALARM_MINUTE = "in.basulabs.shakealarmclock.ALARM_MINUTES";
 
 	/**
 	 * Bundle key for the alarm type. The value is one of {@link #ALARM_TYPE_SOUND_ONLY}, {@link #ALARM_TYPE_VIBRATE_ONLY} or {@link
 	 * #ALARM_TYPE_SOUND_AND_VIBRATE}.
 	 */
-	static final String BUNDLE_KEY_ALARM_TYPE = "in.basulabs.shakealarmclock.AlarmType";
+	static final String BUNDLE_KEY_ALARM_TYPE = "in.basulabs.shakealarmclock.ALARM_TYPE";
 
 	/**
 	 * Bundle key for the alarm volume. The value is an integer.
 	 */
-	static final String BUNDLE_KEY_ALARM_VOLUME = "in.basulabs.shakealarmclock.AlarmVolume";
+	static final String BUNDLE_KEY_ALARM_VOLUME = "in.basulabs.shakealarmclock.ALARM_VOLUME";
 
 	/**
 	 * Bundle key for the alarm snooze interval. The value is an integer.
 	 */
-	static final String BUNDLE_KEY_SNOOZE_TIME_IN_MINS = "in.basulabs.shakealarmclock.SnoozeTimeInMins";
+	static final String BUNDLE_KEY_SNOOZE_TIME_IN_MINS = "in.basulabs.shakealarmclock.SNOOZE_TIME_IN_MINS";
 
 	/**
 	 * Bundle key for the number of times the alarm should snooze itself. The value is an integer.
 	 */
-	static final String BUNDLE_KEY_SNOOZE_FREQUENCY = "in.basulabs.shakealarmclock.SnoozeFrequency";
+	static final String BUNDLE_KEY_SNOOZE_FREQUENCY = "in.basulabs.shakealarmclock.SNOOZE_FREQUENCY";
 
 	/**
 	 * Bundle key denoting whether repeat is on or off. Value is boolean.
 	 */
-	static final String BUNDLE_KEY_IS_REPEAT_ON = "in.basulabs.shakealarmclock.IsRepeatOn";
+	static final String BUNDLE_KEY_IS_REPEAT_ON = "in.basulabs.shakealarmclock.IS_REPEAT_ON";
 
 	/**
 	 * Bundle key denoting whether snooze is on or off. Value is boolean.
 	 */
-	static final String BUNDLE_KEY_IS_SNOOZE_ON = "in.basulabs.shakealarmclock.IsSnoozeOn";
+	static final String BUNDLE_KEY_IS_SNOOZE_ON = "in.basulabs.shakealarmclock.IS_SNOOZE_ON";
 
 	/**
 	 * Bundle key denoting whether alarm is on or off. Value is boolean.
 	 */
-	static final String BUNDLE_KEY_IS_ALARM_ON = "in.basulabs.shakealarmclock.IsAlarmOn";
+	static final String BUNDLE_KEY_IS_ALARM_ON = "in.basulabs.shakealarmclock.IS_ALARM_ON";
 
 	/**
 	 * Bundle key for the alarm repeat days. The value is an ArrayList of Integer type. Monday is 1 and Sunday is 7.
 	 */
-	static final String BUNDLE_KEY_REPEAT_DAYS = "in.basulabs.shakealarmclock.ArrayListOfRepeatDays";
+	static final String BUNDLE_KEY_REPEAT_DAYS = "in.basulabs.shakealarmclock.REPEAT_DAYS";
 
 	/**
 	 * Denotes that the alarm type will be "Sound".
@@ -130,12 +130,12 @@ final class ConstantsAndStatics {
 	/**
 	 * Intent action delivered to {@link android.content.BroadcastReceiver} in {@link Service_RingAlarm} instructing it to snooze the alarm.
 	 */
-	static final String ACTION_SNOOZE_ALARM = "in.basulabs.shakealarmclock.Service_RingAlarm -- SNOOZE_ALARM";
+	static final String ACTION_SNOOZE_ALARM = "in.basulabs.shakealarmclock.SNOOZE_ALARM";
 
 	/**
 	 * Intent action delivered to {@link android.content.BroadcastReceiver} in {@link Service_RingAlarm} instructing it to cancel the alarm.
 	 */
-	static final String ACTION_CANCEL_ALARM = "in.basulabs.shakealarmclock.Service_RingAlarm -- CANCEL_ALARM";
+	static final String ACTION_CANCEL_ALARM = "in.basulabs.shakealarmclock.CANCEL_ALARM";
 
 	/**
 	 * The name of the {@link android.content.SharedPreferences} file for this app.
@@ -152,6 +152,10 @@ final class ConstantsAndStatics {
 	 */
 	static final String ACTION_EXISTING_ALARM = "in.basulabs.shakealarmclock.ACTION_EXISTING_ALARM";
 
+	/**
+	 * Intent action indicating that a new alarm is being requested to be created from a direct intent to the app rather than the user clicking on the "Add"
+	 * button.
+	 */
 	static final String ACTION_NEW_ALARM_FROM_INTENT =	"in.basulabs.shakealarmclock.ACTION_NEW_ALARM_FROM_INTENT";
 
 	/**
@@ -208,8 +212,20 @@ final class ConstantsAndStatics {
 	 */
 	static final String SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION = "in.basulabs.shakealarmclock.DEFAULT_POWER_BTN_OPERATION";
 
+	/**
+	 * {@link android.content.SharedPreferences} key to store the sensitivity of the shake detector. The data type is {@code float}.
+	 */
 	static final String SHARED_PREF_KEY_SHAKE_SENSITIVITY = "in.basulabs.shakealarmclock.SHAKE_SENSITIVITY";
 
+	/**
+	 * {@link android.content.SharedPreferences} key indicating whether {@link AlertDialog_BatteryOptimizations} should be shown in
+	 * {@link Activity_AlarmsList}. Data type is {@code boolean}.
+	 */
+	static final String SHARED_PREF_KEY_SHOW_BATTERY_OPTIM_DIALOG = "in.basulabs.shakealarmclock.SHOW_BATTERY_OPTIM_DIALOG";
+
+	/**
+	 * The default sensitivity of the shake detector.
+	 */
 	static final float DEFAULT_SHAKE_SENSITIVITY = 3.2f;
 
 	/**
@@ -278,6 +294,10 @@ final class ConstantsAndStatics {
 	 */
 	static final String SHARED_PREF_KEY_THEME = "in.basulabs.shakealarmclock.THEME";
 
+	/**
+	 * {@link android.content.SharedPreferences} key indicating whether a new alarm tone chosen by the user should be set as the default tone for future
+	 * alarms. Data type: {@code boolean}.
+	 */
 	static final String SHARED_PREF_KEY_AUTO_SET_TONE = "in.basulabs.shakealarmclock.AUTO_SET_TONE";
 
 	/**

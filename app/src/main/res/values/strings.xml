@@ -147,6 +147,14 @@
     <string name="message_shakeDetectionTest">Shake your phone. A vibration will tell you that a shake event has
     been detected. Change the sensitivity as per your choice.</string>
     <string name="negative_shakeDetectionTest">Stop</string>
+    
+    <!-- AlertDialog_BatteryOptimizations -->
+    <string name="batteryOptim_message">Please disable battery optimizations for this app. If this app is 
+        optimized, it might not be able to ring the alarm.</string>
+    <string name="batteryOptim_title">Disable battery optimizations</string>
+    <string name="batteryOptim_positive">Proceed</string>
+    <string name="batteryOptim_negative">Maybe later</string>
+    <string name="batteryOptim_neutral">Never show again</string>
 
 
     <string name="defaultAlarmToneText">Default alarm tone</string>

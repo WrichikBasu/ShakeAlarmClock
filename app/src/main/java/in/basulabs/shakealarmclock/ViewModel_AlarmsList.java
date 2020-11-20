@@ -96,8 +96,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 						// Update the date iff the alarm is OFF and the repeat is OFF.
 						if (! entity.isRepeatOn && ! entity.isAlarmOn) {
 
-							alarmDateTime = LocalDateTime.of(entity.alarmYear, entity.alarmMonth,
-									entity.alarmDay, entity.alarmHour, entity.alarmMinutes);
+							alarmDateTime = LocalDateTime.of(entity.alarmYear, entity.alarmMonth, entity.alarmDay, entity.alarmHour, entity.alarmMinutes);
 
 							if (alarmDateTime.isBefore(LocalDateTime.now())) {
 								while (alarmDateTime.isBefore(LocalDateTime.now())) {
@@ -121,15 +120,11 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 					for (AlarmEntity entity : alarmEntityList) {
 
-						LocalDateTime alarmDateTime = LocalDateTime.of(entity.alarmYear, entity.alarmMonth,
-								entity.alarmDay, entity.alarmHour, entity.alarmMinutes);
+						LocalDateTime alarmDateTime = LocalDateTime.of(entity.alarmYear, entity.alarmMonth,	entity.alarmDay, entity.alarmHour, entity.alarmMinutes);
 
-						ArrayList<Integer> repeatDays = entity.isRepeatOn ?
-								new ArrayList<>(
-										alarmDatabase.alarmDAO().getAlarmRepeatDays(entity.alarmID)) : null;
+						ArrayList<Integer> repeatDays = entity.isRepeatOn ?	new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(entity.alarmID)) : null;
 
-						Objects.requireNonNull(alarmDataArrayList.getValue())
-								.add(getAlarmDataObject(entity, alarmDateTime, repeatDays));
+						Objects.requireNonNull(alarmDataArrayList.getValue()).add(getAlarmDataObject(entity, alarmDateTime, repeatDays));
 
 					}
 				}
@@ -198,10 +193,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * @return An array consiting of TWO elements: the alarm ID at index 0 and the position at which the alarm was inserted at index 1. The latter can be used
 	 * 		to scroll the {@link androidx.recyclerview.widget.RecyclerView} using {@link androidx.recyclerview.widget.RecyclerView#scrollToPosition(int)}.
 	 */
-	public int[] addAlarm(@NonNull AlarmDatabase alarmDatabase, @NonNull AlarmEntity alarmEntity,
-	                      @Nullable ArrayList<Integer> repeatDays) {
-
-		//Log.e(this.getClass().getSimpleName(), "addAlarm(...) called.");
+	public int[] addAlarm(@NonNull AlarmDatabase alarmDatabase, @NonNull AlarmEntity alarmEntity, @Nullable ArrayList<Integer> repeatDays) {
 
 		AtomicInteger alarmID = new AtomicInteger();
 
@@ -227,13 +219,10 @@ public class ViewModel_AlarmsList extends ViewModel {
 		///////////////////////////////////////////////////////////////
 		// Now, change the data in alarmDataArrayList.
 		///////////////////////////////////////////////////////////////
-		LocalDateTime alarmDateTime = LocalDateTime.of(alarmEntity.alarmYear, alarmEntity.alarmMonth,
-				alarmEntity.alarmDay, alarmEntity.alarmHour, alarmEntity.alarmMinutes);
+		LocalDateTime alarmDateTime = LocalDateTime.of(alarmEntity.alarmYear, alarmEntity.alarmMonth, alarmEntity.alarmDay, alarmEntity.alarmHour,
+				alarmEntity.alarmMinutes);
 
 		int scrollToPosition = 0;
-
-		/*Log.e(this.getClass().getSimpleName(), "size = " + Objects
-				.requireNonNull(alarmDataArrayList.getValue()).size());*/
 
 		AlarmData newAlarmData = getAlarmDataObject(alarmEntity, alarmDateTime, repeatDays);
 
@@ -242,42 +231,25 @@ public class ViewModel_AlarmsList extends ViewModel {
 			alarmDataArrayList = new MutableLiveData<>(new ArrayList<>());
 			Objects.requireNonNull(alarmDataArrayList.getValue()).add(newAlarmData);
 
-			//Log.e(this.getClass().getSimpleName(), "null");
-
 		} else {
-
-			//Log.e(this.getClass().getSimpleName(), "NOT null");
 
 			int index = isAlarmInTheList(alarmEntity.alarmHour, alarmEntity.alarmMinutes);
 			if (index != - 1) {
-				//Log.e(this.getClass().getSimpleName(), "alarm already in the list.");
 				alarmDataArrayList.getValue().remove(index);
 			}
 
-
 			for (int i = 0; i < Objects.requireNonNull(alarmDataArrayList.getValue()).size(); i++) {
 
-				//Log.e(this.getClass().getSimpleName(), "Inside loop.");
-
-				if (alarmDataArrayList.getValue().get(i).getAlarmDateTime().toLocalTime()
-						.isBefore(alarmDateTime.toLocalTime())) {
-
-					//Log.e(this.getClass().getSimpleName(), "Initial 1.");
+				if (alarmDataArrayList.getValue().get(i).getAlarmDateTime().toLocalTime().isBefore(alarmDateTime.toLocalTime())) {
 
 					if ((i + 1) < alarmDataArrayList.getValue().size()) {
 
-						//Log.e(this.getClass().getSimpleName(), "Initial 2.");
-
-						if (alarmDataArrayList.getValue().get(i + 1).getAlarmDateTime().toLocalTime()
-								.isAfter(alarmDateTime.toLocalTime())) {
-
-							//Log.e(this.getClass().getSimpleName(), "Initial 3.");
+						if (alarmDataArrayList.getValue().get(i + 1).getAlarmDateTime().toLocalTime().isAfter(alarmDateTime.toLocalTime())) {
 							alarmDataArrayList.getValue().add(i + 1, newAlarmData);
 							scrollToPosition = i + 1;
 							break;
 						}
 					} else {
-						//Log.e(this.getClass().getSimpleName(), "Initial 4.");
 						alarmDataArrayList.getValue().add(newAlarmData);
 						scrollToPosition = alarmDataArrayList.getValue().size() - 1;
 						break;
@@ -285,15 +257,12 @@ public class ViewModel_AlarmsList extends ViewModel {
 				}
 
 				if (i == alarmDataArrayList.getValue().size() - 1) {
-					//Log.e(this.getClass().getSimpleName(), "Initial 5.");
 					alarmDataArrayList.getValue().add(0, newAlarmData);
 					break;
 				}
 
 			}
 		}
-
-		//Log.e(this.getClass().getSimpleName(), "size = " + alarmDataArrayList.getValue().size());
 
 		try {
 			thread.join();
@@ -316,8 +285,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 *
 	 * @return An {@link AlarmData} object that can be added to {@code alarmDataArrayList}.
 	 */
-	private AlarmData getAlarmDataObject(@NonNull AlarmEntity entity, @NonNull LocalDateTime alarmDateTime,
-	                                     @Nullable ArrayList<Integer> repeatDays) {
+	private AlarmData getAlarmDataObject(@NonNull AlarmEntity entity, @NonNull LocalDateTime alarmDateTime, @Nullable ArrayList<Integer> repeatDays) {
 
 		if (! entity.isRepeatOn) {
 			return new AlarmData(entity.isAlarmOn, alarmDateTime, entity.alarmType);
@@ -344,7 +312,6 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 		Thread thread = new Thread(() -> {
 			alarmId.set(alarmDatabase.alarmDAO().getAlarmId(hour, mins));
-
 			alarmDatabase.alarmDAO().deleteAlarm(hour, mins);
 		});
 		thread.start();
@@ -441,9 +408,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 	public ArrayList<Integer> getRepeatDays(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
 		AtomicReference<ArrayList<Integer>> repeatDays = new AtomicReference<>(new ArrayList<>());
 
-		Thread thread = new Thread(() -> repeatDays
-				.set(new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(getAlarmId(alarmDatabase,
-						hour, mins)))));
+		Thread thread = new Thread(() -> repeatDays.set(new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(getAlarmId(alarmDatabase, hour, mins)))));
 		thread.start();
 
 		try {
@@ -468,8 +433,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 	public AlarmEntity getAlarmEntity(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
 		AtomicReference<AlarmEntity> alarmEntity = new AtomicReference<>();
 
-		Thread thread = new Thread(
-				() -> alarmEntity.set(alarmDatabase.alarmDAO().getAlarmDetails(hour, mins).get(0)));
+		Thread thread = new Thread(() -> alarmEntity.set(alarmDatabase.alarmDAO().getAlarmDetails(hour, mins).get(0)));
 		thread.start();
 
 		try {
