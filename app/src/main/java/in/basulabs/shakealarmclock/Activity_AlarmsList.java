@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -125,12 +127,11 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 				}
 
 				startActivityForResult(intent, NEW_ALARM_REQUEST_CODE);
-
 			}
 		}
 
 		if (savedInstanceState == null && showAppUpdate) {
-			checkForUpdatesFromGooglePlay();
+			showDialogs();
 		}
 	}
 
@@ -345,7 +346,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 						deleteOrDeactivateAlarm(MODE_DELETE_ALARM,
 								data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
 								data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
-
 					}
 
 					AlarmEntity alarmEntity = new AlarmEntity(data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
@@ -471,6 +471,31 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	//-------------------------------------------------------------------------------------------------------------
 
+	private void showDialogs() {
+
+		boolean showBatteryOptimDialog = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
+						.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_SHOW_BATTERY_OPTIM_DIALOG, true);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && showBatteryOptimDialog) {
+			PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+			if (! powerManager.isIgnoringBatteryOptimizations("in.basulabs.shakealarmclock")) {
+				DialogFragment dialogFragment = new AlertDialog_BatteryOptimizations();
+				dialogFragment.setCancelable(false);
+				dialogFragment.show(getSupportFragmentManager(), "");
+				return;
+			}
+		}
+		checkForUpdatesFromGooglePlay();
+	}
+
+	//-------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Checks for updates from Google Play.
+	 * <p>
+	 *     Courtsey: https://github.com/javiersantos/AppUpdater
+	 * </p>
+	 */
 	private void checkForUpdatesFromGooglePlay() {
 		Context context = this;
 
@@ -494,6 +519,13 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	//-------------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Checks for updates from Github.
+	 * <p>
+	 *     Courtsey: https://github.com/javiersantos/AppUpdater
+	 * </p>
+	 */
+	@SuppressWarnings({"unused", "RedundantSuppression"})
 	private void checkForUpdatesFromGitHub() {
 		Context context = this;
 

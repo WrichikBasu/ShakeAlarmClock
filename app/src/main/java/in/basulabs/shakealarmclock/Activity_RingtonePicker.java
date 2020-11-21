@@ -164,7 +164,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 				if (intent.hasExtra(EXTRA_RINGTONE_TITLE)) {
 					viewModel.setTitle((CharSequence) Objects.requireNonNull(intent.getExtras()).get(EXTRA_RINGTONE_TITLE));
 				} else {
-					viewModel.setTitle("Select tone:");
+					viewModel.setTitle((CharSequence) getResources().getString(R.string.ringtonePicker_defaultTitle));
 				}
 
 				if (intent.hasExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE)) {
@@ -284,8 +284,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 					// or not. If it exists, we shall add that file to our RadioGroup.
 					// If the file does not exist, we do not select any Radiogroup.
 					///////////////////////////////////////////////////////////////////////
-					try (Cursor cursor = getContentResolver()
-							.query(viewModel.getExistingUri(), null, null, null, null)) {
+					try (Cursor cursor = getContentResolver().query(viewModel.getExistingUri(), null, null, null, null)) {
 
 						if (cursor != null && cursor.getCount() > 0 && cursor.moveToFirst()) {
 							// existingUri is a valid Uri.
@@ -413,13 +412,15 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	 * Fires an implicit Intent to open a file browser and let the user choose an alarm tone.
 	 */
 	private void openFileBrowser() {
-		Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-		intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-		intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-		intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-		intent.setType("*/*");
 		String[] mimeTypes = new String[]{"audio/mpeg", "audio/ogg", "audio/aac", "audio/x-matroska"};
-		intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+
+		Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT)
+				.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+				.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+				.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+				.setType("*/*")
+				.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+
 		startActivityForResult(intent, FILE_REQUEST_CODE);
 	}
 
@@ -431,8 +432,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	 * @return {@code true} if the permission is available, otherwise {@code false}.
 	 */
 	private boolean isPermissionAvailable() {
-		return ContextCompat.checkSelfPermission(this,
-				Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+		return ContextCompat.checkSelfPermission(this,	Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -476,8 +476,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	 * Shows an {@code AlertDialog} explaining why the permission is necessary.
 	 */
 	private void showPermissionExplanationDialog() {
-		DialogFragment dialogPermissionReason = new AlertDialog_PermissionReason(
-				getResources().getString(R.string.permissionReasonExp_ringtonePicker));
+		DialogFragment dialogPermissionReason = new AlertDialog_PermissionReason(getResources().getString(R.string.permissionReasonExp_ringtonePicker));
 		dialogPermissionReason.setCancelable(false);
 		dialogPermissionReason.show(getSupportFragmentManager(), "");
 	}
@@ -520,15 +519,19 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 							int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
 							cursor.moveToFirst();
 
-							String fileNameWithExt = cursor.getString(nameIndex);
-							String fileNameWithoutExt = fileNameWithExt.substring(0, fileNameWithExt.indexOf("."));
+							String fileName = cursor.getString(nameIndex);
+
+							int indexOfDot = fileName.lastIndexOf(".");
+							if (indexOfDot != -1){
+								fileName = fileName.substring(0, indexOfDot);
+							}
 							int toneId = View.generateViewId();
 
-							viewModel.getToneNameList().add(fileNameWithoutExt);
+							viewModel.getToneNameList().add(fileName);
 							viewModel.getToneUriList().add(toneUri);
 							viewModel.getToneIdList().add(toneId);
 
-							createOneRadioButton(toneId, fileNameWithoutExt);
+							createOneRadioButton(toneId, fileName);
 
 							((RadioButton) findViewById(toneId)).setChecked(true);
 						}
@@ -546,9 +549,8 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	public void onDialogPositiveClick(DialogFragment dialogFragment) {
 		if (dialogFragment.getClass().equals(AlertDialog_PermissionReason.class)) {
 
-			if ((! ActivityCompat.shouldShowRequestPermissionRationale(this,
-					Manifest.permission.READ_EXTERNAL_STORAGE)) && (sharedPreferences
-					.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE, false))) {
+			if ((! ActivityCompat.shouldShowRequestPermissionRationale(this,	Manifest.permission.READ_EXTERNAL_STORAGE)) &&
+					(sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE, false))) {
 
 				////////////////////////////////////////////////////////////////////////////////
 				// User had chosen "Don't ask again". We need to redirect the user to the

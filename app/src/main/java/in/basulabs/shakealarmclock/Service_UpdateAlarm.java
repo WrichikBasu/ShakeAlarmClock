@@ -7,20 +7,27 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.format.DateFormat;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Service_UpdateAlarm extends Service {
@@ -36,7 +43,11 @@ public class Service_UpdateAlarm extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
-		startForeground(NOTIFICATION_ID, buildNotification());
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+			startForeground(NOTIFICATION_ID, buildNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+		} else {
+			startForeground(NOTIFICATION_ID, buildNotification());
+		}
 		isThisServiceRunning = true;
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
@@ -69,15 +80,16 @@ public class Service_UpdateAlarm extends Service {
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Creates the notification channel.
+	 * Creates a notification channel.
+	 *
+	 * @param NOTIFICATION_ID The ID of the notification channel.
 	 */
-	private void createNotificationChannel() {
+	private void createNotificationChannel(final int NOTIFICATION_ID) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
 			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID),
 					"in.basulabs.shakealarmclock Notification", importance);
 			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-			channel.setSound(null, null);
 			assert notificationManager != null;
 			notificationManager.createNotificationChannel(channel);
 		}
@@ -93,15 +105,14 @@ public class Service_UpdateAlarm extends Service {
 	 *        Notification)}.
 	 */
 	private Notification buildNotification() {
-		createNotificationChannel();
+		createNotificationChannel(NOTIFICATION_ID);
 
 		Intent contentIntent = new Intent(this, Activity_AlarmsList.class);
 		contentIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		contentIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		PendingIntent contentPendingIntent = PendingIntent.getActivity(this, 5701, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
-				Integer.toString(NOTIFICATION_ID))
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(NOTIFICATION_ID))
 				.setContentTitle(getResources().getString(R.string.app_name))
 				.setContentText(getResources().getString(R.string.updateAlarm_notifMessage))
 				.setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -166,6 +177,14 @@ public class Service_UpdateAlarm extends Service {
 
 	//--------------------------------------------------------------------------------------------------
 
+	/**
+	 * Get the list of repeat days for a particular alarm.
+	 *
+	 * @param alarmID The unique alarm ID.
+	 *
+	 * @return An {@link ArrayList} of integers for the days in which the alarm is repeated. The day numbers follow the {@link DayOfWeek} enum.
+	 */
+	@Nullable
 	private ArrayList<Integer> getRepeatDays(int alarmID) {
 
 		AtomicReference<ArrayList<Integer>> repeatDays = new AtomicReference<>();
@@ -183,6 +202,16 @@ public class Service_UpdateAlarm extends Service {
 
 	//--------------------------------------------------------------------------------------------------
 
+	/**
+	 * Activates the alarms that are switched on, if possibe.
+	 * <p>
+	 * If repeat is ON for an alarm, then the alarm is set as usual. If, however, repeat is OFF, then it is first checked whether the time is reachable or not.
+	 * If reachable, the alarm is set, otherwise the alarm is switched off in the database and a notification is posted using {@link
+	 * #postAlarmMissedNotification(int, LocalTime)}.
+	 * </p>
+	 *
+	 * @param alarmEntityArrayList The list of active alarms.
+	 */
 	private void activateAlarms(@NonNull ArrayList<AlarmEntity> alarmEntityArrayList) {
 
 		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -191,13 +220,14 @@ public class Service_UpdateAlarm extends Service {
 
 			ArrayList<Integer> repeatDays = getRepeatDays(alarmEntity.alarmID);
 
-			LocalDateTime alarmDateTime = ConstantsAndStatics.getAlarmDateTime(LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth,
-					alarmEntity.alarmDay), LocalTime.of(alarmEntity.alarmHour, alarmEntity.alarmMinutes), alarmEntity.isRepeatOn, repeatDays);
+			LocalDateTime alarmDateTime;
 
-			/*LocalDate alarmDate = LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth, alarmEntity.alarmDay);
+			LocalDate alarmDate = LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth, alarmEntity.alarmDay);
 			LocalTime alarmTime = LocalTime.of(alarmEntity.alarmHour, alarmEntity.alarmMinutes);
 
 			if (alarmEntity.isRepeatOn && repeatDays != null && repeatDays.size() > 0) {
+
+				// If repeat is ON, set the alarm as we normally would.
 
 				Collections.sort(repeatDays);
 
@@ -215,42 +245,94 @@ public class Service_UpdateAlarm extends Service {
 						// There is a day available in the same week for the alarm to ring;
 						// select that day and break from loop.
 						////////////////////////////////////////////////////////////////////////
-						alarmDateTime =
-								alarmDateTime.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(i))));
+						alarmDateTime = alarmDateTime.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(i))));
 						break;
 					}
 					if (i == repeatDays.size() - 1) {
 						// No day possible in this week. Select the first available date from next week.
-						alarmDateTime = alarmDateTime
-								.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(0))));
+						alarmDateTime = alarmDateTime.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(0))));
 					}
 				}
 
 			} else {
 
+				// If repeat is OFF, first check whether the alarm time is reachable. If yes, then set the alarm, otherwise ignore this alarm and
+				// switch it off in the database.
+
 				alarmDateTime = LocalDateTime.of(alarmDate, alarmTime);
 
 				if (! alarmDateTime.isAfter(LocalDateTime.now())) {
-					alarmDateTime = alarmDateTime.plusDays(1);
+					alarmDateTime = null;
 				}
 
-			}*/
+			}
 
-			Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class);
-			intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
-			intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+			if (alarmDateTime != null) {
 
-			Bundle data = alarmEntity.getAlarmDetailsInABundle();
-			data.putIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS, repeatDays);
-			intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, data);
+				Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class);
+				intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
+				intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmEntity.alarmID, intent, 0);
+				Bundle data = alarmEntity.getAlarmDetailsInABundle();
+				data.putIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS, repeatDays);
+				intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, data);
 
-			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime, ZoneId.systemDefault());
+				PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmEntity.alarmID, intent, 0);
 
-			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent), pendingIntent);
+				ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime, ZoneId.systemDefault());
+
+				alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent), pendingIntent);
+
+			} else {
+
+				Thread thread = new Thread(() -> alarmDatabase.alarmDAO().toggleAlarm(alarmEntity.alarmID, 0));
+
+				thread.start();
+				try {
+					thread.join();
+				} catch (InterruptedException ignored) {
+				}
+
+				postAlarmMissedNotification(alarmEntity.alarmID, alarmTime);
+
+			}
 
 		}
+
+	}
+
+	//--------------------------------------------------------------------------------------------------
+
+	/**
+	 * Posts a notification informing the user that an alarm has been missed.
+	 *
+	 * @param alarmID The unique alarm ID — will be used as notification ID.
+	 * @param alarmTime The alarm time.
+	 */
+	private void postAlarmMissedNotification(int alarmID, LocalTime alarmTime) {
+
+		createNotificationChannel(alarmID);
+
+		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+		DateTimeFormatter formatter;
+		if (! DateFormat.is24HourFormat(this)) {
+			formatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.getDefault());
+		} else {
+			formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault());
+		}
+		
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(alarmID))
+				.setContentTitle(getResources().getString(R.string.updateAlarm_alarmMissedTitle))
+				.setContentText(getString(R.string.updateAlarm_alarmMissedText, alarmTime.format(formatter)))
+				.setSmallIcon(R.drawable.ic_notif)
+				.setPriority(NotificationCompat.PRIORITY_HIGH)
+				.setCategory(NotificationCompat.CATEGORY_ERROR)
+				.setDefaults(Notification.DEFAULT_SOUND)
+				.setAutoCancel(true)
+				.setOngoing(false);
+
+		notificationManager.notify(alarmID, builder.build());
 
 	}
 
