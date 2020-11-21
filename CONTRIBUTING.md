@@ -11,9 +11,16 @@ However, before contributing, please read the following guidelines:
    - Gradle version
    - Android SDK version
    - Build tools version
-   - Version of any other dependency, even if it is outdated
+   - Version of any other third-party library, even if it is outdated
    - App version and/or version codes
 1. Please try to make a logical series of commits in your PR such that they have meaning when someone looks at the history of the project. If this is not followed, I will do a squash merge rather than normal merge (doing so will put all your commits into one single commit in the history of your project).
 1. Clear merge conflicts, if any, that Github shows when you submit the PR. I will help if you need.
 1. Follow the "one feature one PR" rule: each PR should add only one feature to the app. You can change as many files as you need for introducing the feature, but these changes should cater to only one feature.
 1. Document your code where necessary. Changes without proper documentation may not be accepted.
+
+## Version information:
+The following versions have been used in compiling this project:
+
+1. Gradle version: 6.7.1
+1. Android Gradle Plugin version: 4.1.1
+1. JDK version: 15.0.1
