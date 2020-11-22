@@ -1,19 +1,17 @@
-# Shake Alarm Clock
+## Shake Alarm Clock: Privacy policy
 
-## Privacy policy:
+Welcome to the Shake Alarm Clock app for Android!
 
-The Shake Alarm Clock app is an open source Android app developed by Wrichik Basu. The source code is available on GitHub under the MIT license; the app is also available on Google Play.
+This is an open source Android app developed by Wrichik Basu. The source code is available on GitHub under the MIT license; the app is also available on Google Play.
 
-As far as my knowledge extends, I have not programmed this app to collect any personal data. All data created by the user is stored on the user's device and not transported to any server without the user's consent. The only data that is collected is the version of the app installed, and that is done by a third party open-source library (available on GitHub: javiersantos/AppUpdater) for checking whether a newer version of the app is available. This library simply notifies the user when a newer version of the app is available.
+As an avid Android user myself, I take privacy very seriously.
+I know how irritating it is when apps collect your data without your knowledge.
 
-If anyone finds any security vulnerability that has been inadvertently caused by me, please send me an email, and I will surely try to fix it.
+I have not programmed this app to collect any personally identifiable information. All data (app preferences (like theme, etc.) and alarms) created by the you is stored on your device only, and can be simply erased by clearing the app's data or uninstalling it.
 
-As an Android user, I do not like apps collecting my data, and I have made my app such that it collects no sensitive data.
+If you find any security vulnerability that has been inadvertently caused by me, or have any question regarding how the app protectes your privacy, please send me an email and I will surely try to fix it/help you.
 
-Yours sincerely,
-
-Wrichik Basu.
-
-Kolkata, India.
-
+Yours sincerely,  
+Wrichik Basu.  
+Kolkata, India.  
 basulabs.developer@gmail.com
