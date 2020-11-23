@@ -1,6 +1,5 @@
 package in.basulabs.shakealarmclock;
 
-import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -66,9 +65,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	private static final int MODE_DELETE_ALARM = 504;
 	private static final int MODE_DEACTIVATE_ONLY = 509;
 
-	@SuppressLint("StaticFieldLeak")
-	private static Activity_AlarmsList myInstance;
-
 	//--------------------------------------------------------------------------------------------------
 
 	@Override
@@ -90,8 +86,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 			AppCompatDelegate
 					.setDefaultNightMode(ConstantsAndStatics.getTheme(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme)));
 		}
-
-		myInstance = this;
 
 		Button addAlarmButton = findViewById(R.id.addAlarmButton);
 		addAlarmButton.setOnClickListener(view -> {
@@ -156,13 +150,11 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		return super.onOptionsItemSelected(item);
 	}
 
-
 	//--------------------------------------------------------------------------------------------------
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		myInstance = null;
 		ConstantsAndStatics.schedulePeriodicWork(this);
 	}
 
@@ -178,13 +170,12 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	}
 
 	//--------------------------------------------------------------------------------------------------
-
-	public static void onDateChanged() {
-		if (myInstance != null) {
-			myInstance.viewModel.forceInit(myInstance.alarmDatabase);
-			myInstance.alarmAdapter = new AlarmAdapter(myInstance.viewModel.getAlarmDataArrayList(), myInstance, myInstance);
-			myInstance.alarmsRecyclerView.swapAdapter(myInstance.alarmAdapter, false);
-		}
+	
+	@SuppressWarnings({"unused", "RedundantSuppression"})
+	private void onDateChanged() {
+		viewModel.forceInit(alarmDatabase);
+		alarmAdapter = new AlarmAdapter(viewModel.getAlarmDataArrayList(), this, this);
+		alarmsRecyclerView.swapAdapter(alarmAdapter, false);
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -474,7 +465,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	private void showDialogs() {
 
 		boolean showBatteryOptimDialog = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
-						.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_SHOW_BATTERY_OPTIM_DIALOG, true);
+				.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_SHOW_BATTERY_OPTIM_DIALOG, true);
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && showBatteryOptimDialog) {
 			PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
@@ -493,7 +484,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	/**
 	 * Checks for updates from Google Play.
 	 * <p>
-	 *     Courtsey: https://github.com/javiersantos/AppUpdater
+	 * Courtsey: https://github.com/javiersantos/AppUpdater
 	 * </p>
 	 */
 	private void checkForUpdatesFromGooglePlay() {
@@ -522,7 +513,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	/**
 	 * Checks for updates from Github.
 	 * <p>
-	 *     Courtsey: https://github.com/javiersantos/AppUpdater
+	 * Courtsey: https://github.com/javiersantos/AppUpdater
 	 * </p>
 	 */
 	@SuppressWarnings({"unused", "RedundantSuppression"})
