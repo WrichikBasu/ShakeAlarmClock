@@ -109,8 +109,8 @@
         <item>Snooze the alarm.</item>
         <item>Dismiss the alarm.</item>
     </string-array>
-    <string name="settings_snoozeOps"><b>Default snooze options</b>\n(These will be the default snooze options
-        when you create a new alarm.)</string>
+    <string name="settings_snoozeOps"><b>Default snooze options</b>\n<small>(These will be the default snooze options
+        when you create a new alarm.)</small></string>
     <string name="settings_snoozeInterval">Snooze interval in minutes:</string>
     <string name="settings_snoozeFreq">Snooze frequency:</string>
 
@@ -129,15 +129,15 @@
 
     <string name="settings_toneUri">Default alarm tone:</string>
     <string name="settings_volume">Default alarm volume:</string>
-    <string name="settings_toneCheckbox">Automatically set new tones I select as default tones</string>
+    <string name="settings_toneCheckbox">Automatically set new tones I select as default tones for new alarms</string>
 
-    <string name="settings_shakeSensitivityMainLabel"><b>Shake sensitivity settings</b>\nTest the sensitivity of the shake
-    detector, and change it as you wish</string>
-    <string name="shakeSensitivityChangeLabel">Change sensitivity:</string>
+    <string name="settings_shakeSensitivityMainLabel"><b>Shake sensitivity settings</b>\n<small>Test the sensitivity of the shake
+        detector, and change it as you wish</small></string>
+    <string name="shakeSensitivityChangeLabel"><small>Change sensitivity:</small></string>
     <string name="leastSensitiveLabel">\u2191\nLeast\nsensitive</string>
     <string name="mostSensitiveLabel">\u2191\nMost\nsensitive</string>
-    <string name="testShake">Test shake sensitivity\n<i>Tap to enable the shake detector so that you can
-        choose the sensitivity that correctly suits you.</i></string>
+    <string name="testShake"><small><b>Test shake sensitivity</b>\nTap to enable the shake detector so that you can
+        choose the sensitivity that correctly suits you.</small></string>
 
     <!-- Service_UpdateAlarm -->
     <string name="updateAlarm_notifMessage">Activating alarms. This may take a while…</string>
@@ -157,7 +157,6 @@
     <string name="batteryOptim_positive">Proceed</string>
     <string name="batteryOptim_negative">Maybe later</string>
     <string name="batteryOptim_neutral">Never show again</string>
-
 
     <string name="defaultAlarmToneText">Default alarm tone</string>
 
