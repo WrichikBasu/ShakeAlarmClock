@@ -22,13 +22,19 @@ Tired of pressing the power button/swiping the screen every time an alarm rings?
 1. Uses latest Android Room database for storing alarms.
 1. Inbuilt dark theme, even in phones that do not support it.
 1. Snooze your alarm as many times as you want with custom snooze options.
+1. Actively maintained app. Bug reports will be worked upon with high priority.
 
-## How to use?
-Simply download the latest apk file, install it and you are all set!
+## How to install?
+You have two options:
+### From Github:
+Go the [release page](https://github.com/WrichikBasu/ShakeAlarmClock/releases), download the latest apk file, install it and you are ready to go!
+Once you download and install the app, it will notify you automatically when a new version is available on Github. The app downloaded from Github will not be linked to Google Play.
 
-## Google Play:
+### From Google Play:
 
-You can also download the app from [Google Play](https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock).
+
+<a href='https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=200/></a>
+
 
 ## How to contribute?
 Please read the [guidelines for contributing](https://github.com/WrichikBasu/ShakeAlarmClock/blob/master/CONTRIBUTING.md).
