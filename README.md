@@ -30,7 +30,7 @@ You have two options:
 Go the [release page](https://github.com/WrichikBasu/ShakeAlarmClock/releases), download the latest apk file, install it and you are ready to go!
 Once you download and install the app, it will notify you automatically when a new version is available on Github. The app downloaded from Github will not be linked to Google Play.
 
-## From Google Play:
+### From Google Play:
 
 
 <a href='https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=200/></a>
