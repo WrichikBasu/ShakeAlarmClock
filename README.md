@@ -7,7 +7,7 @@
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/WrichikBasu/ShakeAlarmClock)
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/WrichikBasu/ShakeAlarmClock)](https://github.com/WrichikBasu/ShakeAlarmClock/releases)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/WrichikBasu/ShakeAlarmClock)](https://github.com/WrichikBasu/ShakeAlarmClock/releases/latest)
 ![GitHub Release Date](https://img.shields.io/github/release-date/WrichikBasu/ShakeAlarmClock)
 
 ![Minimum SDK version](https://img.shields.io/badge/minimum%20sdk%20version-Lollipop%20(API%2021)-brightgreen)
@@ -26,16 +26,15 @@ Tired of pressing the power button/swiping the screen every time an alarm rings?
 
 ## How to install?
 You have two options:
-### From Github:
-Go the [release page](https://github.com/WrichikBasu/ShakeAlarmClock/releases), download the latest apk file, install it and you are ready to go!
+### 1. From Github:
+Go to the [latest release](https://github.com/WrichikBasu/ShakeAlarmClock/releases/latest), download the latest apk file, install it and you are ready to go!
 Once you download and install the app, it will notify you automatically when a new version is available on Github. The app downloaded from Github will not be linked to Google Play.
 
-### From Google Play:
+### 2. From Google Play:
 
 
 <a href='https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=200/></a>
 
 
 ## How to contribute?
-Please read the [guidelines for contributing](https://github.com/WrichikBasu/ShakeAlarmClock/blob/master/CONTRIBUTING.md).
-
+Before forking, creating a pull request or an issue, please read the [guidelines for contributing](https://github.com/WrichikBasu/ShakeAlarmClock/blob/master/CONTRIBUTING.md).
