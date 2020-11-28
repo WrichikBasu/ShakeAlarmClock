@@ -44,6 +44,8 @@ public class Service_SnoozeAlarm extends Service {
 
 	public static boolean isThisServiceRunning = false;
 
+	private boolean preMatureDeath;
+
 	//--------------------------------------------------------------------------------------------------
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -63,12 +65,8 @@ public class Service_SnoozeAlarm extends Service {
 		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		assert notificationManager != null;
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(NOTIFICATION_ID, buildSnoozeNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
-		} else {
-			startForeground(NOTIFICATION_ID, buildSnoozeNotification());
-		}
-		isThisServiceRunning = true;
+		startSelfForeground();
+		preMatureDeath = true;
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
@@ -77,7 +75,7 @@ public class Service_SnoozeAlarm extends Service {
 		assert alarmDetails != null;
 		alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
 
-		numberOfTimesTheAlarmhasBeenSnoozed = intent.getExtras().getInt(Service_RingAlarm.BUNDLE_KEY_NO_OF_TIMES_SNOOZED);
+		numberOfTimesTheAlarmhasBeenSnoozed = intent.getExtras().getInt(Service_RingAlarm.EXTRA_NO_OF_TIMES_SNOOZED);
 
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
@@ -96,18 +94,19 @@ public class Service_SnoozeAlarm extends Service {
 		ZonedDateTime newAlarmDateTime = alarmDateTime.plusMinutes(numberOfTimesTheAlarmhasBeenSnoozed *
 				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS));
 
-		snoozeTimer = new CountDownTimer(Math.abs(Duration.between(ZonedDateTime.now(), newAlarmDateTime).toMillis()), 2000) {
+		snoozeTimer = new CountDownTimer(Math.abs(Duration.between(ZonedDateTime.now(), newAlarmDateTime).toMillis()), 60000) {
 
 			@Override
 			public void onTick(long millisUntilFinished) {
-				updateNotification();
+				myInstance.startSelfForeground();
 			}
 
 			@Override
 			public void onFinish() {
 				Intent intent1 = new Intent(myInstance, Service_RingAlarm.class)
 						.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails)
-						.putExtra(Service_RingAlarm.BUNDLE_KEY_NO_OF_TIMES_SNOOZED, numberOfTimesTheAlarmhasBeenSnoozed);
+						.putExtra(Service_RingAlarm.EXTRA_NO_OF_TIMES_SNOOZED, numberOfTimesTheAlarmhasBeenSnoozed);
+				preMatureDeath = false;
 				ContextCompat.startForegroundService(myInstance, intent1);
 				myInstance.stopSelf();
 			}
@@ -116,6 +115,17 @@ public class Service_SnoozeAlarm extends Service {
 		snoozeTimer.start();
 
 		return START_NOT_STICKY;
+	}
+
+	//----------------------------------------------------------------------------------------------------
+
+	private void startSelfForeground(){
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+			startForeground(NOTIFICATION_ID, buildSnoozeNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+		} else {
+			startForeground(NOTIFICATION_ID, buildSnoozeNotification());
+		}
+		isThisServiceRunning = true;
 	}
 
 	//----------------------------------------------------------------------------------------------------
@@ -135,6 +145,10 @@ public class Service_SnoozeAlarm extends Service {
 
 	//---------------------------------------------------------------------------------------------------
 
+	/**
+	 * Builds and returns the notification that can be used with {@link Service#startForeground(int, Notification)}.
+	 * @return The notification that can be used with {@link Service#startForeground(int, Notification)}.
+	 */
 	private Notification buildSnoozeNotification() {
 		createNotificationChannel();
 
@@ -188,9 +202,9 @@ public class Service_SnoozeAlarm extends Service {
 		/////////////////////////////////////
 		// Dismiss the snoozed alarm
 		/////////////////////////////////////
-		Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class);
-		intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
-		intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+		Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class)
+				.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM)
+				.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
 				intent, PendingIntent.FLAG_NO_CREATE);
@@ -199,10 +213,9 @@ public class Service_SnoozeAlarm extends Service {
 			alarmManager.cancel(pendingIntent);
 		}
 
-		//////////////////////////////////////////////////////
-		// If repeat is on, set another alarm. Otherwise
-		// toggle alarm state in database.
-		/////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////////////////////
+		// If repeat is on, set another alarm. Otherwise toggle alarm state in database.
+		////////////////////////////////////////////////////////////////////////////////////
 		if (! alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON)) {
 			thread_toggleAlarm.start();
 			try {
@@ -246,8 +259,10 @@ public class Service_SnoozeAlarm extends Service {
 			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
 
 			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent2), pendingIntent2);
+
 		}
 		ConstantsAndStatics.schedulePeriodicWork(this);
+		preMatureDeath = false;
 		stopForeground(true);
 		stopSelf();
 
@@ -258,10 +273,10 @@ public class Service_SnoozeAlarm extends Service {
 	private void cancelPendingIntent() {
 		AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-		Intent intent = new Intent(this, AlarmBroadcastReceiver.class);
-		intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
-		intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-		intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
+		Intent intent = new Intent(this, AlarmBroadcastReceiver.class)
+				.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM)
+				.setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+				.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmID, intent, PendingIntent.FLAG_NO_CREATE);
 
@@ -282,10 +297,16 @@ public class Service_SnoozeAlarm extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		try{
-			snoozeTimer.cancel();
-		} catch (Exception ignored){
+
+		if (preMatureDeath) {
+			dismissAlarm();
 		}
+
+		try {
+			snoozeTimer.cancel();
+		} catch (Exception ignored) {
+		}
+
 		unregisterReceiver(broadcastReceiver);
 		isThisServiceRunning = false;
 		alarmID = - 1;
