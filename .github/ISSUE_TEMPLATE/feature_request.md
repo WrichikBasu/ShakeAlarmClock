@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for this project
 title: ''
-labels: status-review
+labels: feature request, status - needs review
 assignees: ''
 
 ---
