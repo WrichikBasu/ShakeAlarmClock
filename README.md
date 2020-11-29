@@ -27,8 +27,12 @@ Tired of pressing the power button/swiping the screen every time an alarm rings?
 ## How to install?
 You have two options:
 ### 1. From Github:
-Go to the [latest release](https://github.com/WrichikBasu/ShakeAlarmClock/releases/latest), download the latest apk file, install it and you are ready to go!
-Once you download and install the app, it will notify you automatically when a new version is available on Github. The app downloaded from Github will not be linked to Google Play.
+
+<a href="https://github.com/WrichikBasu/ShakeAlarmClock/releases/latest"><img src="github.png"
+     alt="Download from Github icon"
+     width="200" /></a>
+
+The app downloaded from Github will not be linked to Google Play.
 
 ### 2. From Google Play:
 
