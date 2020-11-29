@@ -120,21 +120,23 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
-		alarmDetails = Objects.requireNonNull(intent.getExtras()).getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
-
-		numberOfTimesTheAlarmHasBeenSnoozed = intent.getExtras().getInt(EXTRA_NO_OF_TIMES_SNOOZED, 0);
-
-		assert alarmDetails != null;
-
 		sharedPreferences = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
 
 		isShakeActive = sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
 				ConstantsAndStatics.SNOOZE) != ConstantsAndStatics.DO_NOTHING;
 
+		alarmDetails = Objects.requireNonNull(intent.getExtras()).getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
 		assert alarmDetails != null;
-		alarmToneUri = alarmDetails.getParcelable(ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI);
 
 		alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
+
+		// Kill Service_SnoozeAlarm if it is running for a different alarm.
+		if (Service_SnoozeAlarm.isThisServiceRunning && Service_SnoozeAlarm.alarmID != alarmID) {
+			stopService(new Intent(this, Service_SnoozeAlarm.class));
+		}
+
+		alarmToneUri = alarmDetails.getParcelable(ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI);
+		numberOfTimesTheAlarmHasBeenSnoozed = intent.getExtras().getInt(EXTRA_NO_OF_TIMES_SNOOZED, 0);
 
 		ringTimer = new CountDownTimer(60000, 1000) {
 
@@ -178,7 +180,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	public void onDestroy() {
 		super.onDestroy();
 
-		if (preMatureDeath){
+		if (preMatureDeath) {
 			dismissAlarm();
 		}
 
@@ -221,7 +223,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	private void createNotificationChannel() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
-			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID),"in.basulabs.shakealarmclock Notifications", importance);
+			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID), "in.basulabs.shakealarmclock Notifications", importance);
 			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
 			assert notificationManager != null;
@@ -278,7 +280,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 					.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
 					.build();
 
-			audioManager.setStreamVolume(AudioManager.STREAM_ALARM,	alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME), 0);
+			audioManager.setStreamVolume(AudioManager.STREAM_ALARM, alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME), 0);
 
 			try {
 				mediaPlayer.setDataSource(this, alarmToneUri);
@@ -288,7 +290,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			} catch (IOException ignored) {
 			}
 
-			if (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE)	== ConstantsAndStatics.ALARM_TYPE_SOUND_AND_VIBRATE) {
+			if (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) == ConstantsAndStatics.ALARM_TYPE_SOUND_AND_VIBRATE) {
 				alarmVibration();
 			}
 			mediaPlayer.start();
