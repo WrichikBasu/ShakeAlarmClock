@@ -12,11 +12,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,11 +33,14 @@ import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.Display;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 
+import java.text.NumberFormat;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -170,8 +175,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	}
 
 	//--------------------------------------------------------------------------------------------------
-	
-	@SuppressWarnings({"unused", "RedundantSuppression"})
+
 	private void onDateChanged() {
 		viewModel.forceInit(alarmDatabase);
 		alarmAdapter = new AlarmAdapter(viewModel.getAlarmDataArrayList(), this, this);
@@ -251,6 +255,9 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent), pendingIntent);
 
+		Toast.makeText(this, getString(R.string.toast_alarmSwitchedOn,
+				getDuration(Duration.between(ZonedDateTime.now(ZoneId.systemDefault()), zonedDateTime))), Toast.LENGTH_LONG).show();
+
 		ConstantsAndStatics.schedulePeriodicWork(this);
 	}
 
@@ -283,12 +290,23 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		ConstantsAndStatics.killServices(this, alarmID);
 
+		DateTimeFormatter formatter;
+		if (DateFormat.is24HourFormat(this)) {
+			formatter = DateTimeFormatter.ofPattern("HH:mm");
+		} else {
+			formatter = DateTimeFormatter.ofPattern("hh:mm a");
+		}
+		LocalTime alarmTime = LocalTime.of(hour, mins);
+
 		if (mode == MODE_DELETE_ALARM) {
 			viewModel.removeAlarm(alarmDatabase, hour, mins);
 			alarmAdapter = new AlarmAdapter(viewModel.getAlarmDataArrayList(), this, this);
 			alarmsRecyclerView.swapAdapter(alarmAdapter, false);
+
+			Toast.makeText(this, getString(R.string.toast_alarmDeleted, alarmTime.format(formatter)), Toast.LENGTH_LONG).show();
 		} else {
 			viewModel.toggleAlarmState(alarmDatabase, hour, mins, 0);
+			Toast.makeText(this, getString(R.string.toast_alarmSwitchedOff, alarmTime.format(formatter)), Toast.LENGTH_LONG).show();
 		}
 
 		ConstantsAndStatics.schedulePeriodicWork(this);
@@ -458,6 +476,45 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		});
 		thread.start();
 
+	}
+
+	//-------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Converts a {@link Duration} object to human-readable form.
+	 *
+	 * @return The duration in a human-readable form.
+	 */
+	String getDuration(Duration duration) {
+
+		NumberFormat numFormat = NumberFormat.getInstance();
+		numFormat.setGroupingUsed(false);
+
+		long days = duration.toDays();
+		duration = duration.minusDays(days);
+
+		long hours = duration.toHours();
+		duration = duration.minusHours(hours);
+
+		long minutes = duration.toMinutes();
+
+		String msg;
+
+		if (days == 0) {
+			if (hours == 0) {
+				msg = numFormat.format(minutes) + getResources().getQuantityString(R.plurals.mins, (int) minutes);
+			} else {
+				msg = numFormat.format(hours) + getResources().getQuantityString(R.plurals.hour, (int) hours)
+						+ getString(R.string.and)
+						+ numFormat.format(minutes) + getResources().getQuantityString(R.plurals.mins, (int) minutes);
+			}
+		} else {
+			msg = numFormat.format(days) + getResources().getQuantityString(R.plurals.day, (int) days) + ", "
+					+ numFormat.format(hours) + getResources().getQuantityString(R.plurals.hour, (int) hours)
+					+ getString(R.string.and)
+					+ numFormat.format(minutes) + " " + getResources().getQuantityString(R.plurals.mins, (int) minutes);
+		}
+		return msg;
 	}
 
 	//-------------------------------------------------------------------------------------------------------------

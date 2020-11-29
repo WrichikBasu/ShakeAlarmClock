@@ -5,6 +5,22 @@
     <string name="no_alarm">No alarms to show!</string>
     <string name="addAlarm">Add</string>
     <string name="settingsMenuItem">Settings</string>
+    <string name="toast_alarmSwitchedOn">Alarm set for %s from now.</string>
+    <plurals name="day">
+        <item quantity="one">\u0020day</item>
+        <item quantity="other">\u0020days</item>
+    </plurals>
+    <plurals name="hour">
+        <item quantity="one">\u0020hour</item>
+        <item quantity="other">\u0020hours</item>
+    </plurals>
+    <plurals name="mins">
+        <item quantity="one">\u0020minute</item>
+        <item quantity="other">\u0020minutes</item>
+    </plurals>
+    <string name="and">\u0020and\u0020</string>
+    <string name="toast_alarmDeleted">The alarm at %s was deleted successfully.</string>
+    <string name="toast_alarmSwitchedOff">The alarm at %s was switched off.</string>
 
     <!-- Activity_AlarmDetails -->
     <string name="actionBarTitle_newAlarm">New alarm</string>
