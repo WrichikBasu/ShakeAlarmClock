@@ -42,6 +42,3 @@ The app downloaded from Github will not be linked to Google Play.
 
 ## How to contribute?
 Before forking, creating a pull request or an issue, please read the [guidelines for contributing](https://github.com/WrichikBasu/ShakeAlarmClock/blob/master/CONTRIBUTING.md).
-
-## Translations
-Translations are always welcome. You can directly translate the `strings.xml` file and create a pull request. Note that all strings should be translated; if any string cannot be translated, please mark it so. If you are not proficient in Git and still want to translate, create an issue and I will create a Google sheets file where you will be able to add the translations.
