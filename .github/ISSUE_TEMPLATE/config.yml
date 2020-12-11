@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question
+    url: https://github.com/WrichikBasu/ShakeAlarmClock/discussions?discussions_q=category%3AQ%26A
+    about: Ask and answer questions here.
+  - name: Feature request
+    url: https://github.com/WrichikBasu/ShakeAlarmClock/discussions?discussions_q=category%3A%22Feature+requests%22
+    about: Propose a new feature for this app.
