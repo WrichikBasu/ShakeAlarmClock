@@ -28,7 +28,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 	//--------------------------------------------------------------------------------------------------
 
-	public void incrementAlarmsCount() {
+	private void incrementAlarmsCount() {
 		if (alarmsCount == null || alarmsCount.getValue() == null) {
 			alarmsCount = new MutableLiveData<>();
 			alarmsCount.setValue(1);
@@ -39,7 +39,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 	//--------------------------------------------------------------------------------------------------
 
-	public void decrementAlarmsCount() {
+	private void decrementAlarmsCount() {
 		if ((alarmsCount != null) && (alarmsCount.getValue() != null) && (alarmsCount.getValue() > 0)) {
 			alarmsCount.setValue(alarmsCount.getValue() - 1);
 		}
@@ -216,11 +216,8 @@ public class ViewModel_AlarmsList extends ViewModel {
 		});
 		thread.start();
 
-		///////////////////////////////////////////////////////////////
-		// Now, change the data in alarmDataArrayList.
-		///////////////////////////////////////////////////////////////
-		LocalDateTime alarmDateTime = LocalDateTime.of(alarmEntity.alarmYear, alarmEntity.alarmMonth, alarmEntity.alarmDay, alarmEntity.alarmHour,
-				alarmEntity.alarmMinutes);
+		LocalDateTime alarmDateTime = LocalDateTime.of(alarmEntity.alarmYear, alarmEntity.alarmMonth,
+				alarmEntity.alarmDay, alarmEntity.alarmHour, alarmEntity.alarmMinutes);
 
 		int scrollToPosition = 0;
 
@@ -233,18 +230,20 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 		} else {
 
+			// Check if the array list already has an alarm with same time, and remove it:
 			int index = isAlarmInTheList(alarmEntity.alarmHour, alarmEntity.alarmMinutes);
 			if (index != - 1) {
 				alarmDataArrayList.getValue().remove(index);
 			}
 
+			// Insert the new alarm at the correct position:
 			for (int i = 0; i < Objects.requireNonNull(alarmDataArrayList.getValue()).size(); i++) {
 
-				if (alarmDataArrayList.getValue().get(i).getAlarmDateTime().toLocalTime().isBefore(alarmDateTime.toLocalTime())) {
+				if (alarmDataArrayList.getValue().get(i).getAlarmTime().isBefore(alarmDateTime.toLocalTime())) {
 
 					if ((i + 1) < alarmDataArrayList.getValue().size()) {
 
-						if (alarmDataArrayList.getValue().get(i + 1).getAlarmDateTime().toLocalTime().isAfter(alarmDateTime.toLocalTime())) {
+						if (alarmDataArrayList.getValue().get(i + 1).getAlarmTime().isAfter(alarmDateTime.toLocalTime())) {
 							alarmDataArrayList.getValue().add(i + 1, newAlarmData);
 							scrollToPosition = i + 1;
 							break;

@@ -1,6 +1,7 @@
 package in.basulabs.shakealarmclock;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -39,8 +40,7 @@ public class AlarmData {
 	 * @param soundVibrateSetting
 	 * @param repeatDays
 	 */
-	public AlarmData(boolean isSwitchedOn, @NonNull LocalTime alarmTime, int soundVibrateSetting,
-	                 @NonNull ArrayList<Integer> repeatDays) {
+	public AlarmData(boolean isSwitchedOn, @NonNull LocalTime alarmTime, int soundVibrateSetting, @NonNull ArrayList<Integer> repeatDays) {
 		this.isSwitchedOn = isSwitchedOn;
 		this.alarmTime = alarmTime;
 		this.soundVibrateSetting = soundVibrateSetting;
@@ -57,11 +57,12 @@ public class AlarmData {
 		isRepeatOn = repeatOn;
 	}
 
+	@Nullable
 	public ArrayList<Integer> getRepeatDays() {
 		return repeatDays;
 	}
 
-	public void setRepeatDays(ArrayList<Integer> repeatDays) {
+	public void setRepeatDays(@Nullable ArrayList<Integer> repeatDays) {
 		this.repeatDays = repeatDays;
 	}
 
@@ -73,19 +74,21 @@ public class AlarmData {
 		isSwitchedOn = switchedOn;
 	}
 
+	@Nullable
 	public LocalDateTime getAlarmDateTime() {
 		return alarmDateTime;
 	}
 
-	public void setAlarmDateTime(LocalDateTime alarmDateTime) {
+	public void setAlarmDateTime(@NonNull LocalDateTime alarmDateTime) {
 		this.alarmDateTime = alarmDateTime;
 	}
 
+	@NonNull
 	public LocalTime getAlarmTime() {
 		return alarmTime;
 	}
 
-	public void setAlarmTime(LocalTime alarmTime) {
+	public void setAlarmTime(@NonNull LocalTime alarmTime) {
 		this.alarmTime = alarmTime;
 	}
 
