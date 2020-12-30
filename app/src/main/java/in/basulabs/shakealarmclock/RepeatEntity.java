@@ -11,8 +11,14 @@ import androidx.room.ForeignKey;
 				onUpdate = ForeignKey.CASCADE))
 public class RepeatEntity {
 
+	/**
+	 * The unique id of the alarm. Follows from {@link AlarmEntity}.
+	 */
 	public int alarmID;
 
+	/**
+	 * The day on which the alarm is to be repeated. Follows {@link java.time.DayOfWeek} enum.
+	 */
 	public int repeatDay;
 
 	public RepeatEntity(int alarmID, int repeatDay) {

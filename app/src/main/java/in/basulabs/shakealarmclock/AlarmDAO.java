@@ -46,8 +46,7 @@ public interface AlarmDAO {
 	 * @param mins The alarm minutes.
 	 * @param newAlarmState The new alarm state. {@code 0} means OFF and {code 1} means ON.
 	 */
-	@Query("UPDATE alarm_entity SET isAlarmOn = :newAlarmState WHERE alarmHour = :hour AND alarmMinutes = " +
-			":mins")
+	@Query("UPDATE alarm_entity SET isAlarmOn = :newAlarmState WHERE alarmHour = :hour AND alarmMinutes = :mins")
 	void toggleAlarm(int hour, int mins, int newAlarmState);
 
 	/**

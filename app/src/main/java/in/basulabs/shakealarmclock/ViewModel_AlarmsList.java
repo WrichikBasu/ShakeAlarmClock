@@ -28,6 +28,9 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 	//--------------------------------------------------------------------------------------------------
 
+	/**
+	 * Increments the number of alarms by 1.
+	 */
 	private void incrementAlarmsCount() {
 		if (alarmsCount == null || alarmsCount.getValue() == null) {
 			alarmsCount = new MutableLiveData<>();
@@ -39,6 +42,9 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 	//--------------------------------------------------------------------------------------------------
 
+	/**
+	 * Decrements the number of alarms by 1.
+	 */
 	private void decrementAlarmsCount() {
 		if ((alarmsCount != null) && (alarmsCount.getValue() != null) && (alarmsCount.getValue() > 0)) {
 			alarmsCount.setValue(alarmsCount.getValue() - 1);
@@ -47,6 +53,13 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 	//--------------------------------------------------------------------------------------------------
 
+	/**
+	 * Get the total number of alarms in the database.
+	 *
+	 * @param alarmDatabase The {@link AlarmDatabase} object.
+	 *
+	 * @return The total number of alarms in the database.
+	 */
 	public int getAlarmsCount(AlarmDatabase alarmDatabase) {
 
 		AtomicInteger count = new AtomicInteger(0);
@@ -120,9 +133,10 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 					for (AlarmEntity entity : alarmEntityList) {
 
-						LocalDateTime alarmDateTime = LocalDateTime.of(entity.alarmYear, entity.alarmMonth,	entity.alarmDay, entity.alarmHour, entity.alarmMinutes);
+						LocalDateTime alarmDateTime = LocalDateTime
+								.of(entity.alarmYear, entity.alarmMonth, entity.alarmDay, entity.alarmHour, entity.alarmMinutes);
 
-						ArrayList<Integer> repeatDays = entity.isRepeatOn ?	new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(entity.alarmID)) : null;
+						ArrayList<Integer> repeatDays = entity.isRepeatOn ? new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(entity.alarmID)) : null;
 
 						Objects.requireNonNull(alarmDataArrayList.getValue()).add(getAlarmDataObject(entity, alarmDateTime, repeatDays));
 
@@ -343,8 +357,8 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * @param mins The alarm minute.
 	 * @param newAlarmState The new alarm state. 0 means OFF and 1 means ON.
 	 */
-	public int toggleAlarmState(@NonNull AlarmDatabase alarmDatabase, int hour, int mins,
-	                            int newAlarmState) {
+	public int toggleAlarmState(@NonNull AlarmDatabase alarmDatabase, int hour, int mins, int newAlarmState) {
+
 		AtomicInteger alarmId = new AtomicInteger();
 
 		Thread thread = new Thread(() -> {
@@ -430,6 +444,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * @return The {@link AlarmEntity} object for the alarm specified by {@code hour} and {@code mins}.
 	 */
 	public AlarmEntity getAlarmEntity(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
+
 		AtomicReference<AlarmEntity> alarmEntity = new AtomicReference<>();
 
 		Thread thread = new Thread(() -> alarmEntity.set(alarmDatabase.alarmDAO().getAlarmDetails(hour, mins).get(0)));

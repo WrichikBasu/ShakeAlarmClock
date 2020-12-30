@@ -96,6 +96,9 @@ public class AlarmEntity {
 	 */
 	public Uri alarmTone;
 
+	/**
+	 * Indicates whether the user has specifically chosen a date for the alarm.
+	 */
 	public boolean hasUserChosenDate;
 
 	public AlarmEntity(int alarmHour, int alarmMinutes, boolean isAlarmOn, boolean isSnoozeOn,
@@ -118,6 +121,10 @@ public class AlarmEntity {
 		this.hasUserChosenDate = hasUserChosenDate;
 	}
 
+	/**
+	 * Get all the alarm details in a single bundle.
+	 * @return All the information in the alarm entitiy in a single Bundle.
+	 */
 	@Ignore
 	public Bundle getAlarmDetailsInABundle() {
 		Bundle data = new Bundle();
