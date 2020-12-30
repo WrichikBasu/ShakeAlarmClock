@@ -13,11 +13,15 @@ public class AlertDialog_TestShakeSensitivity extends DialogFragment {
 
 	private AlertDialog_TestShakeSensitivity.DialogListener listener;
 
+	//---------------------------------------------------------------------------------------------------
+
 	public interface DialogListener {
 
 		void onDialogNegativeClick(DialogFragment dialogFragment);
 
 	}
+
+	//---------------------------------------------------------------------------------------------------
 
 	@Override
 	public void onAttach(@NonNull Context context) {
@@ -25,9 +29,11 @@ public class AlertDialog_TestShakeSensitivity extends DialogFragment {
 		if (context instanceof AlertDialog_TestShakeSensitivity.DialogListener) {
 			listener = (AlertDialog_TestShakeSensitivity.DialogListener) context;
 		} else {
-			throw new ClassCastException(context.getClass() + " must implement AlertDialog_TestShakeSensitivity.DialogListener");
+			throw new ClassCastException(context.getClass().getSimpleName() + " must implement AlertDialog_TestShakeSensitivity.DialogListener");
 		}
 	}
+
+	//---------------------------------------------------------------------------------------------------
 
 	@NonNull
 	@Override
@@ -44,6 +50,8 @@ public class AlertDialog_TestShakeSensitivity extends DialogFragment {
 
 		return builder.create();
 	}
+
+	//---------------------------------------------------------------------------------------------------
 
 	@Override
 	public void onDetach() {

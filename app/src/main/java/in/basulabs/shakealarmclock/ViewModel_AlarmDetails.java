@@ -3,7 +3,10 @@ package in.basulabs.shakealarmclock;
 import android.content.Context;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.provider.Settings;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -11,6 +14,7 @@ import androidx.lifecycle.ViewModel;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class ViewModel_AlarmDetails extends ViewModel {
 
@@ -102,13 +106,26 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	//------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Get whether the user has manually chosen a date. Default: {@code false}.
+	 *
+	 * @return Same as in description.
+	 */
 	public boolean getHasUserChosenDate() {
-		return hasUserChosenDate.getValue();
+		if (hasUserChosenDate == null) {
+			hasUserChosenDate = new MutableLiveData<>(false);
+		}
+		return hasUserChosenDate.getValue() == null ? false : hasUserChosenDate.getValue();
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
 
+	/**
+	 * Set whether the user has manually chosen a date.
+	 *
+	 * @param hasUserChosenDate The value to be set.
+	 */
 	public void setHasUserChosenDate(boolean hasUserChosenDate) {
 		if (this.hasUserChosenDate == null) {
 			this.hasUserChosenDate = new MutableLiveData<>();
@@ -119,20 +136,23 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	//------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Get the alarm date and time.
-	 * @return The alarm date and time.
+	 * Get the alarm date and time. If {@code null}, throws a {@link NullPointerException}.
+	 *
+	 * @return Same as in description.
 	 */
+	@NonNull
 	public LocalDateTime getAlarmDateTime() {
-		return alarmDateTime.getValue();
+		return Objects.requireNonNull(alarmDateTime.getValue(), "Alarm date-time was null.");
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
 	/**
 	 * Set the alarm date and time.
-	 * @param alarmDateTime The new alarm date and time.
+	 *
+	 * @param alarmDateTime The value to be set. Cannot be null.
 	 */
-	public void setAlarmDateTime(LocalDateTime alarmDateTime) {
+	public void setAlarmDateTime(@NonNull LocalDateTime alarmDateTime) {
 		if (this.alarmDateTime == null) {
 			this.alarmDateTime = new MutableLiveData<>();
 		}
@@ -142,22 +162,23 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	//------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Get the snooze interval, i.e. the period after which the alarm should ring again.
-	 * @return The snooze interval in minutes.
+	 * Get the snooze interval, i.e. the period after which the alarm should ring again. Returns 5 if not set previously.
+	 *
+	 * @return Same as in description.
 	 */
 	public int getSnoozeIntervalInMins() {
-		if (snoozeIntervalInMins.getValue() != null) {
-			return snoozeIntervalInMins.getValue();
-		} else {
-			return 5;
+		if (snoozeIntervalInMins == null) {
+			snoozeIntervalInMins = new MutableLiveData<>(5);
 		}
+		return snoozeIntervalInMins.getValue() == null ? 5 : snoozeIntervalInMins.getValue();
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
 	/**
 	 * Set the snooze interval, i.e. the period after which the alarm should ring again.
-	 * @param snoozeIntervalInMins The new snooze interval in minutes.
+	 *
+	 * @param snoozeIntervalInMins The value to be set.
 	 */
 	public void setSnoozeIntervalInMins(int snoozeIntervalInMins) {
 		if (this.snoozeIntervalInMins == null) {
@@ -169,16 +190,16 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	//------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Get the number of times the alarm will be snoozed.
+	 * Get the number of times the alarm will be snoozed. Returns 3 if not set previously.
 	 *
-	 * @return The number of times the alarm will be snoozed. If null, returns 3.
+	 * @return Same as in description.
 	 */
 	public int getSnoozeFreq() {
-		if (snoozeFreq.getValue() != null) {
-			return snoozeFreq.getValue();
-		} else {
-			return 3;
+
+		if (snoozeFreq == null) {
+			snoozeFreq = new MutableLiveData<>(3);
 		}
+		return snoozeFreq.getValue() == null ? 3 : snoozeFreq.getValue();
 	}
 
 	//------------------------------------------------------------------------------------------------------
@@ -186,7 +207,7 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	/**
 	 * Set the number of times the alarm will be snoozed before being dismissed.
 	 *
-	 * @param snoozeFreq The number of times the alarm will be snoozed before being dismissed.
+	 * @param snoozeFreq The value to be set.
 	 */
 	public void setSnoozeFreq(int snoozeFreq) {
 		if (this.snoozeFreq == null) {
@@ -201,14 +222,14 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	 * Get the alarm type.
 	 *
 	 * @return One of {@link ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY}, {@link ConstantsAndStatics#ALARM_TYPE_VIBRATE_ONLY} or {@link
-	 *        ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}. Default value is {@link ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY}.
+	 *        ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}. Default is {@code ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY}.
 	 */
 	public int getAlarmType() {
-		if (alarmType.getValue() != null) {
-			return alarmType.getValue();
-		} else {
-			return ConstantsAndStatics.ALARM_TYPE_SOUND_ONLY;
+		if (alarmType == null) {
+			alarmType = new MutableLiveData<>(ConstantsAndStatics.ALARM_TYPE_SOUND_ONLY);
 		}
+		return alarmType.getValue() == null ? ConstantsAndStatics.ALARM_TYPE_SOUND_ONLY : alarmType.getValue();
+
 	}
 
 	//------------------------------------------------------------------------------------------------------
@@ -229,22 +250,23 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	//------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Get the alarm volume.
-	 * @return The alarm volume, or 3 if not set.
+	 * Get the alarm volume. Returns 3 if not set previously.
+	 *
+	 * @return Same as in description.
 	 */
 	public int getAlarmVolume() {
-		if (alarmVolume.getValue() != null) {
-			return alarmVolume.getValue();
-		} else {
-			return 3;
+		if (alarmVolume == null) {
+			alarmVolume = new MutableLiveData<>(3);
 		}
+		return alarmVolume.getValue() == null ? 3 : alarmVolume.getValue();
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
 	/**
 	 * Set the alarm volume.
-	 * @param alarmVolume The new alarm volume to be set.
+	 *
+	 * @param alarmVolume The value to be set.
 	 */
 	public void setAlarmVolume(int alarmVolume) {
 		if (this.alarmVolume == null) {
@@ -256,22 +278,24 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	//------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Get whether snooze is on or off.
-	 * @return {@code true} is snooze is ON, otherwise {@code false}.
+	 * Get whether snooze is ON or OFF. Default: {@code true}.
+	 *
+	 * @return {@code true} is snooze is ON, otherwise {@code false}. Default: {@code true}.
 	 */
 	public boolean getIsSnoozeOn() {
-		if (isSnoozeOn.getValue() != null) {
-			return isSnoozeOn.getValue();
-		} else {
-			return true;
+		if (isSnoozeOn == null) {
+			isSnoozeOn = new MutableLiveData<>(true);
 		}
+		return isSnoozeOn.getValue() == null ? true : isSnoozeOn.getValue();
+
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
 	/**
 	 * Set whether snooze is ON or OFF.
-	 * @param isSnoozeOn The new snooze state.
+	 *
+	 * @param isSnoozeOn The value to be set.
 	 */
 	public void setIsSnoozeOn(boolean isSnoozeOn) {
 		if (this.isSnoozeOn == null) {
@@ -283,22 +307,24 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	//------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Get whether repeat is ON or OFF.
+	 * Get whether repeat is ON or OFF. Default: {@code false}.
+	 *
 	 * @return {@code true} is repeat is ON, otherwise {@code false}. Default: {@code false}.
 	 */
 	public boolean getIsRepeatOn() {
-		if (isRepeatOn.getValue() != null) {
-			return isRepeatOn.getValue();
-		} else {
-			return false;
+		if (isRepeatOn == null) {
+			isRepeatOn = new MutableLiveData<>(false);
 		}
+		return isRepeatOn.getValue() == null ? false : isRepeatOn.getValue();
+
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Set repeat state.
-	 * @param isRepeatOn The new repeat state.
+	 * Set whether repeat is ON or OFF.
+	 *
+	 * @param isRepeatOn The value to be set.
 	 */
 	public void setIsRepeatOn(boolean isRepeatOn) {
 		if (this.isRepeatOn == null) {
@@ -309,12 +335,25 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	//------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Get whether the chosen date is same as today's date.
+	 *
+	 * @return Same as in description.
+	 */
 	public boolean getIsChosenDateToday() {
-		return isChosenDateToday.getValue();
+		if (isChosenDateToday == null) {
+			isChosenDateToday = new MutableLiveData<>(getAlarmDateTime().toLocalDate().equals(LocalDate.now()));
+		}
+		return isChosenDateToday.getValue() == null ? getAlarmDateTime().toLocalDate().equals(LocalDate.now()) : isChosenDateToday.getValue();
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Set whether the chosen date is same as today.
+	 *
+	 * @param isChosenDateToday The value to be set.
+	 */
 	public void setIsChosenDateToday(boolean isChosenDateToday) {
 		if (this.isChosenDateToday == null) {
 			this.isChosenDateToday = new MutableLiveData<>();
@@ -326,19 +365,25 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	/**
 	 * Get the alarm tone Uri.
+	 *
 	 * @return The alarm tone Uri.
 	 */
+	@NonNull
 	public Uri getAlarmToneUri() {
-		return alarmToneUri.getValue();
+		if (alarmToneUri == null) {
+			alarmToneUri = new MutableLiveData<>(Settings.System.DEFAULT_ALARM_ALERT_URI);
+		}
+		return alarmToneUri.getValue() == null ? Settings.System.DEFAULT_ALARM_ALERT_URI : alarmToneUri.getValue();
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
 	/**
 	 * Set the alarm tone Uri.
-	 * @param alarmToneUri The new alarm tone Uri.
+	 *
+	 * @param alarmToneUri The value to be set.
 	 */
-	public void setAlarmToneUri(Uri alarmToneUri) {
+	public void setAlarmToneUri(@NonNull Uri alarmToneUri) {
 		if (this.alarmToneUri == null) {
 			this.alarmToneUri = new MutableLiveData<>();
 		}
@@ -349,24 +394,24 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	/**
 	 * Get the minimum date allowed.
+	 * <p>
+	 * This will be set as the min date for the calendar shown while choosing date.
 	 *
-	 *     This will be set as the min date for the calendar shown while choosing date.
-	 *
-	 * @return The minimum date allowed.
+	 * @return Same as in description.
 	 */
+	@NonNull
 	public LocalDate getMinDate() {
-		return minDate.getValue();
+		return Objects.requireNonNull(minDate.getValue(), "Minimum date was null.");
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Set the minimum allowed date.
-	 *     This will be set as the min date for the calendar shown while choosing date.
+	 * Set the minimum allowed date. This will be set as the min date for the calendar shown while choosing date.
 	 *
-	 * @param minDate The minimum allowed date.
+	 * @param minDate The value to be set.
 	 */
-	public void setMinDate(LocalDate minDate) {
+	public void setMinDate(@NonNull LocalDate minDate) {
 		if (this.minDate == null) {
 			this.minDate = new MutableLiveData<>();
 		}
@@ -377,8 +422,10 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	/**
 	 * Get the days on which the alarm should repeat.
+	 *
 	 * @return An ArrayList specifying the days on which the alarm should repeat. Follows {@link java.time.DayOfWeek} enum.
 	 */
+	@Nullable
 	public ArrayList<Integer> getRepeatDays() {
 		return repeatDays.getValue();
 	}
@@ -387,9 +434,10 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	/**
 	 * Set the days on which the alarm should repeat.
-	 * @param repeatDays An ArrayList specifying the days on which the alarm should repeat. Follows {@link java.time.DayOfWeek} enum.
+	 *
+	 * @param repeatDays An ArrayList specifying the days on which the alarm should repeat. Must follow {@link java.time.DayOfWeek} enum.
 	 */
-	public void setRepeatDays(ArrayList<Integer> repeatDays) {
+	public void setRepeatDays(@Nullable ArrayList<Integer> repeatDays) {
 		if (this.repeatDays == null) {
 			this.repeatDays = new MutableLiveData<>();
 		}
@@ -400,17 +448,22 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	/**
 	 * The mode in which this activity has been opened.
+	 *
 	 * @return Either {@link Activity_AlarmDetails#MODE_EXISTING_ALARM} or {@link Activity_AlarmDetails#MODE_NEW_ALARM}.
 	 */
 	public int getMode() {
-		return mode.getValue();
+		if (mode == null) {
+			mode = new MutableLiveData<>(Activity_AlarmDetails.MODE_NEW_ALARM);
+		}
+		return mode.getValue() == null ? Activity_AlarmDetails.MODE_NEW_ALARM : mode.getValue();
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
 	/**
 	 * The mode in which this activity has been opened.
-	 * @param mode Either {@link Activity_AlarmDetails#MODE_EXISTING_ALARM} or {@link Activity_AlarmDetails#MODE_NEW_ALARM}.
+	 *
+	 * @param mode The value to be set. Either {@link Activity_AlarmDetails#MODE_EXISTING_ALARM} or {@link Activity_AlarmDetails#MODE_NEW_ALARM}.
 	 */
 	public void setMode(int mode) {
 		if (this.mode == null) {
@@ -421,12 +474,32 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	//------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Get the old alarm hour.
+	 * <p>
+	 * This should be called if and only if {@code mode} = {@link Activity_AlarmDetails#MODE_EXISTING_ALARM}. Otherwise this method will throw a {@code
+	 * NullPointerException}.
+	 * </p>
+	 *
+	 * @return The old alarm hour, if available. Otherwise throws {@code NullPointerException}.
+	 */
 	public int getOldAlarmHour() {
+		if (oldAlarmHour == null || oldAlarmHour.getValue() == null) {
+			throw new NullPointerException("Old alarm hour was null.");
+		}
 		return oldAlarmHour.getValue();
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Set the old alarm hour.
+	 * <p>
+	 * This should be called if and only if {@code mode} = {@link Activity_AlarmDetails#MODE_EXISTING_ALARM}.
+	 * </p>
+	 *
+	 * @param oldAlarmHour The value to be set.
+	 */
 	public void setOldAlarmHour(int oldAlarmHour) {
 		if (this.oldAlarmHour == null) {
 			this.oldAlarmHour = new MutableLiveData<>();
@@ -436,12 +509,32 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	//------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Get the old alarm minute.
+	 * <p>
+	 * This should be called if and only if {@code mode} = {@link Activity_AlarmDetails#MODE_EXISTING_ALARM}. Otherwise this method will throw a {@code
+	 * NullPointerException}.
+	 * </p>
+	 *
+	 * @return The old alarm minute, if available. Otherwise throws {@code NullPointerException}.
+	 */
 	public int getOldAlarmMinute() {
+		if (oldAlarmMinute == null || oldAlarmMinute.getValue() == null) {
+			throw new NullPointerException("Old alarm minute was null.");
+		}
 		return oldAlarmMinute.getValue();
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Set the old alarm minute.
+	 * <p>
+	 * This should be called if and only if {@code mode} = {@link Activity_AlarmDetails#MODE_EXISTING_ALARM}.
+	 * </p>
+	 *
+	 * @param oldAlarmMinute The value to be set.
+	 */
 	public void setOldAlarmMinute(int oldAlarmMinute) {
 		if (this.oldAlarmMinute == null) {
 			this.oldAlarmMinute = new MutableLiveData<>();
@@ -451,18 +544,30 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	//------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Get an observable instance of alarm volume.
+	 * @return Same as in description.
+	 */
 	public LiveData<Integer> getLiveAlarmVolume() {
 		return alarmVolume;
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Get an observable instance of whether repeat is ON or OFF.
+	 * @return Same as in description.
+	 */
 	public LiveData<Boolean> getLiveIsRepeatOn() {
 		return isRepeatOn;
 	}
 
 	//------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Get an observable instance of the alarm type.
+	 * @return Same as in description.
+	 */
 	public LiveData<Integer> getLiveAlarmType() {
 		return alarmType;
 	}

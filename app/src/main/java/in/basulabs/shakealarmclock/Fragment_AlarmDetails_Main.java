@@ -40,9 +40,8 @@ import java.util.Objects;
 
 import static android.app.Activity.RESULT_OK;
 
-public class Fragment_AlarmDetails_Main extends Fragment
-		implements View.OnClickListener, SeekBar.OnSeekBarChangeListener, TimePicker.OnTimeChangedListener,
-		AdapterView.OnItemSelectedListener {
+public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClickListener,
+		SeekBar.OnSeekBarChangeListener, TimePicker.OnTimeChangedListener, AdapterView.OnItemSelectedListener {
 
 	private static final int RINGTONE_REQUEST_CODE = 5280;
 
@@ -77,8 +76,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 		if (context instanceof FragmentGUIListener) {
 			listener = (FragmentGUIListener) context;
 		} else {
-			throw new ClassCastException(context.getClass().getSimpleName() +
-					" must implement Fragment_AlarmDetails_Main.FragmentGUIListener");
+			throw new ClassCastException(context.getClass().getSimpleName() + " must implement Fragment_AlarmDetails_Main.FragmentGUIListener.");
 		}
 	}
 
@@ -94,8 +92,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 
 	@Nullable
 	@Override
-	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-	                         @Nullable Bundle savedInstanceState) {
+	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
 		View view = inflater.inflate(R.layout.frag_alarm_details_main, container, false);
 
@@ -210,7 +207,9 @@ public class Fragment_AlarmDetails_Main extends Fragment
 		});
 
 		viewModel.getLiveIsRepeatOn().observe(getViewLifecycleOwner(), isRepeatOn -> {
+
 			if (isRepeatOn) {
+
 				alarmDateConstarintLayout.setEnabled(false);
 
 				alarmDateLabel.setTextColor(getResources().getColor(R.color.disabledColor));
@@ -218,7 +217,9 @@ public class Fragment_AlarmDetails_Main extends Fragment
 
 				alarmDateTV.setTextColor(getResources().getColor(R.color.disabledColor));
 				alarmDateTV.setPaintFlags(alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+
 			} else {
+
 				alarmDateConstarintLayout.setEnabled(true);
 
 				alarmDateLabel.setTextColor(getResources().getColor(R.color.defaultLabelColor));
@@ -292,8 +293,12 @@ public class Fragment_AlarmDetails_Main extends Fragment
 	 */
 	private void displayRepeatOptions() {
 
-		if (viewModel.getIsRepeatOn()) {
+		if (viewModel.getIsRepeatOn() && viewModel.getRepeatDays() != null) {
+
+			viewModel.setIsRepeatOn(true);
+
 			StringBuilder str = new StringBuilder();
+
 			for (int i = 0; i < viewModel.getRepeatDays().size(); i++) {
 				int day = (viewModel.getRepeatDays().get(i) + 1) > 7 ? 1 : (viewModel.getRepeatDays().get(i) + 1);
 				str.append(new DateFormatSymbols().getShortWeekdays()[day]);
@@ -303,6 +308,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 			}
 			currentRepeatOptionsTV.setText(str.toString());
 		} else {
+			viewModel.setIsRepeatOn(false);
 			currentRepeatOptionsTV.setText(requireContext().getResources().getString(R.string.repeatNone));
 		}
 	}
@@ -313,10 +319,6 @@ public class Fragment_AlarmDetails_Main extends Fragment
 	 * Displays the alarm tone in {@link #alarmToneTV}.
 	 */
 	private void displayAlarmTone() {
-
-		if (viewModel.getAlarmToneUri() == null) {
-			viewModel.setAlarmToneUri(Settings.System.DEFAULT_ALARM_ALERT_URI);
-		}
 
 		if (viewModel.getAlarmToneUri().equals(Settings.System.DEFAULT_ALARM_ALERT_URI)) {
 			alarmToneTV.setText(R.string.defaultAlarmToneText);
@@ -364,17 +366,17 @@ public class Fragment_AlarmDetails_Main extends Fragment
 	@Override
 	public void onClick(View view) {
 
-		if (view.getId() == R.id.saveButton){
+		if (view.getId() == R.id.saveButton) {
 			saveButtonClicked();
-		} else if (view.getId() == R.id.cancelButton){
+		} else if (view.getId() == R.id.cancelButton) {
 			listener.onCancelButtonClick();
-		} else if (view.getId() == R.id.repeatConstraintLayout){
+		} else if (view.getId() == R.id.repeatConstraintLayout) {
 			listener.onRequestRepeatFragCreation();
-		} else if (view.getId() == R.id.snoozeConstraintLayout){
+		} else if (view.getId() == R.id.snoozeConstraintLayout) {
 			listener.onRequestSnoozeFragCreation();
-		} else if (view.getId() == R.id.alarmDateConstraintLayout){
+		} else if (view.getId() == R.id.alarmDateConstraintLayout) {
 			listener.onRequestDatePickerFragCreation();
-		} else if (view.getId() == R.id.alarmToneConstraintLayout){
+		} else if (view.getId() == R.id.alarmToneConstraintLayout) {
 			Intent intent = new Intent(requireContext(), Activity_RingtonePicker.class)
 					.setAction(RingtoneManager.ACTION_RINGTONE_PICKER)
 					.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
@@ -421,8 +423,7 @@ public class Fragment_AlarmDetails_Main extends Fragment
 			// Chosen date is today. We have to check if the alarm is possible today.
 			// If not possible, the date is changed to tomorrow.
 			//////////////////////////////////////////////////////////////////////////////////
-			viewModel.setAlarmDateTime(LocalDateTime.of(LocalDate.now(),
-					viewModel.getAlarmDateTime().toLocalTime()));
+			viewModel.setAlarmDateTime(LocalDateTime.of(LocalDate.now(), viewModel.getAlarmDateTime().toLocalTime()));
 
 			if (! viewModel.getAlarmDateTime().toLocalTime().isAfter(LocalTime.now())) {
 				//Date today NOT possible.
@@ -501,11 +502,9 @@ public class Fragment_AlarmDetails_Main extends Fragment
 	 */
 	private void saveButtonClicked() {
 		SharedPreferences sharedPreferences = requireContext()
-				.getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
-						Context.MODE_PRIVATE);
+				.getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
 
-		if (sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_AUTO_SET_TONE, true)
-				&& viewModel.getAlarmToneUri() != null) {
+		if (sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_AUTO_SET_TONE, true)) {
 
 			sharedPreferences.edit()
 					.remove(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI)
