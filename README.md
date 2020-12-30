@@ -40,7 +40,7 @@ Tired of pressing the power button/swiping the screen every time an alarm rings?
 
 ## How to contribute?
 ### Bug reports:
-Please create an issue with as much details as possible. Also look at the [guidelines]() for creating an issue.
+Please create an issue with as much details as possible. Also look at the [guidelines](https://github.com/WrichikBasu/ShakeAlarmClock/blob/master/CONTRIBUTING.md#guidelines-for-creating-an-issue) for creating an issue.
 
 ### Ideas/Feature Requests:
 Ideas for improvement and feature requests are always welcome. Please post them in the [Feature requests](https://github.com/WrichikBasu/ShakeAlarmClock/discussions/categories/feature-requests) category under Discussions.
