@@ -18,26 +18,23 @@ Tired of pressing the power button/swiping the screen every time an alarm rings?
 
 ## Salient features:
 1. Works offline.
-1. The alarm is handled by a service which has almost no dependency with the UI. So, even if your UI freezes, the alarm will ring and can be dismissed.
-1. Uses latest Android Room database for storing alarms.
+1. Alarms are unique by alarm time. This means that you cannot have two alarms at the same time, even if they are on different dates.
+1. Each alarm is independent of other alarms. This means that the alarm volume, ringtone, etc. will not be carried over to another alarm unless you do so manually.
 1. Inbuilt dark theme, even in phones that do not support it.
 1. Snooze your alarm as many times as you want with custom snooze options.
+1. When updates are released, you will be notified within the app itself. If you download from GitHub, the app will not be linked to Google Play and vice-versa.
+1. The alarm is handled by a service which has almost no dependency on the UI. So, even if your UI freezes, the alarm will ring and can be dismissed.
+1. Uses latest Android Room database for storing alarms.
 1. Actively maintained app. Bug reports will be worked upon with high priority.
 
 ## How to install?
-You have two options:
-### 1. From Github:
-
-<a href="https://github.com/WrichikBasu/ShakeAlarmClock/releases/latest"><img src="github.png"
-     alt="Download from Github icon"
-     width="200" /></a>
-
-The app downloaded from Github will not be linked to Google Play.
-
-### 2. From Google Play:
 
 
-<a href='https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=200/></a>
+<a href="https://github.com/WrichikBasu/ShakeAlarmClock/releases/latest"><img src="github.png" alt="Download from Github icon" width="200"/></a>
+
+
+
+<a href='https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=200/></a>
 
 
 ## How to contribute?
