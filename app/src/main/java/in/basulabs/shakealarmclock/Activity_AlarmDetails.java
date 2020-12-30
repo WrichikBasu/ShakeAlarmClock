@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -180,7 +181,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 
 		String alarmTone = sharedPreferences.getString(SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, null);
 
-		viewModel.setAlarmToneUri(alarmTone != null ? Uri.parse(alarmTone) : null);
+		viewModel.setAlarmToneUri(alarmTone != null ? Uri.parse(alarmTone) : Settings.System.DEFAULT_ALARM_ALERT_URI);
 
 		viewModel.setAlarmType(ALARM_TYPE_SOUND_ONLY);
 
@@ -191,7 +192,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 		viewModel.setSnoozeFreq(sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ, 3));
 		viewModel.setSnoozeIntervalInMins(sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL, 5));
 
-		viewModel.setRepeatDays(new ArrayList<>());
+		viewModel.setRepeatDays(null);
 
 		viewModel.setIsChosenDateToday(viewModel.getAlarmDateTime().toLocalDate().equals(LocalDate.now()));
 
@@ -240,7 +241,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 		if (isRepeatOn && repeatDays != null) {
 			viewModel.setRepeatDays(repeatDays);
 		} else {
-			viewModel.setRepeatDays(new ArrayList<>());
+			viewModel.setRepeatDays(null);
 		}
 
 		viewModel.setIsChosenDateToday(viewModel.getAlarmDateTime().toLocalDate().equals(LocalDate.now()));

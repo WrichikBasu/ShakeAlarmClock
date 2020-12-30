@@ -133,8 +133,8 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 					for (AlarmEntity entity : alarmEntityList) {
 
-						LocalDateTime alarmDateTime = LocalDateTime
-								.of(entity.alarmYear, entity.alarmMonth, entity.alarmDay, entity.alarmHour, entity.alarmMinutes);
+						LocalDateTime alarmDateTime = LocalDateTime.of(entity.alarmYear, entity.alarmMonth,
+								entity.alarmDay, entity.alarmHour, entity.alarmMinutes);
 
 						ArrayList<Integer> repeatDays = entity.isRepeatOn ? new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(entity.alarmID)) : null;
 
@@ -273,7 +273,6 @@ public class ViewModel_AlarmsList extends ViewModel {
 					alarmDataArrayList.getValue().add(0, newAlarmData);
 					break;
 				}
-
 			}
 		}
 
