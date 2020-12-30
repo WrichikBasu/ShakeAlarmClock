@@ -5,7 +5,11 @@ Issues and suggestions for improvements are always welcome. Anyone is allowed to
 However, before contributing, please read the following guidelines:
 
 ## Guidelines for creating an issue:
-Issue templates have been set up for bug reports and feature requests separately. Please try to follow them. If, however, you find that what you have in mind cannot be written properly in the provided template, you may create an issue from a blank template.
+Issues should only be created for bug reports. Feature requests and questions should be posted under Discussions.
+
+A template has been set up for bug report. Please try to follow it. It will be extremely helpful if you can also provide a stack trace of the crash (if available), or screenshots.
+
+If you find that what you have in mind cannot be written properly in the provided template, you may create an issue from a blank template.
 
 ## Guidelines for forking and creating pull requests:
 1. Do **not** change the following:
@@ -19,10 +23,3 @@ Issue templates have been set up for bug reports and feature requests separately
 1. It's upto the owner to decide whether the PR will be simply merged, or squashed.
 1. Follow the "one feature one PR" rule: each PR should add only one feature to the app. You can add as many commits as you want for introducing the feature, but these changes should cater to only one feature.
 1. Document your code where necessary. Changes without proper documentation may not be accepted.
-
-## Version information:
-The following versions have been used in compiling this project:
-
-1. Gradle version: 6.7.1
-1. Android Gradle Plugin version: 4.1.1
-1. JDK version: 15.0.1

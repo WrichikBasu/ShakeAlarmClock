@@ -18,6 +18,7 @@ Tired of pressing the power button/swiping the screen every time an alarm rings?
 
 ## Salient features:
 1. Works offline.
+1. No advertisements.
 1. Alarms are unique by alarm time. This means that you cannot have two alarms at the same time, even if they are on different dates.
 1. Each alarm is independent of other alarms. This means that the alarm volume, ringtone, etc. will not be carried over to another alarm unless you do so manually.
 1. Inbuilt dark theme, even in phones that do not support it.
@@ -38,4 +39,14 @@ Tired of pressing the power button/swiping the screen every time an alarm rings?
 
 
 ## How to contribute?
-Before forking, creating a pull request or an issue, please read the [guidelines for contributing](https://github.com/WrichikBasu/ShakeAlarmClock/blob/master/CONTRIBUTING.md).
+### Bug reports:
+Please create an issue with as much details as possible. Also look at the [guidelines](https://github.com/WrichikBasu/ShakeAlarmClock/blob/master/CONTRIBUTING.md#guidelines-for-creating-an-issue) for creating an issue.
+
+### Ideas/Feature Requests:
+Ideas for improvement and feature requests are always welcome. Please post them in the [Feature requests](https://github.com/WrichikBasu/ShakeAlarmClock/discussions/categories/feature-requests) category under Discussions.
+
+### Questions:
+We will try to answer all questions and help you in using this library. Please post your questions in the [Q&A category](https://github.com/WrichikBasu/ShakeAlarmClock/discussions/categories/q-a) under Discussions.
+
+### Forking and Pull Requests:
+I appreciate people forking this repository and putting in their bit to improve it. Please follow the [guidelines](https://github.com/WrichikBasu/ShakeAlarmClock/blob/master/CONTRIBUTING.md#guidelines-for-forking-and-creating-pull-requests) for forking and creating pull requests.
