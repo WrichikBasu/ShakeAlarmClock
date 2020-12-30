@@ -154,9 +154,9 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 			holder.alarmDateTextView.setText(str.toString());
 		}
 
-		if (alarmData.getSoundVibrateSetting() == ConstantsAndStatics.ALARM_TYPE_SOUND_ONLY) {
+		if (alarmData.getAlarmType() == ConstantsAndStatics.ALARM_TYPE_SOUND_ONLY) {
 			holder.alarmTypeTextView.setText(context.getResources().getString(R.string.sound));
-		} else if (alarmData.getSoundVibrateSetting() == ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY) {
+		} else if (alarmData.getAlarmType() == ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY) {
 			holder.alarmTypeTextView.setText(context.getResources().getString(R.string.vibrate));
 		} else {
 			holder.alarmTypeTextView.setText(context.getResources().getString(R.string.sound_and_vibrate));

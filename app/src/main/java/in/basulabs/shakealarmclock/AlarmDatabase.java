@@ -17,7 +17,9 @@ public abstract class AlarmDatabase extends RoomDatabase {
 
 	public static synchronized AlarmDatabase getInstance(Context context) {
 		if (instance == null) {
-			instance = Room.databaseBuilder(context.getApplicationContext(), AlarmDatabase.class, DATABASE_NAME).fallbackToDestructiveMigration().build();
+			instance = Room.databaseBuilder(context.getApplicationContext(), AlarmDatabase.class, DATABASE_NAME)
+					.fallbackToDestructiveMigration()
+					.build();
 		}
 		return instance;
 	}

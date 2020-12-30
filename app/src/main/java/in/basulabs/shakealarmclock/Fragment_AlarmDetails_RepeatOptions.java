@@ -23,6 +23,8 @@ public class Fragment_AlarmDetails_RepeatOptions extends Fragment
 
 	private ViewModel_AlarmDetails viewModel;
 
+	//----------------------------------------------------------------------------------------------------
+
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -47,10 +49,7 @@ public class Fragment_AlarmDetails_RepeatOptions extends Fragment
 
 		if (viewModel.getRepeatDays() != null && viewModel.getRepeatDays().size() > 0) {
 			for (int i : viewModel.getRepeatDays()) {
-				///////////////////////////////////////////////////////////
-				// The ArrayList starts from index 0 (for monday),
-				// while the DayOfWeek enum assigns monday to 1.
-				//////////////////////////////////////////////////////////
+				// The ArrayList starts from index 0 (for monday), while the DayOfWeek enum assigns monday to 1.
 				checkBoxArrayList.get(i - 1).setChecked(true);
 			}
 		}
@@ -68,7 +67,7 @@ public class Fragment_AlarmDetails_RepeatOptions extends Fragment
 	public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
 		CheckBox checkBox = (CheckBox) compoundButton;
 
-		if (isChecked) { //TODO Check
+		if (isChecked) {
 			viewModel.getRepeatDays().add(checkBoxArrayList.indexOf(checkBox) + 1);
 		} else {
 			int index = viewModel.getRepeatDays().indexOf(checkBoxArrayList.indexOf(checkBox) + 1);
@@ -78,8 +77,5 @@ public class Fragment_AlarmDetails_RepeatOptions extends Fragment
 		viewModel.setIsRepeatOn(viewModel.getRepeatDays().size() > 0);
 
 		Collections.sort(viewModel.getRepeatDays());
-
-		/*Log.e(this.getClass().getSimpleName(),
-				"contents = " + Arrays.toString(viewModel.getRepeatDays().toArray()));*/
 	}
 }

@@ -84,43 +84,6 @@ public class Worker_ActivateAlarms extends Worker {
 					LocalDateTime alarmDateTime = ConstantsAndStatics.getAlarmDateTime(LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth,
 							alarmEntity.alarmDay), LocalTime.of(alarmEntity.alarmHour, alarmEntity.alarmMinutes), alarmEntity.isRepeatOn, repeatDays);
 
-
-					/*LocalDate alarmDate = LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth, alarmEntity.alarmDay);
-					LocalTime alarmTime = LocalTime.of(alarmEntity.alarmHour, alarmEntity.alarmMinutes);
-
-					if (alarmEntity.isRepeatOn && repeatDays.size() > 0) {
-
-						Collections.sort(repeatDays);
-
-						alarmDateTime = LocalDateTime.of(LocalDate.now(), alarmTime);
-						int dayOfWeek = alarmDateTime.getDayOfWeek().getValue();
-
-						for (int i = 0; i < repeatDays.size(); i++) {
-							if (repeatDays.get(i) == dayOfWeek) {
-								if (alarmTime.isAfter(LocalTime.now())) {
-									// Alarm possible today, nothing more to do, break out of loop.
-									break;
-								}
-							} else if (repeatDays.get(i) > dayOfWeek) {
-								// There is a day available in the same week for the alarm to ring; select that day and
-								// break from loop.
-								alarmDateTime =
-										alarmDateTime.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(i))));
-								break;
-							}
-							if (i == repeatDays.size() - 1) {
-								// No day possible in this week. Select the first available date from next week.
-								alarmDateTime = alarmDateTime.with(TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(0))));
-							}
-						}
-
-					} else {
-						alarmDateTime = LocalDateTime.of(alarmDate, alarmTime);
-						if (! alarmDateTime.isAfter(LocalDateTime.now())) {
-							alarmDateTime.plusDays(1);
-						}
-					}*/
-
 					ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime, ZoneId.systemDefault());
 
 					PendingIntent pendingIntent1 = PendingIntent.getBroadcast(context.getApplicationContext(), alarmEntity.alarmID, intent, 0);

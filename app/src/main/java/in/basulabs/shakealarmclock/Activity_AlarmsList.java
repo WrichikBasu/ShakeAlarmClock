@@ -166,6 +166,11 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	//--------------------------------------------------------------------------------------------------
 
+	/**
+	 * Displays/hides the view stub.
+	 *
+	 * @param count The total number of alarms currently in the database.
+	 */
 	private void manageViewStub(int count) {
 		if (count == 0) {
 			viewStub.setVisibility(View.VISIBLE);
@@ -176,6 +181,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	//--------------------------------------------------------------------------------------------------
 
+	@Deprecated
 	private void onDateChanged() {
 		viewModel.forceInit(alarmDatabase);
 		alarmAdapter = new AlarmAdapter(viewModel.getAlarmDataArrayList(), this, this);
@@ -264,7 +270,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	//------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Delete and/or deactivate an alarm.
+	 * Delete or deactivate an alarm.
 	 *
 	 * @param mode Can have only two values: {@link #MODE_DEACTIVATE_ONLY} or {@link #MODE_DELETE_ALARM}.
 	 * @param hour The alarm hour.
@@ -519,6 +525,12 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	//-------------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Show the battery optimization dialog/update available dialog.
+	 * <p>
+	 * If the battery optimizations dialog is shown, then the update dialog is not shown.
+	 * </p>
+	 */
 	private void showDialogs() {
 
 		boolean showBatteryOptimDialog = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
