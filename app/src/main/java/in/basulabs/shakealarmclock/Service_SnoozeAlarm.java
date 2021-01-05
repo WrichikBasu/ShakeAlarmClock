@@ -46,6 +46,8 @@ public class Service_SnoozeAlarm extends Service {
 
 	private boolean preMatureDeath;
 
+	private ArrayList<Integer> repeatDays;
+
 	//--------------------------------------------------------------------------------------------------
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -114,6 +116,8 @@ public class Service_SnoozeAlarm extends Service {
 
 		snoozeTimer.start();
 
+		loadRepeatDays();
+
 		return START_NOT_STICKY;
 	}
 
@@ -128,6 +132,26 @@ public class Service_SnoozeAlarm extends Service {
 		isThisServiceRunning = true;
 	}
 
+	//--------------------------------------------------------------------------------------------------
+
+	/**
+	 * Reads the repeat days from alarm database.
+	 * <p>
+	 * I have received some crash reports from Google Play stating that {@code NullPointerException} is being thrown in {@code dismissAlarm()} at the statement
+	 * {@code Collections.sort(repeatDays)}. It seems that even if repeat is ON, the repeat days list is null. That is why we are re-reading the repeat days
+	 * from the database as a temporary fix. For details, see https://github.com/WrichikBasu/ShakeAlarmClock/issues/39
+	 * </p>
+	 */
+	private void loadRepeatDays() {
+		if (alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON)) {
+			AlarmDatabase alarmDatabase = AlarmDatabase.getInstance(this);
+			Thread thread = new Thread(() -> repeatDays = new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID))));
+			thread.start();
+		} else {
+			repeatDays = null;
+		}
+	}
+
 	//----------------------------------------------------------------------------------------------------
 
 	/**
@@ -137,7 +161,6 @@ public class Service_SnoozeAlarm extends Service {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
 			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID), "in.basulabs.shakealarmclock Notifications", importance);
-			//NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
 			notificationManager.createNotificationChannel(channel);
 		}
@@ -164,23 +187,6 @@ public class Service_SnoozeAlarm extends Service {
 				.setContentIntent(contentPendingIntent);
 
 		return builder.build();
-	}
-
-	//-----------------------------------------------------------------------------------------------------
-
-	private void updateNotification() {
-		Intent intent = new Intent().setAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
-		PendingIntent contentPendingIntent = PendingIntent.getBroadcast(this, 5017, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(NOTIFICATION_ID))
-				.setContentTitle(getResources().getString(R.string.app_name))
-				.setContentText(getResources().getString(R.string.notifContent_snooze))
-				.setPriority(NotificationCompat.PRIORITY_HIGH)
-				.setCategory(NotificationCompat.CATEGORY_STATUS)
-				.setSmallIcon(R.drawable.ic_notif)
-				.setContentIntent(contentPendingIntent);
-
-		notificationManager.notify(NOTIFICATION_ID, builder.build());
 	}
 
 	//-----------------------------------------------------------------------------------------------------
@@ -216,19 +222,11 @@ public class Service_SnoozeAlarm extends Service {
 		/////////////////////////////////////////////////////////////////////////////////////
 		// If repeat is on, set another alarm. Otherwise toggle alarm state in database.
 		////////////////////////////////////////////////////////////////////////////////////
-		if (! alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON)) {
-			thread_toggleAlarm.start();
-			try {
-				thread_toggleAlarm.join();
-			} catch (InterruptedException ignored) {
-			}
-		} else {
+		if (alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON, false) && repeatDays != null && repeatDays.size() > 0) {
+
 			LocalTime alarmTime = LocalTime.of(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
 					alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
 
-			ArrayList<Integer> repeatDays = alarmDetails.getIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS);
-
-			assert repeatDays != null;
 			Collections.sort(repeatDays);
 
 			LocalDateTime alarmDateTime = LocalDateTime.of(LocalDate.now(), alarmTime);
@@ -260,6 +258,12 @@ public class Service_SnoozeAlarm extends Service {
 
 			alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent2), pendingIntent2);
 
+		} else {
+			thread_toggleAlarm.start();
+			try {
+				thread_toggleAlarm.join();
+			} catch (InterruptedException ignored) {
+			}
 		}
 		ConstantsAndStatics.schedulePeriodicWork(this);
 		preMatureDeath = false;
@@ -271,6 +275,7 @@ public class Service_SnoozeAlarm extends Service {
 	//-----------------------------------------------------------------------------------------------------
 
 	private void cancelPendingIntent() {
+
 		AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
 		Intent intent = new Intent(this, AlarmBroadcastReceiver.class)
