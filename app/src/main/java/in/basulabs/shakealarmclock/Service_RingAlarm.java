@@ -92,6 +92,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 	private boolean preMatureDeath;
 
+	private ArrayList<Integer> repeatDays;
+
 	//--------------------------------------------------------------------------------------------------
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -171,6 +173,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		ringAlarm();
 
+		loadRepeatDays();
+
 		return START_NOT_STICKY;
 	}
 
@@ -200,6 +204,27 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		unregisterReceiver(broadcastReceiver);
 		isThisServiceRunning = false;
 		alarmID = - 1;
+	}
+
+	//--------------------------------------------------------------------------------------------------
+
+	/**
+	 * Reads the repeat days from alarm database.
+	 * <p>
+	 * I have received some crash reports from Google Play stating that {@code NullPointerException} is being thrown in {@code dismissAlarm()} at the statement
+	 * {@code Collections.sort(repeatDays)}. It seems that even if repeat is ON, the repeat days list is null. That is why we are re-reading the repeat days
+	 * from the database as a temporary fix.
+	 * </p>
+	 */
+	private void loadRepeatDays() {
+		if (alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON)) {
+			AlarmDatabase alarmDatabase = AlarmDatabase.getInstance(this);
+			Thread thread = new Thread(() -> repeatDays = new ArrayList<>(
+					alarmDatabase.alarmDAO().getAlarmRepeatDays(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID))));
+			thread.start();
+		} else {
+			repeatDays = null;
+		}
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -370,19 +395,11 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		// If repeat is on, set another alarm. Otherwise
 		// toggle alarm state in database.
 		/////////////////////////////////////////////////////
-		if (! alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON)) {
-			thread_toggleAlarm.start();
-			try {
-				thread_toggleAlarm.join();
-			} catch (InterruptedException ignored) {
-			}
-		} else {
+		if (alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON, false) && repeatDays != null && repeatDays.size() > 0) {
+
 			LocalTime alarmTime = LocalTime.of(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
 					alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
 
-			ArrayList<Integer> repeatDays = alarmDetails.getIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS);
-
-			assert repeatDays != null;
 			Collections.sort(repeatDays);
 
 			LocalDateTime alarmDateTime = LocalDateTime.of(LocalDate.now(), alarmTime);
@@ -406,6 +423,15 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				}
 			}
 			setAlarm(alarmDateTime);
+
+		} else {
+
+			thread_toggleAlarm.start();
+
+			try {
+				thread_toggleAlarm.join();
+			} catch (InterruptedException ignored) {
+			}
 		}
 
 		ConstantsAndStatics.schedulePeriodicWork(this);
