@@ -316,7 +316,7 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 	//----------------------------------------------------------------------------------------------------
 
 	/**
-	 * Displays the alarm tone in {@link #alarmToneTV}.
+	 * Displays the alarm tone file name in {@link #alarmToneTV}.
 	 */
 	private void displayAlarmTone() {
 
@@ -327,10 +327,10 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 
 			String fileName = null;
 
-			try (Cursor cursor = requireContext().getContentResolver()
-					.query(viewModel.getAlarmToneUri(), null, null, null, null)) {
+			try {
+				try (Cursor cursor = requireContext().getContentResolver()
+						.query(viewModel.getAlarmToneUri(), null, null, null, null)) {
 
-				try {
 					if (cursor != null && cursor.getCount() > 0 && cursor.moveToFirst()) {
 
 						int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
@@ -339,9 +339,17 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 						} else {
 							fileName = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
 						}
+					} else {
+						viewModel.setAlarmToneUri(Settings.System.DEFAULT_ALARM_ALERT_URI);
+						alarmToneTV.setText(R.string.defaultAlarmToneText);
+						return;
 					}
-				} catch (Exception ignored) {
 				}
+			} catch (java.lang.SecurityException se){
+				viewModel.setAlarmToneUri(Settings.System.DEFAULT_ALARM_ALERT_URI);
+				alarmToneTV.setText(R.string.defaultAlarmToneText);
+				return;
+			} catch (Exception ignored) {
 			}
 
 			if (fileName != null) {
