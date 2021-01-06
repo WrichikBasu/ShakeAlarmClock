@@ -29,6 +29,7 @@ import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
@@ -44,7 +45,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
 
-public class Service_RingAlarm extends Service implements SensorEventListener {
+import in.basulabs.audiofocuscontroller.AudioFocusController;
+
+public class Service_RingAlarm extends Service implements SensorEventListener, AudioFocusController.OnAudioFocusChangeListener {
 
 	private Bundle alarmDetails;
 
@@ -94,6 +97,14 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 	private ArrayList<Integer> repeatDays;
 
+	private AudioFocusController audioFocusController;
+
+	/**
+	 * Indicates whether alarm ringing has already started, and prevents {@code ringAlarm()} to be called more than once by {@link
+	 * AudioFocusController.OnAudioFocusChangeListener#resume()}.
+	 */
+	private boolean alarmRingingStarted;
+
 	//--------------------------------------------------------------------------------------------------
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -119,10 +130,21 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		}
 		isThisServiceRunning = true;
 		preMatureDeath = true;
+		alarmRingingStarted = false;
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
 		sharedPreferences = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
+
+		audioFocusController = new AudioFocusController.Builder(this)
+				.setAcceptsDelayedFocus(true)
+				.setAudioFocusChangeListener(this)
+				.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+				.setUsage(AudioAttributes.USAGE_ALARM)
+				.setPauseWhenAudioIsNoisy(false)
+				.setStream(AudioManager.STREAM_ALARM)
+				.setDurationHint(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
+				.build();
 
 		isShakeActive = sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
 				ConstantsAndStatics.SNOOZE) != ConstantsAndStatics.DO_NOTHING;
@@ -171,7 +193,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		intentFilter.addAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
 		registerReceiver(broadcastReceiver, intentFilter);
 
-		ringAlarm();
+		audioFocusController.requestFocus();
 
 		loadRepeatDays();
 
@@ -302,7 +324,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			mediaPlayer = new MediaPlayer();
 			AudioAttributes attributes = new AudioAttributes.Builder()
 					.setUsage(AudioAttributes.USAGE_ALARM)
-					.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+					.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
 					.build();
 
 			audioManager.setStreamVolume(AudioManager.STREAM_ALARM, alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME), 0);
@@ -466,11 +488,18 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			Intent intent = new Intent(ConstantsAndStatics.ACTION_DESTROY_RING_ALARM_ACTIVITY);
 			sendBroadcast(intent);
 		}
+		audioFocusController.abandonFocus();
 	}
 
 	//--------------------------------------------------------------------------------------------------
 
-	private void setAlarm(LocalDateTime alarmDateTime) {
+	/**
+	 * Sets the next alarn in case of a repeat alarm.
+	 *
+	 * @param alarmDateTime The date and time when the alarm is to be set.
+	 */
+	private void setAlarm(@NonNull LocalDateTime alarmDateTime) {
+
 		AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
 		Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class)
@@ -487,7 +516,11 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 	//---------------------------------------------------------------------------------------------------
 
+	/**
+	 * While testing, we found that sometimes, the alarm was being reset at a later date unintentionally. This function cancels such an unintentional alarm.
+	 */
 	private void cancelPendingIntent() {
+
 		AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
 		Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class)
@@ -550,7 +583,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	private void shakeVibration() {
 		if (vibrator.hasVibrator()) {
 			vibrator.cancel();
-			SystemClock.sleep(200);
+			SystemClock.sleep(100);
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 				vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
 			} else {
@@ -564,6 +597,37 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int i) {
+	}
+
+	//--------------------------------------------------------------------------------------------------
+
+	@Override
+	public void decreaseVolume() {
+		// No ducking.
+	}
+
+	//--------------------------------------------------------------------------------------------------
+
+	@Override
+	public void increaseVolume() {
+		// No ducking.
+	}
+
+	//--------------------------------------------------------------------------------------------------
+
+	@Override
+	public void pause() {
+		// No pause.
+	}
+
+	//--------------------------------------------------------------------------------------------------
+
+	@Override
+	public void resume() {
+		if (! alarmRingingStarted) {
+			alarmRingingStarted = true;
+			ringAlarm();
+		}
 	}
 
 }
