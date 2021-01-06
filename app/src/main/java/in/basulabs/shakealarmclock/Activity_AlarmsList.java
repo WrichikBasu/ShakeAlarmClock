@@ -52,6 +52,10 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	private RecyclerView alarmsRecyclerView;
 	private AlarmDatabase alarmDatabase;
 	private ViewModel_AlarmsList viewModel;
+
+	/**
+	 * The view stub will show up only when there are no alarms to show.
+	 */
 	private ViewStub viewStub;
 
 	/**
@@ -80,13 +84,13 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		alarmDatabase = AlarmDatabase.getInstance(this);
 		viewModel = new ViewModelProvider(this).get(ViewModel_AlarmsList.class);
-
 		SharedPreferences sharedPreferences = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
 
+		// Initialise the view model:
 		viewModel.init(alarmDatabase);
 
+		// Find and set the app theme:
 		int defaultTheme = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? ConstantsAndStatics.THEME_SYSTEM : ConstantsAndStatics.THEME_AUTO_TIME;
-
 		if (savedInstanceState == null) {
 			AppCompatDelegate
 					.setDefaultNightMode(ConstantsAndStatics.getTheme(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme)));
@@ -104,14 +108,22 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		viewStub = findViewById(R.id.viewStub);
 
-		initAdapter();
+		initialiseRecyclerView();
 
 		manageViewStub(viewModel.getAlarmsCount(alarmDatabase));
 
+		// Observe the number of alarms in the database, and display the view stub based on that count.
 		viewModel.getLiveAlarmsCount().observe(this, this::manageViewStub);
 
-		boolean showAppUpdate = true;
+		///////////////////////////////////////////////////////////////////////////////////////////////////
+		// This variable determines whether the update dialog will be displayed or not.
+		// Do not display the update dialog if the either of the snooze or update services is running.
+		// Also, do not display the dialog if the activity is created by an Activity_IntentManager.
+		//////////////////////////////////////////////////////////////////////////////////////////////////
+		boolean showAppUpdate = Service_RingAlarm.isThisServiceRunning || Service_SnoozeAlarm.isThisServiceRunning;
 
+		// Check if this activity has been started by Activity_IntentManager.
+		// If yes, start Activity_AlarmDetails with necessary data.
 		if (getIntent().getAction() != null) {
 
 			if (getIntent().getAction().equals(ConstantsAndStatics.ACTION_NEW_ALARM_FROM_INTENT)) {
@@ -193,9 +205,9 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Initialises {@link #alarmAdapter}, and sets the adapter in {@link #alarmsRecyclerView}.
+	 * Initialises the {@code alarmsRecyclerView}.
 	 */
-	private void initAdapter() {
+	private void initialiseRecyclerView() {
 		alarmAdapter = new AlarmAdapter(viewModel.getAlarmDataArrayList(), this, this);
 		alarmsRecyclerView.setAdapter(alarmAdapter);
 	}
@@ -203,11 +215,14 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Adds an alarm to the database, updates {@link #alarmAdapter}, and activates it via {@link AlarmManager}.
+	 * Activates an alarm.
+	 * <p>
+	 * Adds the alarm to the database, depending on the {@code mode}, updates the {@code alarmAdapter}, and finally activates the alarm via {@link
+	 * AlarmManager}.
 	 *
 	 * @param mode The mode. Can be either {@link #MODE_ADD_NEW_ALARM} or {@link #MODE_ACTIVATE_EXISTING_ALARM}.
 	 * @param alarmEntity The {@link AlarmEntity} object representing the alarm.
-	 * @param repeatDays The days in which the alarm is to repeat. Can be {@code null} is repeat is OFF.
+	 * @param repeatDays The days on which the alarm is to repeat. Can be {@code null} is repeat is OFF.
 	 */
 	private void addOrActivateAlarm(int mode, AlarmEntity alarmEntity, @Nullable ArrayList<Integer> repeatDays) {
 
@@ -241,6 +256,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 			alarmsRecyclerView.scrollToPosition(result[1]);
 
 		} else {
+
 			viewModel.toggleAlarmState(alarmDatabase, alarmEntity.alarmHour, alarmEntity.alarmMinutes, 1);
 			alarmAdapter = new AlarmAdapter(viewModel.getAlarmDataArrayList(), this, this);
 			alarmsRecyclerView.swapAdapter(alarmAdapter, false);
@@ -264,7 +280,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent), pendingIntent);
 
 		Toast.makeText(this, getString(R.string.toast_alarmSwitchedOn,
-				getDuration(Duration.between(ZonedDateTime.now(ZoneId.systemDefault()), zonedDateTime))), Toast.LENGTH_LONG).show();
+				getDuration(Duration.between(ZonedDateTime.now(ZoneId.systemDefault()).withSecond(0), zonedDateTime))), Toast.LENGTH_LONG).show();
 
 		ConstantsAndStatics.schedulePeriodicWork(this);
 	}
@@ -272,7 +288,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	//------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Delete or deactivate an alarm.
+	 * Deletes or deactivates an alarm.
 	 *
 	 * @param mode Can have only two values: {@link #MODE_DEACTIVATE_ONLY} or {@link #MODE_DELETE_ALARM}.
 	 * @param hour The alarm hour.
@@ -493,7 +509,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	 *
 	 * @return The duration in a human-readable form.
 	 */
-	String getDuration(Duration duration) {
+	@NonNull
+	private String getDuration(@NonNull Duration duration) {
 
 		NumberFormat numFormat = NumberFormat.getInstance();
 		numFormat.setGroupingUsed(false);
