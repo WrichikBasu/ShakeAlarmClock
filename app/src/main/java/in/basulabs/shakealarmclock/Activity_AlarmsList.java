@@ -441,8 +441,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	//--------------------------------------------------------------------------------------------------
 
 	@Override
-	public void onOnOffButtonClick(int rowNumber, int hour, int mins, int currentAlarmState) {
-		toggleAlarmState(hour, mins, currentAlarmState);
+	public void onOnOffButtonClick(int rowNumber, int hour, int mins, int newAlarmState) {
+		toggleAlarmState(hour, mins, newAlarmState);
 	}
 
 	//--------------------------------------------------------------------------------------------------
