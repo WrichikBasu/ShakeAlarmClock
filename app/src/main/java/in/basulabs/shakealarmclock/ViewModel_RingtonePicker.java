@@ -2,6 +2,8 @@ package in.basulabs.shakealarmclock;
 
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -9,46 +11,49 @@ import java.util.ArrayList;
 
 public class ViewModel_RingtonePicker extends ViewModel {
 
-	private MutableLiveData<Uri> defaultUri = new MutableLiveData<>();
-	private MutableLiveData<Uri> existingUri = new MutableLiveData<>();
-	private MutableLiveData<Uri> pickedUri = new MutableLiveData<>();
+	private final MutableLiveData<Uri> defaultUri = new MutableLiveData<>();
+	private final MutableLiveData<Uri> existingUri = new MutableLiveData<>();
+	private final MutableLiveData<Uri> pickedUri = new MutableLiveData<>();
 
-	private MutableLiveData<Boolean> showDefault = new MutableLiveData<>();
-	private MutableLiveData<Boolean> showSilent = new MutableLiveData<>();
-	private MutableLiveData<Boolean> wasExistingUriGiven = new MutableLiveData<>();
-	private MutableLiveData<Boolean> playTone = new MutableLiveData<>();
+	private final MutableLiveData<Boolean> showDefault = new MutableLiveData<>();
+	private final MutableLiveData<Boolean> showSilent = new MutableLiveData<>();
+	private final MutableLiveData<Boolean> wasExistingUriGiven = new MutableLiveData<>();
+	private final MutableLiveData<Boolean> playTone = new MutableLiveData<>();
 
-	private MutableLiveData<CharSequence> title = new MutableLiveData<>();
+	private final MutableLiveData<CharSequence> title = new MutableLiveData<>();
 
-	private MutableLiveData<ArrayList<Uri>> toneUriList = new MutableLiveData<>(new ArrayList<>());
-	private MutableLiveData<ArrayList<String>> toneNameList = new MutableLiveData<>(new ArrayList<>());
-	private MutableLiveData<ArrayList<Integer>> toneIdList = new MutableLiveData<>(new ArrayList<>());
+	private final MutableLiveData<ArrayList<Uri>> toneUriList = new MutableLiveData<>(new ArrayList<>());
+	private final MutableLiveData<ArrayList<String>> toneNameList = new MutableLiveData<>(new ArrayList<>());
+	private final MutableLiveData<ArrayList<Integer>> toneIdList = new MutableLiveData<>(new ArrayList<>());
 
+	@Nullable
 	public Uri getDefaultUri() {
 		return defaultUri.getValue();
 	}
 
-	public void setDefaultUri(Uri defaultUri) {
+	public void setDefaultUri(@Nullable Uri defaultUri) {
 		this.defaultUri.setValue(defaultUri);
 	}
 
+	@Nullable
 	public Uri getExistingUri() {
 		return existingUri.getValue();
 	}
 
-	public void setExistingUri(Uri existingUri) {
+	public void setExistingUri(@Nullable Uri existingUri) {
 		this.existingUri.setValue(existingUri);
 	}
 
+	@Nullable
 	public Uri getPickedUri() {
 		return pickedUri.getValue();
 	}
 
-	public void setPickedUri(Uri pickedUri) {
+	public void setPickedUri(@Nullable Uri pickedUri) {
 		this.pickedUri.setValue(pickedUri);
 	}
 
-	public Boolean getShowDefault() {
+	public boolean getShowDefault() {
 		return showDefault.getValue();
 	}
 
@@ -56,7 +61,7 @@ public class ViewModel_RingtonePicker extends ViewModel {
 		this.showDefault.setValue(showDefault);
 	}
 
-	public Boolean getShowSilent() {
+	public boolean getShowSilent() {
 		return showSilent.getValue();
 	}
 
@@ -64,7 +69,7 @@ public class ViewModel_RingtonePicker extends ViewModel {
 		this.showSilent.setValue(showSilent);
 	}
 
-	public Boolean getWasExistingUriGiven() {
+	public boolean getWasExistingUriGiven() {
 		return wasExistingUriGiven.getValue();
 	}
 
@@ -72,7 +77,7 @@ public class ViewModel_RingtonePicker extends ViewModel {
 		this.wasExistingUriGiven.setValue(wasExistingUriGiven);
 	}
 
-	public Boolean getPlayTone() {
+	public boolean getPlayTone() {
 		return playTone.getValue();
 	}
 
@@ -80,36 +85,28 @@ public class ViewModel_RingtonePicker extends ViewModel {
 		this.playTone.setValue(playTone);
 	}
 
+	@NonNull
 	public CharSequence getTitle() {
 		return title.getValue();
 	}
 
-	public void setTitle(CharSequence title) {
+	public void setTitle(@NonNull CharSequence title) {
 		this.title.setValue(title);
 	}
 
+	@NonNull
 	public ArrayList<Uri> getToneUriList() {
 		return toneUriList.getValue();
 	}
 
-	public void setToneUriList(ArrayList<Uri> toneUriList) {
-		this.toneUriList.setValue(toneUriList);
-	}
-
+	@NonNull
 	public ArrayList<String> getToneNameList() {
 		return toneNameList.getValue();
 	}
 
-	public void setToneNameList(ArrayList<String> toneNameList) {
-		this.toneNameList.setValue(toneNameList);
-	}
-
+	@NonNull
 	public ArrayList<Integer> getToneIdList() {
 		return toneIdList.getValue();
-	}
-
-	public void setToneIdList(ArrayList<Integer> toneIdList) {
-		this.toneIdList.setValue(toneIdList);
 	}
 
 }
