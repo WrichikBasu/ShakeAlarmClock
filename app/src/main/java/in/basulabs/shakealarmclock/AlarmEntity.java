@@ -101,10 +101,16 @@ public class AlarmEntity {
 	 */
 	public boolean hasUserChosenDate;
 
+	/**
+	 * A personalised message for the alarm.
+	 */
+	public String alarmMessage;
+
 	public AlarmEntity(int alarmHour, int alarmMinutes, boolean isAlarmOn, boolean isSnoozeOn,
 	                   int snoozeTimeInMinutes, int snoozeFrequency, int alarmVolume, boolean isRepeatOn,
-	                   int alarmType, int alarmDay, int alarmMonth, int alarmYear, Uri alarmTone,
+	                   int alarmType, int alarmDay, int alarmMonth, int alarmYear, Uri alarmTone, String alarmMessage,
 	                   boolean hasUserChosenDate) {
+
 		this.alarmHour = alarmHour;
 		this.alarmMinutes = alarmMinutes;
 		this.isAlarmOn = isAlarmOn;
@@ -118,6 +124,7 @@ public class AlarmEntity {
 		this.alarmMonth = alarmMonth;
 		this.alarmYear = alarmYear;
 		this.alarmTone = alarmTone;
+		this.alarmMessage = alarmMessage;
 		this.hasUserChosenDate = hasUserChosenDate;
 	}
 
@@ -142,6 +149,7 @@ public class AlarmEntity {
 		data.putInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS, snoozeTimeInMinutes);
 		data.putInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY, snoozeFrequency);
 		data.putParcelable(ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI, alarmTone);
+		data.putString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, alarmMessage);
 		data.putBoolean(ConstantsAndStatics.BUNDLE_KEY_HAS_USER_CHOSEN_DATE, hasUserChosenDate);
 		return data;
 	}
