@@ -118,6 +118,11 @@ final class ConstantsAndStatics {
 	static final String BUNDLE_KEY_ALARM_YEAR = "in.basulabs.shakealarmclock.ALARM_YEAR";
 
 	/**
+	 * Bundle key for the personalised alarm message.
+	 */
+	static final String BUNDLE_KEY_ALARM_MESSAGE = "in.basulabs.shakealarmclock.ALARM_MESSAGE";
+
+	/**
 	 * Bundle key for Uri of the alarm tone.
 	 */
 	static final String BUNDLE_KEY_ALARM_TONE_URI = "in.basulabs.shakealarmclock.ALARM_TONE_URI";
