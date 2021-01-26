@@ -24,9 +24,11 @@
 
     <!-- Activity_AlarmDetails -->
     <string name="actionBarTitle_newAlarm">New alarm</string>
+    <string name="actionBarTitle_editAlarm">Edit alarm</string>
     <string name="actionBarTitle_snoozeOptions">Snooze options</string>
     <string name="actionBarTitle_repeatOptions">Repeat options</string>
     <string name="actionBarTitle_dateOptions">Alarm date</string>
+    <string name="actionBarTitle_alarmMessage">Alarm message</string>
 
     <!-- Fragment_AlarmDetails_Main -->
     <string name="saveButton">SAVE</string>
@@ -49,6 +51,9 @@
 
     <string name="snoozeOptionsTV_snoozeOn">%d mins, %d times</string>
     <string name="alarmToneLabel">Alarm tone:</string>
+
+    <string name="alarmMessageLabel">Alarm message:</string>
+    <string name="alarmMessage_default">Not set</string>
 
     <!-- Fragment_AlarmDetails_Snooze-->
     <string name="switchOn">On</string>
@@ -93,6 +98,9 @@
     <string name="thursday">Thursday</string>
     <string name="friday">Friday</string>
     <string name="saturday">Saturday</string>
+
+    <!-- Fragment_AlarmDetails_Message -->
+    <string name="message_label">Enter the alarm message in no more than 50 characters:</string>
 
     <!-- Service_RingAlarm -->
     <string name="notifContent_ring">Alarm ringing. Tap to launch alarm screen.</string>
