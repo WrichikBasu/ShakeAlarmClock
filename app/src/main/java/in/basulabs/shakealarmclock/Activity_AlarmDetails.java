@@ -65,6 +65,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 	private static final int FRAGMENT_SNOOZE = 103;
 	private static final int FRAGMENT_REPEAT = 110;
 	private static final int FRAGMENT_PICK_DATE = 203;
+	private static final int FRAGMENT_ALARM_MESSAGE = 401;
 
 	private static int whichFragment = 0;
 
@@ -117,6 +118,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 						data.getInt(BUNDLE_KEY_ALARM_TYPE),
 						data.getInt(BUNDLE_KEY_ALARM_VOLUME),
 						data.getIntegerArrayList(BUNDLE_KEY_REPEAT_DAYS),
+						data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE),
 						Objects.requireNonNull(data.getParcelable(BUNDLE_KEY_ALARM_TONE_URI)),
 						data.getBoolean(BUNDLE_KEY_HAS_USER_CHOSEN_DATE));
 
@@ -148,6 +150,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 							data.getInt(BUNDLE_KEY_ALARM_TYPE),
 							data.getInt(BUNDLE_KEY_ALARM_VOLUME),
 							data.getIntegerArrayList(BUNDLE_KEY_REPEAT_DAYS),
+							data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null),
 							Objects.requireNonNull(data.getParcelable(BUNDLE_KEY_ALARM_TONE_URI)), false);
 
 				}
@@ -206,15 +209,16 @@ public class Activity_AlarmDetails extends AppCompatActivity
 			}
 		}
 
+		viewModel.setAlarmMessage(null);
+
 		viewModel.setHasUserChosenDate(false);
 	}
 
 	//----------------------------------------------------------------------------------------------------
 
-	private void setVariablesInViewModel(int mode, int alarmHour, int alarmMinute, int dayOfMonth, int month,
-	                                     int year, boolean isSnoozeOn, boolean isRepeatOn, int snoozeFreq,
-	                                     int snoozeIntervalInMins, int alarmType, int alarmVolume,
-	                                     @Nullable ArrayList<Integer> repeatDays,
+	private void setVariablesInViewModel(int mode, int alarmHour, int alarmMinute, int dayOfMonth, int month, int year, boolean isSnoozeOn,
+										 boolean isRepeatOn, int snoozeFreq, int snoozeIntervalInMins, int alarmType, int alarmVolume,
+	                                     @Nullable ArrayList<Integer> repeatDays, @Nullable String alarmMessage,
 	                                     @NonNull Uri alarmToneUri, boolean hasUserChosenDate) {
 
 		viewModel.setMode(mode);
@@ -256,6 +260,8 @@ public class Activity_AlarmDetails extends AppCompatActivity
 			}
 		}
 
+		viewModel.setAlarmMessage(alarmMessage);
+
 		viewModel.setHasUserChosenDate(hasUserChosenDate);
 
 		if (mode == MODE_EXISTING_ALARM) {
@@ -274,19 +280,23 @@ public class Activity_AlarmDetails extends AppCompatActivity
 		switch (whichFragment) {
 			case FRAGMENT_MAIN:
 				if (viewModel.getMode() == MODE_NEW_ALARM) {
-					actionBar.setTitle(getResources().getString(R.string.actionBarTitle_newAlarm));
+					actionBar.setTitle(R.string.actionBarTitle_newAlarm);
 				} else if (viewModel.getMode() == MODE_EXISTING_ALARM) {
-					actionBar.setTitle("Edit alarm");
+					actionBar.setTitle(R.string.actionBarTitle_editAlarm);
 				}
 				break;
 			case FRAGMENT_SNOOZE:
-				actionBar.setTitle(getResources().getString(R.string.actionBarTitle_snoozeOptions));
+				actionBar.setTitle(R.string.actionBarTitle_snoozeOptions);
 				break;
 			case FRAGMENT_REPEAT:
-				actionBar.setTitle(getResources().getString(R.string.actionBarTitle_repeatOptions));
+				actionBar.setTitle(R.string.actionBarTitle_repeatOptions);
 				break;
 			case FRAGMENT_PICK_DATE:
-				actionBar.setTitle(getResources().getString(R.string.actionBarTitle_dateOptions));
+				actionBar.setTitle(R.string.actionBarTitle_dateOptions);
+				break;
+			case FRAGMENT_ALARM_MESSAGE:
+				actionBar.setTitle(R.string.actionBarTitle_alarmMessage);
+				break;
 		}
 	}
 
@@ -334,6 +344,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 		data.putInt(BUNDLE_KEY_SNOOZE_FREQUENCY, viewModel.getSnoozeFreq());
 		data.putIntegerArrayList(BUNDLE_KEY_REPEAT_DAYS, viewModel.getRepeatDays());
 		data.putParcelable(BUNDLE_KEY_ALARM_TONE_URI, viewModel.getAlarmToneUri());
+		data.putString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, viewModel.getAlarmMessage());
 
 		if (viewModel.getIsRepeatOn()) {
 			data.putBoolean(BUNDLE_KEY_HAS_USER_CHOSEN_DATE, false);
@@ -383,12 +394,24 @@ public class Activity_AlarmDetails extends AppCompatActivity
 	@Override
 	public void onRequestRepeatFragCreation() {
 		fragmentManager.beginTransaction()
-				.replace(R.id.addAlarmActFragHolder,
-						new Fragment_AlarmDetails_RepeatOptions())
+				.replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_RepeatOptions())
 				.addToBackStack(BACK_STACK_TAG)
 				.commit();
 		fragmentManager.executePendingTransactions();
 		whichFragment = FRAGMENT_REPEAT;
+		setActionBarTitle();
+	}
+
+	//----------------------------------------------------------------------------------------------------
+
+	@Override
+	public void onRequestMessageFragCreation() {
+		fragmentManager.beginTransaction()
+				.replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Message())
+				.addToBackStack(BACK_STACK_TAG)
+				.commit();
+		fragmentManager.executePendingTransactions();
+		whichFragment = FRAGMENT_ALARM_MESSAGE;
 		setActionBarTitle();
 	}
 

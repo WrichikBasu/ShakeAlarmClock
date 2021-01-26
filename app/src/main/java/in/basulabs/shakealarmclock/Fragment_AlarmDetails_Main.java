@@ -48,22 +48,42 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 	private ViewModel_AlarmDetails viewModel;
 
 	private FragmentGUIListener listener;
-	private TextView currentRepeatOptionsTV, currentSnoozeOptionsTV, alarmDateTV, alarmToneTV;
+	private TextView currentRepeatOptionsTV, currentSnoozeOptionsTV, alarmDateTV, alarmToneTV, alarmMessageTV;
 	private ImageView alarmVolumeImageView;
-	private boolean savedInstanceStateIsNull;
+	private boolean isSavedInstanceStateNull;
 
 	//----------------------------------------------------------------------------------------------------
 
 	public interface FragmentGUIListener {
 
+		/**
+		 * The user has clicked the save button.
+		 */
 		void onSaveButtonClick();
 
+		/**
+		 * The user has requested to display the snooze options.
+		 */
 		void onRequestSnoozeFragCreation();
 
+		/**
+		 * The user has requested to show the calendar to choose a date.
+		 */
 		void onRequestDatePickerFragCreation();
 
+		/**
+		 * The user has requested to see the repeat options.
+		 */
 		void onRequestRepeatFragCreation();
 
+		/**
+		 * The user has requested to edit the alarm message.
+		 */
+		void onRequestMessageFragCreation();
+
+		/**
+		 * The user has clicked the cancel button.
+		 */
 		void onCancelButtonClick();
 
 	}
@@ -85,7 +105,7 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		savedInstanceStateIsNull = savedInstanceState == null;
+		isSavedInstanceStateNull = savedInstanceState == null;
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -106,6 +126,7 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 		ConstraintLayout snoozeConsLayout = view.findViewById(R.id.snoozeConstraintLayout);
 		ConstraintLayout alarmDateConstarintLayout = view.findViewById(R.id.alarmDateConstraintLayout);
 		ConstraintLayout alarmToneConstraintLayout = view.findViewById(R.id.alarmToneConstraintLayout);
+		ConstraintLayout alarmMessageConstraintLayout = view.findViewById(R.id.alarmMessageConstraintLayout);
 		currentRepeatOptionsTV = view.findViewById(R.id.currentRepeatOptionsTextView);
 		currentSnoozeOptionsTV = view.findViewById(R.id.currentSnoozeOptionTextView);
 		Spinner alarmTypeSpinner = view.findViewById(R.id.alarmTypeSpinner);
@@ -118,6 +139,7 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 		TextView alarmDateLabel = view.findViewById(R.id.alarmDateLabel);
 		TextView alarmVolumeLabel = view.findViewById(R.id.alarmVolumeLabel);
 		TextView alarmToneLabel = view.findViewById(R.id.alarmToneLabel);
+		alarmMessageTV = view.findViewById(R.id.textView_alarmMessage);
 
 		////////////////////////////////////////////
 		// Initialise the GUI
@@ -136,6 +158,7 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 		displayRepeatOptions();
 		displaySnoozeOptions();
 		displayAlarmTone();
+		displayAlarmMessage();
 
 		ArrayAdapter<CharSequence> alarmTypeAdapter = ArrayAdapter.createFromResource(requireContext(),
 				R.array.alarmTypeSpinnerEntries, android.R.layout.simple_spinner_item);
@@ -190,6 +213,7 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 		snoozeConsLayout.setOnClickListener(this);
 		alarmDateConstarintLayout.setOnClickListener(this);
 		alarmToneConstraintLayout.setOnClickListener(this);
+		alarmMessageConstraintLayout.setOnClickListener(this);
 
 		alarmVolumeSeekbar.setOnSeekBarChangeListener(this);
 
@@ -264,11 +288,24 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 			}
 		});
 
-		if (savedInstanceStateIsNull) {
-			savedInstanceStateIsNull = false;
+		if (isSavedInstanceStateNull) {
+			isSavedInstanceStateNull = false;
 		}
 
 		return view;
+	}
+
+	//--------------------------------------------------------------------------------------------------
+
+	/**
+	 * Display the alarm message. If not set, "None set" will be displayed.
+	 */
+	private void displayAlarmMessage(){
+		if (viewModel.getAlarmMessage() == null){
+			alarmMessageTV.setText(R.string.alarmMessage_default);
+		} else {
+			alarmMessageTV.setText(viewModel.getAlarmMessage());
+		}
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -385,6 +422,7 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 		} else if (view.getId() == R.id.alarmDateConstraintLayout) {
 			listener.onRequestDatePickerFragCreation();
 		} else if (view.getId() == R.id.alarmToneConstraintLayout) {
+
 			Intent intent = new Intent(requireContext(), Activity_RingtonePicker.class)
 					.setAction(RingtoneManager.ACTION_RINGTONE_PICKER)
 					.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
@@ -395,6 +433,9 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 					.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_ALARM_ALERT_URI)
 					.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, viewModel.getAlarmToneUri());
 			startActivityForResult(intent, RINGTONE_REQUEST_CODE);
+
+		} else if (view.getId() == R.id.alarmMessageConstraintLayout){
+			listener.onRequestMessageFragCreation();
 		}
 	}
 

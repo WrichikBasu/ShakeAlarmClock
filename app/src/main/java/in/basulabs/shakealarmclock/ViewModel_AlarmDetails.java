@@ -104,6 +104,8 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	 */
 	private MutableLiveData<Boolean> hasUserChosenDate;
 
+	private MutableLiveData<String> alarmMessage;
+
 	//------------------------------------------------------------------------------------------------------
 
 	/**
@@ -572,4 +574,30 @@ public class ViewModel_AlarmDetails extends ViewModel {
 		return alarmType;
 	}
 
+	//------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Returns the alarm message.
+	 * @return Same as in description.
+	 */
+	@Nullable
+	public String getAlarmMessage() {
+		if (alarmMessage == null){
+			alarmMessage = new MutableLiveData<>(null);
+		}
+		return alarmMessage.getValue();
+	}
+
+	//------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Set the alarm message.
+	 * @param alarmMessage The alarm message to be set. May be {@code null}.
+	 */
+	public void setAlarmMessage(@Nullable String alarmMessage){
+		if (this.alarmMessage == null){
+			this.alarmMessage = new MutableLiveData<>();
+		}
+		this.alarmMessage.setValue(alarmMessage);
+	}
 }

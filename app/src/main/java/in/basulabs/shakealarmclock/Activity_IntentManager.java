@@ -217,6 +217,8 @@ public class Activity_IntentManager extends AppCompatActivity {
 			alarmType = volume > 0 ? ALARM_TYPE_SOUND_AND_VIBRATE : ALARM_TYPE_VIBRATE_ONLY;
 		}
 
+		String alarmMessage = intent.getExtras().getString(AlarmClock.EXTRA_MESSAGE, null);
+
 		////////////////////////////////
 		// Now set the alarm:
 		////////////////////////////////
@@ -232,7 +234,7 @@ public class Activity_IntentManager extends AppCompatActivity {
 					sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL, 5),
 					sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ, 3),
 					volume, isRepeatOn, alarmType, alarmDateTime.getDayOfMonth(), alarmDateTime.getMonthValue(),
-					alarmDateTime.getYear(), alarmToneUri, false);
+					alarmDateTime.getYear(), alarmToneUri, alarmMessage, false);
 
 			AtomicInteger alarmID = new AtomicInteger();
 

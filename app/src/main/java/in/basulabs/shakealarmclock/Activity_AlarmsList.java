@@ -394,6 +394,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MONTH),
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_YEAR),
 							data.getParcelable(ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI),
+							data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE),
 							data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_HAS_USER_CHOSEN_DATE));
 
 					addOrActivateAlarm(MODE_ADD_NEW_ALARM, alarmEntity,
@@ -428,6 +429,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MONTH),
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_YEAR),
 							data.getParcelable(ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI),
+							data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE),
 							data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_HAS_USER_CHOSEN_DATE));
 
 					addOrActivateAlarm(MODE_ADD_NEW_ALARM, alarmEntity,
