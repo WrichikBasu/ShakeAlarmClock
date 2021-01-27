@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
@@ -64,6 +66,7 @@ public class Activity_RingAlarm extends AppCompatActivity implements View.OnClic
 		sharedPreferences = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
 
 		TextView alarmTimeTextView = findViewById(R.id.alarmTimeTextView2);
+		TextView alarmMessageTextView = findViewById(R.id.alarmmessageTextView);
 		Button snoozeButton = findViewById(R.id.snoozeButton);
 		ImageButton cancelButton = findViewById(R.id.cancelButton);
 
@@ -89,6 +92,18 @@ public class Activity_RingAlarm extends AppCompatActivity implements View.OnClic
 				alarmTimeTextView.setText(getResources().getString(R.string.time_12hour,
 						localTime.getHour() + 12, localTime.getMinute(), amPm));
 			}
+		}
+
+		// Display the alarm message. Additionally, if the screen size is small, change the text size to 15sp.
+		if (getIntent().getExtras() != null) {
+			String message = getIntent().getExtras().getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
+			if (message != null) {
+				int screenSize = getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+				if (screenSize == Configuration.SCREENLAYOUT_SIZE_SMALL) {
+					alarmMessageTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+				}
+			}
+			alarmMessageTextView.setText(message != null ? message : getString(R.string.alarmMessage));
 		}
 
 		snoozeButton.setOnClickListener(this);

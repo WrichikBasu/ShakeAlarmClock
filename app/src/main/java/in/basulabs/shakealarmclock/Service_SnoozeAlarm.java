@@ -123,7 +123,7 @@ public class Service_SnoozeAlarm extends Service {
 
 	//----------------------------------------------------------------------------------------------------
 
-	private void startSelfForeground(){
+	private void startSelfForeground() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			startForeground(NOTIFICATION_ID, buildSnoozeNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
 		} else {
@@ -137,15 +137,18 @@ public class Service_SnoozeAlarm extends Service {
 	/**
 	 * Reads the repeat days from alarm database.
 	 * <p>
-	 * I have received some crash reports from Google Play stating that {@code NullPointerException} is being thrown in {@code dismissAlarm()} at the statement
-	 * {@code Collections.sort(repeatDays)}. It seems that even if repeat is ON, the repeat days list is null. That is why we are re-reading the repeat days
+	 * I have received some crash reports from Google Play stating that {@code NullPointerException} is being thrown in {@code dismissAlarm()} at
+	 * the statement
+	 * {@code Collections.sort(repeatDays)}. It seems that even if repeat is ON, the repeat days list is null. That is why we are re-reading the
+	 * repeat days
 	 * from the database as a temporary fix. For details, see https://github.com/WrichikBasu/ShakeAlarmClock/issues/39
 	 * </p>
 	 */
 	private void loadRepeatDays() {
 		if (alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON)) {
 			AlarmDatabase alarmDatabase = AlarmDatabase.getInstance(this);
-			Thread thread = new Thread(() -> repeatDays = new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID))));
+			Thread thread = new Thread(() -> repeatDays = new ArrayList<>(alarmDatabase.alarmDAO()
+			                                                                           .getAlarmRepeatDays(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID))));
 			thread.start();
 		} else {
 			repeatDays = null;
@@ -160,7 +163,8 @@ public class Service_SnoozeAlarm extends Service {
 	private void createNotificationChannel() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
-			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID), "in.basulabs.shakealarmclock Notifications", importance);
+			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID), "in.basulabs.shakealarmclock Notifications",
+					importance);
 			channel.setSound(null, null);
 			notificationManager.createNotificationChannel(channel);
 		}
@@ -170,6 +174,7 @@ public class Service_SnoozeAlarm extends Service {
 
 	/**
 	 * Builds and returns the notification that can be used with {@link Service#startForeground(int, Notification)}.
+	 *
 	 * @return The notification that can be used with {@link Service#startForeground(int, Notification)}.
 	 */
 	private Notification buildSnoozeNotification() {
@@ -179,12 +184,24 @@ public class Service_SnoozeAlarm extends Service {
 		PendingIntent contentPendingIntent = PendingIntent.getBroadcast(this, 5017, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(NOTIFICATION_ID))
-				.setContentTitle(getResources().getString(R.string.app_name))
-				.setContentText(getResources().getString(R.string.notifContent_snooze))
+				.setContentTitle(getString(R.string.app_name))
+				.setContentText(getString(R.string.notifContent_snooze))
 				.setPriority(NotificationCompat.PRIORITY_HIGH)
 				.setCategory(NotificationCompat.CATEGORY_ALARM)
 				.setSmallIcon(R.drawable.ic_notif)
 				.setContentIntent(contentPendingIntent);
+
+		if (alarmDetails != null) {
+
+			String alarmMessage = alarmDetails.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
+
+			if (alarmMessage != null) {
+				builder.setContentTitle(getString(R.string.app_name) + ": " + "Tap to dismiss snoozed alarm.")
+				       .setContentText(alarmMessage.substring(10))
+				       .setStyle(new NotificationCompat.BigTextStyle().bigText(alarmMessage));
+			}
+
+		}
 
 		return builder.build();
 	}
@@ -212,7 +229,8 @@ public class Service_SnoozeAlarm extends Service {
 				.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM)
 				.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
+				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
 				intent, PendingIntent.FLAG_NO_CREATE);
 
 		if (pendingIntent != null) {
@@ -314,7 +332,7 @@ public class Service_SnoozeAlarm extends Service {
 
 		unregisterReceiver(broadcastReceiver);
 		isThisServiceRunning = false;
-		alarmID = - 1;
+		alarmID = -1;
 		notificationManager.cancel(NOTIFICATION_ID);
 	}
 
