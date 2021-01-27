@@ -57,7 +57,6 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * Get the total number of alarms in the database.
 	 *
 	 * @param alarmDatabase The {@link AlarmDatabase} object.
-	 *
 	 * @return The total number of alarms in the database.
 	 */
 	public int getAlarmsCount(AlarmDatabase alarmDatabase) {
@@ -83,8 +82,9 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * Updates the date of the alarm to the next feasible date, and then reads data into {@link #alarmDataArrayList}.
 	 *
 	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read from/write to the database.
-	 * @param force Whether the operation is to be forced. If this is {@code true}, the method will not return until the thread has completed execution.
-	 * 		Otherwise the thread will run in the background.
+	 * @param force Whether the operation is to be forced. If this is {@code true}, the method will not return until the thread has completed
+	 * execution.
+	 * Otherwise the thread will run in the background.
 	 */
 	private void init(AlarmDatabase alarmDatabase, boolean force) {
 
@@ -107,19 +107,20 @@ public class ViewModel_AlarmsList extends ViewModel {
 						LocalDateTime alarmDateTime;
 
 						// Update the date iff the alarm is OFF and the repeat is OFF.
-						if (! entity.isRepeatOn && ! entity.isAlarmOn) {
+						if (!entity.isRepeatOn && !entity.isAlarmOn) {
 
-							alarmDateTime = LocalDateTime.of(entity.alarmYear, entity.alarmMonth, entity.alarmDay, entity.alarmHour, entity.alarmMinutes);
+							alarmDateTime = LocalDateTime.of(entity.alarmYear, entity.alarmMonth, entity.alarmDay, entity.alarmHour,
+									entity.alarmMinutes);
 
 							if (alarmDateTime.isBefore(LocalDateTime.now())) {
 								while (alarmDateTime.isBefore(LocalDateTime.now())) {
 									alarmDateTime = alarmDateTime.plusDays(1);
 								}
 								alarmDatabase.alarmDAO()
-										.updateAlarmDate(entity.alarmHour, entity.alarmMinutes,
-												alarmDateTime.getDayOfMonth(),
-												alarmDateTime.getMonthValue(),
-												alarmDateTime.getYear());
+								             .updateAlarmDate(entity.alarmHour, entity.alarmMinutes,
+										             alarmDateTime.getDayOfMonth(),
+										             alarmDateTime.getMonthValue(),
+										             alarmDateTime.getYear());
 								alarmDatabase.alarmDAO().toggleHasUserChosenDate(entity.alarmID, 0);
 							}
 						}
@@ -136,7 +137,8 @@ public class ViewModel_AlarmsList extends ViewModel {
 						LocalDateTime alarmDateTime = LocalDateTime.of(entity.alarmYear, entity.alarmMonth,
 								entity.alarmDay, entity.alarmHour, entity.alarmMinutes);
 
-						ArrayList<Integer> repeatDays = entity.isRepeatOn ? new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(entity.alarmID)) : null;
+						ArrayList<Integer> repeatDays = entity.isRepeatOn ? new ArrayList<>(alarmDatabase.alarmDAO()
+						                                                                                 .getAlarmRepeatDays(entity.alarmID)) : null;
 
 						Objects.requireNonNull(alarmDataArrayList.getValue()).add(getAlarmDataObject(entity, alarmDateTime, repeatDays));
 
@@ -203,9 +205,9 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * @param alarmDatabase The {@link AlarmDatabase} object.
 	 * @param alarmEntity The {@link AlarmEntity} object that contanins all the alarm details.
 	 * @param repeatDays The days in which the alarm is to be repeated, if repeat is ON. Otherwise, this value can be null.
-	 *
-	 * @return An array consiting of TWO elements: the alarm ID at index 0 and the position at which the alarm was inserted at index 1. The latter can be used
-	 * 		to scroll the {@link androidx.recyclerview.widget.RecyclerView} using {@link androidx.recyclerview.widget.RecyclerView#scrollToPosition(int)}.
+	 * @return An array consiting of TWO elements: the alarm ID at index 0 and the position at which the alarm was inserted at index 1. The latter
+	 * can be used
+	 * to scroll the {@link androidx.recyclerview.widget.RecyclerView} using {@link androidx.recyclerview.widget.RecyclerView#scrollToPosition(int)}.
 	 */
 	public int[] addAlarm(@NonNull AlarmDatabase alarmDatabase, @NonNull AlarmEntity alarmEntity, @Nullable ArrayList<Integer> repeatDays) {
 
@@ -246,7 +248,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 			// Check if the array list already has an alarm with same time, and remove it:
 			int index = isAlarmInTheList(alarmEntity.alarmHour, alarmEntity.alarmMinutes);
-			if (index != - 1) {
+			if (index != -1) {
 				alarmDataArrayList.getValue().remove(index);
 			}
 
@@ -294,12 +296,12 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 *
 	 * @param entity The {@link AlarmEntity} object representing the alarm.
 	 * @param alarmDateTime The alarm date and time.
-	 *
 	 * @return An {@link AlarmData} object that can be added to {@code alarmDataArrayList}.
 	 */
-	private AlarmData getAlarmDataObject(@NonNull AlarmEntity entity, @NonNull LocalDateTime alarmDateTime, @Nullable ArrayList<Integer> repeatDays) {
+	private AlarmData getAlarmDataObject(@NonNull AlarmEntity entity, @NonNull LocalDateTime alarmDateTime,
+	                                     @Nullable ArrayList<Integer> repeatDays) {
 
-		if (! entity.isRepeatOn) {
+		if (!entity.isRepeatOn) {
 			return new AlarmData(entity.isAlarmOn, alarmDateTime, entity.alarmType, entity.alarmMessage);
 		} else {
 			assert repeatDays != null;
@@ -382,7 +384,6 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minute.
-	 *
 	 * @return The unique alarm ID if the alarm is present in the database, otherwise 0 (zero).
 	 */
 	public int getAlarmId(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
@@ -413,13 +414,13 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minute.
-	 *
 	 * @return An {@link ArrayList} containing the days in which the alarm is set to repeat. Will return an empty {@link ArrayList} if repeat is OFF.
 	 */
 	public ArrayList<Integer> getRepeatDays(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
 		AtomicReference<ArrayList<Integer>> repeatDays = new AtomicReference<>(new ArrayList<>());
 
-		Thread thread = new Thread(() -> repeatDays.set(new ArrayList<>(alarmDatabase.alarmDAO().getAlarmRepeatDays(getAlarmId(alarmDatabase, hour, mins)))));
+		Thread thread = new Thread(() -> repeatDays.set(new ArrayList<>(alarmDatabase.alarmDAO()
+		                                                                             .getAlarmRepeatDays(getAlarmId(alarmDatabase, hour, mins)))));
 		thread.start();
 
 		try {
@@ -438,7 +439,6 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minute.
-	 *
 	 * @return The {@link AlarmEntity} object for the alarm specified by {@code hour} and {@code mins}.
 	 */
 	public AlarmEntity getAlarmEntity(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
@@ -463,7 +463,6 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 *
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minutes.
-	 *
 	 * @return {@code -1} if the alarm is not present in the list, otherwise the index where the alarm is present.
 	 */
 	private int isAlarmInTheList(int hour, int mins) {
@@ -476,7 +475,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 			}
 		}
 
-		return - 1;
+		return -1;
 	}
 
 

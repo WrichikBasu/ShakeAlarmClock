@@ -116,7 +116,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 				R.array.shakeAndPowerOptions, android.R.layout.simple_spinner_item);
 		arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		shakeOpSpinner.setAdapter(arrayAdapter);
-		shakeOpSpinner.setSelection(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION, ConstantsAndStatics.SNOOZE));
+		shakeOpSpinner.setSelection(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,ConstantsAndStatics.SNOOZE));
 		shakeOpSpinner.setOnItemSelectedListener(this);
 
 		/////////////////////////////////////////////////////////
@@ -127,7 +127,8 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 				R.array.shakeAndPowerOptions, android.R.layout.simple_spinner_item);
 		arrayAdapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		powerBtnOpSpinner.setAdapter(arrayAdapter2);
-		powerBtnOpSpinner.setSelection(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION, ConstantsAndStatics.DISMISS));
+		powerBtnOpSpinner.setSelection(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION,
+				ConstantsAndStatics.DISMISS));
 		powerBtnOpSpinner.setOnItemSelectedListener(this);
 
 		////////////////////////////////////////////////////
@@ -338,7 +339,6 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	 * Finds whether a file exists or not.
 	 *
 	 * @param uri The Uri of the file.
-	 *
 	 * @return {@code true} if the file exists, otherwise {@code false}.
 	 */
 	private boolean doesFileExist(Uri uri) {
@@ -368,7 +368,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 					if (cursor != null && cursor.moveToFirst()) {
 
 						int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-						if (index != - 1) {
+						if (index != -1) {
 							fileName = cursor.getString(index);
 						} else {
 							fileName = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
@@ -413,8 +413,8 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	 */
 	private void setDefaultTone(Uri uri) {
 		prefEditor.remove(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI)
-				.putString(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, uri.toString())
-				.commit();
+		          .putString(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, uri.toString())
+		          .commit();
 	}
 
 	//-----------------------------------------------------------------------------------------------------
@@ -510,7 +510,8 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	 * Applies the appropriate theme. Gets the theme using {@link ConstantsAndStatics#getTheme(int)}.
 	 */
 	private void applyTheme() {
-		AppCompatDelegate.setDefaultNightMode(ConstantsAndStatics.getTheme(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme)));
+		AppCompatDelegate.setDefaultNightMode(ConstantsAndStatics.getTheme(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME,
+				defaultTheme)));
 	}
 
 	//-----------------------------------------------------------------------------------------------------
@@ -574,13 +575,13 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 		} else if (view.getId() == R.id.settings_toneConstraintLayout) {
 			Intent intent = new Intent(this, Activity_RingtonePicker.class);
 			intent.setAction(RingtoneManager.ACTION_RINGTONE_PICKER)
-					.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
-					.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select alarm tone:")
-					.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, getCurrentToneUri())
-					.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_ALARM_ALERT_URI)
-					.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
-					.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
-					.putExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE, false);
+			      .putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
+			      .putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select alarm tone:")
+			      .putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, getCurrentToneUri())
+			      .putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_ALARM_ALERT_URI)
+			      .putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+			      .putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+			      .putExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE, false);
 			startActivityForResult(intent, RINGTONE_REQUEST_CODE);
 		} else if (view.getId() == R.id.shakeSensitivityConstarintLayout) {
 			shakeSensitivityExpandableLayout.toggle();
@@ -635,13 +636,13 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	public void onStopTrackingTouch(SeekBar seekBar) {
 		if (seekBar.getId() == R.id.settings_volumeSeekbar) {
 			prefEditor.remove(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME)
-					.putInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME, seekBar.getProgress())
-					.commit();
+			          .putInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME, seekBar.getProgress())
+			          .commit();
 		} else if (seekBar.getId() == R.id.shakeSensitivitySeekBar) {
 			Log.e(getClass().getSimpleName(), "Sensitivity value = " + getSensitivityValue(seekBar.getProgress()));
 			prefEditor.remove(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY)
-					.putFloat(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY, getSensitivityValue(seekBar.getProgress()))
-					.commit();
+			          .putFloat(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY, getSensitivityValue(seekBar.getProgress()))
+			          .commit();
 		}
 	}
 
@@ -651,7 +652,6 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	 * Calculates the steps of seekbar from sensitivity value.
 	 *
 	 * @param sensitivity The value of sensitivity, i.e. the minimum gForce required to trigger the detector.
-	 *
 	 * @return The corresponding progress value that can be set in the seekbar.
 	 */
 	private int getStepValue(float sensitivity) {
@@ -664,7 +664,6 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	 * Given a progress value from the seekbar, this function calculates the sensitivity of shake detector.
 	 *
 	 * @param step The value returned by {@link SeekBar#getProgress()}}.
-	 *
 	 * @return The sensitivity corresponding to the step.
 	 */
 	private float getSensitivityValue(int step) {
@@ -688,7 +687,8 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 			float gForce = (float) Math.sqrt(gX * gX + gY * gY + gZ * gZ);
 			// gForce will be close to 1 when there is no movement.
 
-			if (gForce >= sharedPreferences.getFloat(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY, ConstantsAndStatics.DEFAULT_SHAKE_SENSITIVITY)) {
+			if (gForce >= sharedPreferences.getFloat(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY,
+					ConstantsAndStatics.DEFAULT_SHAKE_SENSITIVITY)) {
 				long currTime = System.currentTimeMillis();
 				if (Math.abs(currTime - lastShakeTime) > MINIMUM_MILLIS_BETWEEN_SHAKES) {
 					lastShakeTime = currTime;

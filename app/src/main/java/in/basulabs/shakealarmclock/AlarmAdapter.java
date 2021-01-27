@@ -35,9 +35,9 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 		/**
 		 * The user has clicked the ON/OFF button.
 		 *
-		 * @param rowNumber     The row of the RecyclerView where the action took place.
-		 * @param hour          The alarm hour.
-		 * @param mins          The alarm minutes.
+		 * @param rowNumber The row of the RecyclerView where the action took place.
+		 * @param hour The alarm hour.
+		 * @param mins The alarm minutes.
 		 * @param newAlarmState The new alarm state -- 0 means OFF anf 1 means ON.
 		 */
 		void onOnOffButtonClick(int rowNumber, int hour, int mins, int newAlarmState);
@@ -46,8 +46,8 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 		 * The user has clicked the delete button.
 		 *
 		 * @param rowNumber The row of the RecyclerView where the action took place.
-		 * @param hour      The alarm hour.
-		 * @param mins      The alarm minutes.
+		 * @param hour The alarm hour.
+		 * @param mins The alarm minutes.
 		 */
 		void onDeleteButtonClicked(int rowNumber, int hour, int mins);
 
@@ -55,8 +55,8 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 		 * The user has requested to see the details of an alarm.
 		 *
 		 * @param rowNumber The row of the RecyclerView where the action took place.
-		 * @param hour      The alarm hour.
-		 * @param mins      The alarm minutes.
+		 * @param hour The alarm hour.
+		 * @param mins The alarm minutes.
 		 */
 		void onItemClicked(int rowNumber, int hour, int mins);
 	}
@@ -87,8 +87,8 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 	 * A constructor.
 	 *
 	 * @param alarmDataArrayList The {@link ArrayList} containing {@link AlarmData} objects.
-	 * @param listener           An instance of  {@link AlarmAdapter.AdapterInterface} that will listen to click events.
-	 * @param context            The context.
+	 * @param listener An instance of  {@link AlarmAdapter.AdapterInterface} that will listen to click events.
+	 * @param context The context.
 	 */
 	public AlarmAdapter(@NonNull ArrayList<AlarmData> alarmDataArrayList, @NonNull AlarmAdapter.AdapterInterface listener,
 	                    @NonNull Context context) {

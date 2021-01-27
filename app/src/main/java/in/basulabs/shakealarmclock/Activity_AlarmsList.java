@@ -93,7 +93,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		int defaultTheme = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? ConstantsAndStatics.THEME_SYSTEM : ConstantsAndStatics.THEME_AUTO_TIME;
 		if (savedInstanceState == null) {
 			AppCompatDelegate
-					.setDefaultNightMode(ConstantsAndStatics.getTheme(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME, defaultTheme)));
+					.setDefaultNightMode(ConstantsAndStatics.getTheme(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME,
+							defaultTheme)));
 		}
 
 		Button addAlarmButton = findViewById(R.id.addAlarmButton);
@@ -408,7 +409,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 				if (intent != null) {
 
 					Bundle data = Objects.requireNonNull(intent.getExtras())
-							.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
+					                     .getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
 					assert data != null;
 
 					deleteOrDeactivateAlarm(MODE_DELETE_ALARM,
@@ -559,7 +560,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && showBatteryOptimDialog) {
 			PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-			if (! powerManager.isIgnoringBatteryOptimizations("in.basulabs.shakealarmclock")) {
+			if (!powerManager.isIgnoringBatteryOptimizations("in.basulabs.shakealarmclock")) {
 				DialogFragment dialogFragment = new AlertDialog_BatteryOptimizations();
 				dialogFragment.setCancelable(false);
 				dialogFragment.show(getSupportFragmentManager(), "");
@@ -591,8 +592,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 					try {
 						context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=in.basulabs.shakealarmclock")));
 					} catch (android.content.ActivityNotFoundException exception) {
-						context.startActivity(
-								new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock")));
+						context.startActivity(new Intent(Intent.ACTION_VIEW,
+								Uri.parse("https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock")));
 					}
 				})
 				.start();
