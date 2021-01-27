@@ -51,8 +51,8 @@ import static in.basulabs.shakealarmclock.ConstantsAndStatics.SHARED_PREF_KEY_DE
 import static in.basulabs.shakealarmclock.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL;
 import static in.basulabs.shakealarmclock.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_IS_ON;
 
-public class Activity_AlarmDetails extends AppCompatActivity
-		implements Fragment_AlarmDetails_Main.FragmentGUIListener, AlertDialog_DiscardChanges.DialogListener {
+public class Activity_AlarmDetails extends AppCompatActivity implements Fragment_AlarmDetails_Main.FragmentGUIListener,
+		AlertDialog_DiscardChanges.DialogListener {
 
 	private FragmentManager fragmentManager;
 	private ActionBar actionBar;
@@ -95,9 +95,9 @@ public class Activity_AlarmDetails extends AppCompatActivity
 				setVariablesInViewModel();
 
 				fragmentManager.beginTransaction()
-						.replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Main())
-						.addToBackStack(BACK_STACK_TAG)
-						.commit();
+				               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Main())
+				               .addToBackStack(BACK_STACK_TAG)
+				               .commit();
 
 			} else if (getIntent().getAction().equals(ACTION_EXISTING_ALARM)) {
 
@@ -123,9 +123,9 @@ public class Activity_AlarmDetails extends AppCompatActivity
 						data.getBoolean(BUNDLE_KEY_HAS_USER_CHOSEN_DATE));
 
 				fragmentManager.beginTransaction()
-						.replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Main())
-						.addToBackStack(BACK_STACK_TAG)
-						.commit();
+				               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Main())
+				               .addToBackStack(BACK_STACK_TAG)
+				               .commit();
 
 			} else if (getIntent().getAction().equals(ACTION_NEW_ALARM_FROM_INTENT)) {
 
@@ -156,9 +156,9 @@ public class Activity_AlarmDetails extends AppCompatActivity
 				}
 
 				fragmentManager.beginTransaction()
-						.replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Main())
-						.addToBackStack(BACK_STACK_TAG)
-						.commit();
+				               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Main())
+				               .addToBackStack(BACK_STACK_TAG)
+				               .commit();
 			}
 
 			fragmentManager.executePendingTransactions();
@@ -202,7 +202,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 		if (viewModel.getIsChosenDateToday()) {
 			viewModel.setMinDate(viewModel.getAlarmDateTime().toLocalDate());
 		} else {
-			if (! viewModel.getAlarmDateTime().toLocalTime().isAfter(LocalTime.now())) {
+			if (!viewModel.getAlarmDateTime().toLocalTime().isAfter(LocalTime.now())) {
 				viewModel.setMinDate(LocalDate.now().plusDays(1));
 			} else {
 				viewModel.setMinDate(LocalDate.now());
@@ -217,7 +217,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 	//----------------------------------------------------------------------------------------------------
 
 	private void setVariablesInViewModel(int mode, int alarmHour, int alarmMinute, int dayOfMonth, int month, int year, boolean isSnoozeOn,
-										 boolean isRepeatOn, int snoozeFreq, int snoozeIntervalInMins, int alarmType, int alarmVolume,
+	                                     boolean isRepeatOn, int snoozeFreq, int snoozeIntervalInMins, int alarmType, int alarmVolume,
 	                                     @Nullable ArrayList<Integer> repeatDays, @Nullable String alarmMessage,
 	                                     @NonNull Uri alarmToneUri, boolean hasUserChosenDate) {
 
@@ -253,7 +253,7 @@ public class Activity_AlarmDetails extends AppCompatActivity
 		if (viewModel.getIsChosenDateToday()) {
 			viewModel.setMinDate(viewModel.getAlarmDateTime().toLocalDate());
 		} else {
-			if (! viewModel.getAlarmDateTime().toLocalTime().isAfter(LocalTime.now())) {
+			if (!viewModel.getAlarmDateTime().toLocalTime().isAfter(LocalTime.now())) {
 				viewModel.setMinDate(LocalDate.now().plusDays(1));
 			} else {
 				viewModel.setMinDate(LocalDate.now());
@@ -369,8 +369,8 @@ public class Activity_AlarmDetails extends AppCompatActivity
 		whichFragment = FRAGMENT_SNOOZE;
 		FragmentTransaction fragmentTransaction =
 				fragmentManager.beginTransaction()
-						.replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_SnoozeOptions())
-						.addToBackStack(BACK_STACK_TAG);
+				               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_SnoozeOptions())
+				               .addToBackStack(BACK_STACK_TAG);
 		fragmentTransaction.commit();
 		fragmentManager.executePendingTransactions();
 		setActionBarTitle();
@@ -381,9 +381,9 @@ public class Activity_AlarmDetails extends AppCompatActivity
 	@Override
 	public void onRequestDatePickerFragCreation() {
 		fragmentManager.beginTransaction()
-				.replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_DatePicker())
-				.addToBackStack(BACK_STACK_TAG)
-				.commit();
+		               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_DatePicker())
+		               .addToBackStack(BACK_STACK_TAG)
+		               .commit();
 		fragmentManager.executePendingTransactions();
 		whichFragment = FRAGMENT_PICK_DATE;
 		setActionBarTitle();
@@ -394,9 +394,9 @@ public class Activity_AlarmDetails extends AppCompatActivity
 	@Override
 	public void onRequestRepeatFragCreation() {
 		fragmentManager.beginTransaction()
-				.replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_RepeatOptions())
-				.addToBackStack(BACK_STACK_TAG)
-				.commit();
+		               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_RepeatOptions())
+		               .addToBackStack(BACK_STACK_TAG)
+		               .commit();
 		fragmentManager.executePendingTransactions();
 		whichFragment = FRAGMENT_REPEAT;
 		setActionBarTitle();
@@ -407,9 +407,9 @@ public class Activity_AlarmDetails extends AppCompatActivity
 	@Override
 	public void onRequestMessageFragCreation() {
 		fragmentManager.beginTransaction()
-				.replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Message())
-				.addToBackStack(BACK_STACK_TAG)
-				.commit();
+		               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Message())
+		               .addToBackStack(BACK_STACK_TAG)
+		               .commit();
 		fragmentManager.executePendingTransactions();
 		whichFragment = FRAGMENT_ALARM_MESSAGE;
 		setActionBarTitle();

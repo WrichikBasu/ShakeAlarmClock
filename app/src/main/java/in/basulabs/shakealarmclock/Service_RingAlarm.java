@@ -77,7 +77,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	/**
 	 * The unique ID of the currently ringing alarm.
 	 */
-	public static int alarmID = - 1;
+	public static int alarmID = -1;
 
 	/**
 	 * Indicates whether this service is running or not.
@@ -225,7 +225,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 		audioManager.setStreamVolume(AudioManager.STREAM_ALARM, initialAlarmStreamVolume, 0);
 		unregisterReceiver(broadcastReceiver);
 		isThisServiceRunning = false;
-		alarmID = - 1;
+		alarmID = -1;
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -233,9 +233,9 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	/**
 	 * Reads the repeat days from alarm database.
 	 * <p>
-	 * I have received some crash reports from Google Play stating that {@code NullPointerException} is being thrown in {@code dismissAlarm()} at the statement
-	 * {@code Collections.sort(repeatDays)}. It seems that even if repeat is ON, the repeat days list is null. That is why we are re-reading the repeat days
-	 * from the database as a temporary fix.
+	 * I have received some crash reports from Google Play stating that {@code NullPointerException} is being thrown in {@code dismissAlarm()} at
+	 * the statement {@code Collections.sort(repeatDays)}. It seems that even if repeat is ON, the repeat days list is null. That is why we are
+	 * re-reading the repeat days from the database as a temporary fix.
 	 * </p>
 	 */
 	private void loadRepeatDays() {
@@ -270,7 +270,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	private void createNotificationChannel() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
-			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID), "in.basulabs.shakealarmclock Notifications", importance);
+			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID), "in.basulabs.shakealarmclock Notifications",
+					importance);
 			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
 			assert notificationManager != null;
@@ -281,30 +282,46 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Creates a notification that can be shown when the alarm is ringing. Has a full screen intent to {@link Activity_RingAlarm}. The content intent points to
-	 * {@link Activity_AlarmsList}.
+	 * Creates a notification that can be shown when the alarm is ringing.
+	 * <p>
+	 * Has a full screen intent to {@link Activity_RingAlarm}. The content intent points to {@link Activity_AlarmsList}.
+	 * </p>
 	 *
-	 * @return A {@link Notification} that can be used with {@link #startForeground(int, Notification)} or displayed with {@link NotificationManager#notify(int,
-	 *        Notification)}.
+	 * @return A {@link Notification} instance that can be displayed to the user.
 	 */
 	private Notification buildRingNotification() {
 		createNotificationChannel();
 
-		Intent fullScreenIntent = new Intent(this, Activity_RingAlarm.class);
-		fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		fullScreenIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		fullScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-		PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 3054, fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
 				Integer.toString(NOTIFICATION_ID))
 				.setContentTitle(getResources().getString(R.string.app_name))
-				.setContentText(getResources().getString(R.string.notifContent_ring))
+				.setContentText("Initialising alarm...")
 				.setPriority(NotificationCompat.PRIORITY_MAX)
 				.setCategory(NotificationCompat.CATEGORY_ALARM)
-				.setSmallIcon(R.drawable.ic_notif)
-				.setContentIntent(fullScreenPendingIntent)
-				.setFullScreenIntent(fullScreenPendingIntent, true);
+				.setSmallIcon(R.drawable.ic_notif);
+
+		// Launch the full-screen intent only when called by ringAlarm() method.
+		if (alarmDetails != null) {
+			Intent fullScreenIntent = new Intent(this, Activity_RingAlarm.class)
+					.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+					.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+					.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY).putExtras(alarmDetails);
+
+			PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 3054, fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+			String alarmMessage = alarmDetails.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
+
+			builder.setContentIntent(fullScreenPendingIntent)
+			       .setFullScreenIntent(fullScreenPendingIntent, true);
+
+			if (alarmMessage != null) {
+				builder.setContentTitle(getString(R.string.app_name) + ": " + "Alarm ringing!")
+				       .setContentText(alarmMessage.substring(10))
+				       .setStyle(new NotificationCompat.BigTextStyle().bigText(alarmMessage));
+			} else {
+				builder.setContentText(getString(R.string.notifContent_ring));
+			}
+		}
 
 		return builder.build();
 	}
@@ -319,7 +336,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 		notificationManager.notify(NOTIFICATION_ID, buildRingNotification());
 		initialiseShakeSensor();
 
-		if (! (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) == ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY)) {
+		if (!(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) == ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY)) {
 
 			mediaPlayer = new MediaPlayer();
 			AudioAttributes attributes = new AudioAttributes.Builder()
@@ -411,7 +428,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 		stopRinging();
 		cancelPendingIntent();
 
-		Thread thread_toggleAlarm = new Thread(() -> alarmDatabase.alarmDAO().toggleAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), 0));
+		Thread thread_toggleAlarm =
+				new Thread(() -> alarmDatabase.alarmDAO().toggleAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), 0));
 
 		//////////////////////////////////////////////////////
 		// If repeat is on, set another alarm. Otherwise
@@ -517,7 +535,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	//---------------------------------------------------------------------------------------------------
 
 	/**
-	 * While testing, we found that sometimes, the alarm was being reset at a later date unintentionally. This function cancels such an unintentional alarm.
+	 * While testing, we found that sometimes, the alarm was being reset at a later date unintentionally. This function cancels such an
+	 * unintentional alarm.
 	 */
 	private void cancelPendingIntent() {
 
@@ -558,7 +577,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 			float gForce = (float) Math.sqrt(gX * gX + gY * gY + gZ * gZ);
 			// gForce will be close to 1 when there is no movement.
 
-			if (gForce >= sharedPreferences.getFloat(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY, ConstantsAndStatics.DEFAULT_SHAKE_SENSITIVITY)) {
+			if (gForce >= sharedPreferences.getFloat(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY,
+					ConstantsAndStatics.DEFAULT_SHAKE_SENSITIVITY)) {
 				long currTime = System.currentTimeMillis();
 				if (Math.abs(currTime - lastShakeTime) > MINIMUM_MILLIS_BETWEEN_SHAKES) {
 					lastShakeTime = currTime;
@@ -624,7 +644,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 
 	@Override
 	public void resume() {
-		if (! alarmRingingStarted) {
+		if (!alarmRingingStarted) {
 			alarmRingingStarted = true;
 			ringAlarm();
 		}
