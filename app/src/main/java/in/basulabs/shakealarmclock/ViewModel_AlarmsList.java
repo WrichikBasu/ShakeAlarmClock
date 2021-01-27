@@ -300,11 +300,10 @@ public class ViewModel_AlarmsList extends ViewModel {
 	private AlarmData getAlarmDataObject(@NonNull AlarmEntity entity, @NonNull LocalDateTime alarmDateTime, @Nullable ArrayList<Integer> repeatDays) {
 
 		if (! entity.isRepeatOn) {
-			return new AlarmData(entity.isAlarmOn, alarmDateTime, entity.alarmType);
+			return new AlarmData(entity.isAlarmOn, alarmDateTime, entity.alarmType, entity.alarmMessage);
 		} else {
 			assert repeatDays != null;
-			return new AlarmData(entity.isAlarmOn, alarmDateTime.toLocalTime(),
-					entity.alarmType, repeatDays);
+			return new AlarmData(entity.isAlarmOn, alarmDateTime.toLocalTime(), entity.alarmType, entity.alarmMessage, repeatDays);
 		}
 
 	}

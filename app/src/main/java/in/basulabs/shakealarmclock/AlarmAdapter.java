@@ -1,5 +1,6 @@
 package in.basulabs.shakealarmclock;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
@@ -34,9 +35,9 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 		/**
 		 * The user has clicked the ON/OFF button.
 		 *
-		 * @param rowNumber The row of the RecyclerView where the action took place.
-		 * @param hour The alarm hour.
-		 * @param mins The alarm minutes.
+		 * @param rowNumber     The row of the RecyclerView where the action took place.
+		 * @param hour          The alarm hour.
+		 * @param mins          The alarm minutes.
 		 * @param newAlarmState The new alarm state -- 0 means OFF anf 1 means ON.
 		 */
 		void onOnOffButtonClick(int rowNumber, int hour, int mins, int newAlarmState);
@@ -45,8 +46,8 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 		 * The user has clicked the delete button.
 		 *
 		 * @param rowNumber The row of the RecyclerView where the action took place.
-		 * @param hour The alarm hour.
-		 * @param mins The alarm minutes.
+		 * @param hour      The alarm hour.
+		 * @param mins      The alarm minutes.
 		 */
 		void onDeleteButtonClicked(int rowNumber, int hour, int mins);
 
@@ -54,8 +55,8 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 		 * The user has requested to see the details of an alarm.
 		 *
 		 * @param rowNumber The row of the RecyclerView where the action took place.
-		 * @param hour The alarm hour.
-		 * @param mins The alarm minutes.
+		 * @param hour      The alarm hour.
+		 * @param mins      The alarm minutes.
 		 */
 		void onItemClicked(int rowNumber, int hour, int mins);
 	}
@@ -65,7 +66,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 	public static class ViewHolder extends RecyclerView.ViewHolder {
 
 		public ImageButton alarmOnOffImgBtn, alarmDeleteBtn;
-		public TextView alarmTimeTextView, alarmDateTextView, alarmTypeTextView;
+		public TextView alarmTimeTextView, alarmDateTextView, alarmTypeTextView, alarmMessageTextView;
 		public CardView alarmCardView;
 
 		public ViewHolder(View view) {
@@ -74,6 +75,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 			alarmTimeTextView = view.findViewById(R.id.alarmTimeTextView);
 			alarmDateTextView = view.findViewById(R.id.alarmDateTextView);
 			alarmTypeTextView = view.findViewById(R.id.alarmTypeTextView);
+			alarmMessageTextView = view.findViewById(R.id.recyclerView_alarmMessageTextView);
 			alarmDeleteBtn = view.findViewById(R.id.alarmDeleteBtn);
 			alarmCardView = view.findViewById(R.id.alarmCardView);
 		}
@@ -85,8 +87,8 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 	 * A constructor.
 	 *
 	 * @param alarmDataArrayList The {@link ArrayList} containing {@link AlarmData} objects.
-	 * @param listener An instance of  {@link AlarmAdapter.AdapterInterface} that will listen to click events.
-	 * @param context The context.
+	 * @param listener           An instance of  {@link AlarmAdapter.AdapterInterface} that will listen to click events.
+	 * @param context            The context.
 	 */
 	public AlarmAdapter(@NonNull ArrayList<AlarmData> alarmDataArrayList, @NonNull AlarmAdapter.AdapterInterface listener,
 	                    @NonNull Context context) {
@@ -112,6 +114,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 
 	//----------------------------------------------------------------------------------------------------
 
+	@SuppressLint("SetTextI18n")
 	@Override
 	public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
 
@@ -173,6 +176,17 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 			holder.alarmTypeTextView.setText(context.getResources().getString(R.string.vibrate));
 		} else {
 			holder.alarmTypeTextView.setText(context.getResources().getString(R.string.sound_and_vibrate));
+		}
+
+		String alarmMessage = alarmData.getAlarmMessage();
+		if (alarmMessage == null) {
+			holder.alarmMessageTextView.setText("");
+		} else {
+			if (alarmMessage.length() > 15) {
+				holder.alarmMessageTextView.setText(alarmData.getAlarmMessage().substring(0, 16) + "...");
+			} else {
+				holder.alarmMessageTextView.setText(alarmData.getAlarmMessage());
+			}
 		}
 
 		holder.alarmOnOffImgBtn.setOnClickListener(view -> {

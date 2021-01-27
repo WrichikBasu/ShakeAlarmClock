@@ -51,10 +51,10 @@
                 android:textSize="25sp"
                 app:layout_constraintBottom_toTopOf="@+id/space"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.13"
+                app:layout_constraintHorizontal_bias="0.23"
                 app:layout_constraintStart_toEndOf="@+id/alarmOnOffImgBtn"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.61"
+                app:layout_constraintTop_toBottomOf="@+id/recyclerView_alarmMessageTextView"
+                app:layout_constraintVertical_bias="0.36"
                 tools:ignore="HardcodedText" />
 
             <ImageButton
@@ -63,8 +63,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
                 android:background="@android:color/transparent"
                 android:padding="5sp"
+                app:layout_constraintBottom_toTopOf="@+id/alarmDateTextView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_alarm_delete"
@@ -74,27 +76,28 @@
                 android:id="@+id/alarmDateTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="24dp"
                 android:layout_marginEnd="16dp"
-                android:textColor="@color/defaultLabelColor"
                 android:text="Mon, Tue, Wed, Thu, Fri, Sat, Sun"
                 android:textAlignment="viewEnd"
+                android:textColor="@color/defaultLabelColor"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toEndOf="@+id/alarmTimeTextView"
-                app:layout_constraintTop_toBottomOf="@+id/alarmDeleteBtn"
+                app:layout_constraintTop_toBottomOf="@+id/recyclerView_alarmMessageTextView"
                 tools:ignore="HardcodedText" />
 
             <TextView
                 android:id="@+id/alarmTypeTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="11dp"
+                android:layout_marginTop="12dp"
                 android:layout_marginEnd="16dp"
-                android:textColor="@color/defaultLabelColor"
                 android:text="Sound &amp; Vibrate"
                 android:textAlignment="viewEnd"
+                android:textColor="@color/defaultLabelColor"
+                app:layout_constraintBottom_toTopOf="@id/space"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/alarmDateTextView"
                 tools:ignore="HardcodedText" />
@@ -102,11 +105,25 @@
             <Space
                 android:id="@+id/space"
                 android:layout_width="0dp"
-                android:layout_height="10dp"
-                android:layout_marginTop="1dp"
+                android:layout_height="12dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/alarmTypeTextView" />
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/recyclerView_alarmMessageTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="24dp"
+                android:gravity="start"
+                android:textColor="@color/defaultLabelColor"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toStartOf="@+id/alarmDeleteBtn"
+                app:layout_constraintStart_toEndOf="@+id/alarmOnOffImgBtn"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
