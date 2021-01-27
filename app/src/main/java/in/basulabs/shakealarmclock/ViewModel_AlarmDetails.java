@@ -55,8 +55,8 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	private MutableLiveData<Boolean> isRepeatOn;
 
 	/**
-	 * This variable indicates whether the date for the alarm is today. It will be {@code true} if the user does not choose a date via the date picker, or
-	 * chooses today as the alarm date.
+	 * This variable indicates whether the date for the alarm is today. It will be {@code true} if the user does not choose a date via the date
+	 * picker, or chooses today as the alarm date.
 	 */
 	private MutableLiveData<Boolean> isChosenDateToday;
 
@@ -72,38 +72,43 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	private MutableLiveData<LocalDate> minDate;
 
 	/**
-	 * An integer ArrayList containing the days on which the alarm is to repeat. The values follow {@link java.time.DayOfWeek} enum, i.e. Monday is 1 and Sunday
-	 * is 7.
+	 * An integer ArrayList containing the days on which the alarm is to repeat.
+	 * <p>
+	 * The values follow {@link java.time.DayOfWeek} enum, i.e. Monday is 1 and Sunday is 7.
+	 * </p>
 	 */
 	private MutableLiveData<ArrayList<Integer>> repeatDays;
 
 	/**
-	 * This variable indicates whether the fragment has been created for a new alarm, or to show the details of an existing alarm. It can have two values only -
-	 * {@link Activity_AlarmDetails#MODE_EXISTING_ALARM} or {@link Activity_AlarmDetails#MODE_NEW_ALARM}.
+	 * This variable indicates whether the fragment has been created for a new alarm, or to show the details of an existing alarm. It can have two
+	 * values only - {@link Activity_AlarmDetails#MODE_EXISTING_ALARM} or {@link Activity_AlarmDetails#MODE_NEW_ALARM}.
 	 */
 	private MutableLiveData<Integer> mode;
 
 	/**
-	 * The old alarm hour. This variable is useful only when {@link #mode} = {@link Activity_AlarmDetails#MODE_EXISTING_ALARM}. This is passed to {@link
-	 * Activity_AlarmsList} along with {@link #oldAlarmMinute} so that the old alarm can be identified and deleted.
+	 * The old alarm hour. This variable is useful only when {@link #mode} = {@link Activity_AlarmDetails#MODE_EXISTING_ALARM}. This is passed to
+	 * {@link Activity_AlarmsList} along with {@link #oldAlarmMinute} so that the old alarm can be identified and deleted.
 	 */
 	private MutableLiveData<Integer> oldAlarmHour;
 
 	/**
-	 * The old alarm hour. This variable is useful only when {@link #mode} = {@link Activity_AlarmDetails#MODE_EXISTING_ALARM}. This is passed to {@link
-	 * Activity_AlarmsList} along with {@link #oldAlarmHour} so that the old alarm can be identified and deleted.
+	 * The old alarm hour. This variable is useful only when {@link #mode} = {@link Activity_AlarmDetails#MODE_EXISTING_ALARM}. This is passed to
+	 * {@link Activity_AlarmsList} along with {@link #oldAlarmHour} so that the old alarm can be identified and deleted.
 	 */
 	private MutableLiveData<Integer> oldAlarmMinute;
 
 	/**
 	 * Indicates whether the user has chosen the date explicitly.
 	 * <p>
-	 * Say the user selects a time that is possible to reach today, but then explicitly choses tomorrow. In that case, the date will not be reverted to today
-	 * even if the time is reachable today.
+	 * Say the user selects a time that is possible to reach today, but then explicitly choses tomorrow. In that case, the date will not be reverted
+	 * to today even if the time is reachable today.
 	 * </p>
 	 */
 	private MutableLiveData<Boolean> hasUserChosenDate;
 
+	/**
+	 * The message that will be displayed when the alarm rings. May be {@code null}.
+	 */
 	private MutableLiveData<String> alarmMessage;
 
 	//------------------------------------------------------------------------------------------------------
@@ -224,7 +229,7 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	 * Get the alarm type.
 	 *
 	 * @return One of {@link ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY}, {@link ConstantsAndStatics#ALARM_TYPE_VIBRATE_ONLY} or {@link
-	 *        ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}. Default is {@code ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY}.
+	 * ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}. Default is {@code ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY}.
 	 */
 	public int getAlarmType() {
 		if (alarmType == null) {
@@ -239,8 +244,8 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	/**
 	 * Set the alarm type.
 	 *
-	 * @param alarmType Should be one of {@link ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY}, {@link ConstantsAndStatics#ALARM_TYPE_VIBRATE_ONLY} or {@link
-	 *        ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}.
+	 * @param alarmType Should be one of {@link ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY}, {@link ConstantsAndStatics#ALARM_TYPE_VIBRATE_ONLY} or
+	 * {@link ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}.
 	 */
 	public void setAlarmType(int alarmType) {
 		if (this.alarmType == null) {
@@ -479,8 +484,8 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	/**
 	 * Get the old alarm hour.
 	 * <p>
-	 * This should be called if and only if {@code mode} = {@link Activity_AlarmDetails#MODE_EXISTING_ALARM}. Otherwise this method will throw a {@code
-	 * NullPointerException}.
+	 * This should be called if and only if {@code mode} = {@link Activity_AlarmDetails#MODE_EXISTING_ALARM}. Otherwise this method will throw a
+	 * {@code NullPointerException}.
 	 * </p>
 	 *
 	 * @return The old alarm hour, if available. Otherwise throws {@code NullPointerException}.
@@ -514,8 +519,8 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	/**
 	 * Get the old alarm minute.
 	 * <p>
-	 * This should be called if and only if {@code mode} = {@link Activity_AlarmDetails#MODE_EXISTING_ALARM}. Otherwise this method will throw a {@code
-	 * NullPointerException}.
+	 * This should be called if and only if {@code mode} = {@link Activity_AlarmDetails#MODE_EXISTING_ALARM}. Otherwise this method will throw a
+	 * {@code NullPointerException}.
 	 * </p>
 	 *
 	 * @return The old alarm minute, if available. Otherwise throws {@code NullPointerException}.
@@ -548,6 +553,7 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	/**
 	 * Get an observable instance of alarm volume.
+	 *
 	 * @return Same as in description.
 	 */
 	public LiveData<Integer> getLiveAlarmVolume() {
@@ -558,6 +564,7 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	/**
 	 * Get an observable instance of whether repeat is ON or OFF.
+	 *
 	 * @return Same as in description.
 	 */
 	public LiveData<Boolean> getLiveIsRepeatOn() {
@@ -568,6 +575,7 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	/**
 	 * Get an observable instance of the alarm type.
+	 *
 	 * @return Same as in description.
 	 */
 	public LiveData<Integer> getLiveAlarmType() {
@@ -578,11 +586,12 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	/**
 	 * Returns the alarm message.
+	 *
 	 * @return Same as in description.
 	 */
 	@Nullable
 	public String getAlarmMessage() {
-		if (alarmMessage == null){
+		if (alarmMessage == null) {
 			alarmMessage = new MutableLiveData<>(null);
 		}
 		return alarmMessage.getValue();
@@ -592,10 +601,11 @@ public class ViewModel_AlarmDetails extends ViewModel {
 
 	/**
 	 * Set the alarm message.
+	 *
 	 * @param alarmMessage The alarm message to be set. May be {@code null}.
 	 */
-	public void setAlarmMessage(@Nullable String alarmMessage){
-		if (this.alarmMessage == null){
+	public void setAlarmMessage(@Nullable String alarmMessage) {
+		if (this.alarmMessage == null) {
 			this.alarmMessage = new MutableLiveData<>();
 		}
 		this.alarmMessage.setValue(alarmMessage);

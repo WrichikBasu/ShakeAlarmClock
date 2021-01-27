@@ -73,7 +73,7 @@ public class Activity_IntentManager extends AppCompatActivity {
 
 			case AlarmClock.ACTION_SET_ALARM:
 
-				if (! intent.hasExtra(AlarmClock.EXTRA_HOUR) || ! intent.hasExtra(AlarmClock.EXTRA_MINUTES)) {
+				if (!intent.hasExtra(AlarmClock.EXTRA_HOUR) || !intent.hasExtra(AlarmClock.EXTRA_MINUTES)) {
 					///////////////////////////////////////////////////////////////////////
 					// These two extras are necessary for an alarm to be set. Without
 					// these, the user will be redirected to Activity_AlarmsList.
@@ -81,8 +81,8 @@ public class Activity_IntentManager extends AppCompatActivity {
 
 					Intent intent1 = new Intent(this, Activity_AlarmsList.class);
 					intent1.setAction(ACTION_NEW_ALARM_FROM_INTENT)
-							.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-							.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+					       .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+					       .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 					startActivity(intent1);
 
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -188,9 +188,10 @@ public class Activity_IntentManager extends AppCompatActivity {
 
 				alarmToneUri = Uri.parse(intent.getExtras().getString(AlarmClock.EXTRA_RINGTONE));
 
-				if (! doesFileExist(alarmToneUri)) {
+				if (!doesFileExist(alarmToneUri)) {
 					// Uri invalid or file doesn't exist; fall back to default tone
-					alarmToneUri = Uri.parse(sharedPreferences.getString(SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, "content://settings/system/alarm_alert"));
+					alarmToneUri = Uri.parse(sharedPreferences.getString(SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, "content://settings/system" +
+							"/alarm_alert"));
 				}
 
 			}
@@ -277,18 +278,18 @@ public class Activity_IntentManager extends AppCompatActivity {
 
 			Intent intent1 = new Intent(this, Activity_AlarmsList.class);
 			intent1.setAction(ACTION_NEW_ALARM_FROM_INTENT)
-					.putExtra(BUNDLE_KEY_ALARM_HOUR, alarmDateTime.getHour())
-					.putExtra(BUNDLE_KEY_ALARM_MINUTE, alarmDateTime.getMinute())
-					.putExtra(BUNDLE_KEY_ALARM_DAY, alarmDateTime.getDayOfMonth())
-					.putExtra(BUNDLE_KEY_ALARM_MONTH, alarmDateTime.getMonthValue())
-					.putExtra(BUNDLE_KEY_ALARM_YEAR, alarmDateTime.getYear())
-					.putExtra(BUNDLE_KEY_ALARM_VOLUME, volume)
-					.putExtra(BUNDLE_KEY_ALARM_TONE_URI, alarmToneUri)
-					.putExtra(BUNDLE_KEY_ALARM_TYPE, alarmType)
-					.putExtra(BUNDLE_KEY_IS_REPEAT_ON, isRepeatOn)
-					.putExtra(BUNDLE_KEY_REPEAT_DAYS, repeatDays)
-					.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-					.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+			       .putExtra(BUNDLE_KEY_ALARM_HOUR, alarmDateTime.getHour())
+			       .putExtra(BUNDLE_KEY_ALARM_MINUTE, alarmDateTime.getMinute())
+			       .putExtra(BUNDLE_KEY_ALARM_DAY, alarmDateTime.getDayOfMonth())
+			       .putExtra(BUNDLE_KEY_ALARM_MONTH, alarmDateTime.getMonthValue())
+			       .putExtra(BUNDLE_KEY_ALARM_YEAR, alarmDateTime.getYear())
+			       .putExtra(BUNDLE_KEY_ALARM_VOLUME, volume)
+			       .putExtra(BUNDLE_KEY_ALARM_TONE_URI, alarmToneUri)
+			       .putExtra(BUNDLE_KEY_ALARM_TYPE, alarmType)
+			       .putExtra(BUNDLE_KEY_IS_REPEAT_ON, isRepeatOn)
+			       .putExtra(BUNDLE_KEY_REPEAT_DAYS, repeatDays)
+			       .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+			       .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			startActivity(intent1);
 
 		}
@@ -301,7 +302,6 @@ public class Activity_IntentManager extends AppCompatActivity {
 	 * Finds whether a file exists or not.
 	 *
 	 * @param uri The Uri of the file.
-	 *
 	 * @return {@code true} if the file exists, otherwise {@code false}.
 	 */
 	private boolean doesFileExist(Uri uri) {
