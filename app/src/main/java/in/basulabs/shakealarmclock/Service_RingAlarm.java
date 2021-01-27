@@ -123,6 +123,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
+		alarmDetails = Objects.requireNonNull(Objects.requireNonNull(intent.getExtras()).getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			startForeground(NOTIFICATION_ID, buildRingNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
 		} else {
@@ -148,9 +150,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 
 		isShakeActive = sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
 				ConstantsAndStatics.SNOOZE) != ConstantsAndStatics.DO_NOTHING;
-
-		alarmDetails = Objects.requireNonNull(intent.getExtras()).getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
-		assert alarmDetails != null;
 
 		alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
 
@@ -233,9 +232,10 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	/**
 	 * Reads the repeat days from alarm database.
 	 * <p>
-	 * I have received some crash reports from Google Play stating that {@code NullPointerException} is being thrown in {@code dismissAlarm()} at
-	 * the statement {@code Collections.sort(repeatDays)}. It seems that even if repeat is ON, the repeat days list is null. That is why we are
-	 * re-reading the repeat days from the database as a temporary fix.
+	 * I have received some crash reports from Google Play stating that {@code NullPointerException} is being thrown in {@code dismissAlarm()} at the
+	 * statement {@code Collections.sort(repeatDays)}. It seems that even if repeat is ON, the repeat days list is null. That is why we are
+	 * re-reading
+	 * the repeat days from the database as a temporary fix.
 	 * </p>
 	 */
 	private void loadRepeatDays() {
@@ -292,36 +292,32 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	private Notification buildRingNotification() {
 		createNotificationChannel();
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
-				Integer.toString(NOTIFICATION_ID))
+		Intent fullScreenIntent = new Intent(this, Activity_RingAlarm.class)
+				.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+				.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+				.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY).putExtras(alarmDetails);
+
+		PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 3054, fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		String alarmMessage = alarmDetails.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
+
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(NOTIFICATION_ID))
 				.setContentTitle(getResources().getString(R.string.app_name))
 				.setContentText("Initialising alarm...")
 				.setPriority(NotificationCompat.PRIORITY_MAX)
 				.setCategory(NotificationCompat.CATEGORY_ALARM)
-				.setSmallIcon(R.drawable.ic_notif);
+				.setSmallIcon(R.drawable.ic_notif)
+				.setContentIntent(fullScreenPendingIntent)
+				.setFullScreenIntent(fullScreenPendingIntent, true);
 
-		// Launch the full-screen intent only when called by ringAlarm() method.
-		if (alarmDetails != null) {
-			Intent fullScreenIntent = new Intent(this, Activity_RingAlarm.class)
-					.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-					.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-					.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY).putExtras(alarmDetails);
-
-			PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 3054, fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-			String alarmMessage = alarmDetails.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
-
-			builder.setContentIntent(fullScreenPendingIntent)
-			       .setFullScreenIntent(fullScreenPendingIntent, true);
-
-			if (alarmMessage != null) {
-				builder.setContentTitle(getString(R.string.app_name) + ": " + "Alarm ringing!")
-				       .setContentText(alarmMessage.substring(10))
-				       .setStyle(new NotificationCompat.BigTextStyle().bigText(alarmMessage));
-			} else {
-				builder.setContentText(getString(R.string.notifContent_ring));
-			}
+		if (alarmMessage != null) {
+			builder.setContentTitle(getString(R.string.app_name))
+			       .setContentText(alarmMessage)
+			       .setStyle(new NotificationCompat.BigTextStyle().bigText(alarmMessage));
+		} else {
+			builder.setContentText(getString(R.string.notifContent_ring));
 		}
+
 
 		return builder.build();
 	}
@@ -535,8 +531,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	//---------------------------------------------------------------------------------------------------
 
 	/**
-	 * While testing, we found that sometimes, the alarm was being reset at a later date unintentionally. This function cancels such an
-	 * unintentional alarm.
+	 * While testing, we found that sometimes, the alarm was being reset at a later date unintentionally. This function cancels such an unintentional
+	 * alarm.
 	 */
 	private void cancelPendingIntent() {
 
