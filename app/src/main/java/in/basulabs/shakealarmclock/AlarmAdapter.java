@@ -179,15 +179,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 		}
 
 		String alarmMessage = alarmData.getAlarmMessage();
-		if (alarmMessage == null) {
-			holder.alarmMessageTextView.setText("");
-		} else {
-			if (alarmMessage.length() > 15) {
-				holder.alarmMessageTextView.setText(alarmData.getAlarmMessage().substring(0, 16) + "...");
-			} else {
-				holder.alarmMessageTextView.setText(alarmData.getAlarmMessage());
-			}
-		}
+		holder.alarmMessageTextView.setText(alarmMessage == null ? "" : alarmMessage);
 
 		holder.alarmOnOffImgBtn.setOnClickListener(view -> {
 			int newAlarmState;
