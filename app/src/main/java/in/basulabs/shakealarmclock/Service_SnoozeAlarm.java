@@ -64,6 +64,8 @@ public class Service_SnoozeAlarm extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
+		alarmDetails = Objects.requireNonNull(Objects.requireNonNull(intent.getExtras()).getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
+
 		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		assert notificationManager != null;
 
@@ -72,9 +74,6 @@ public class Service_SnoozeAlarm extends Service {
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
-		Bundle data = Objects.requireNonNull(intent.getExtras());
-		alarmDetails = data.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
-		assert alarmDetails != null;
 		alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
 
 		numberOfTimesTheAlarmhasBeenSnoozed = intent.getExtras().getInt(Service_RingAlarm.EXTRA_NO_OF_TIMES_SNOOZED);
@@ -137,11 +136,10 @@ public class Service_SnoozeAlarm extends Service {
 	/**
 	 * Reads the repeat days from alarm database.
 	 * <p>
-	 * I have received some crash reports from Google Play stating that {@code NullPointerException} is being thrown in {@code dismissAlarm()} at
-	 * the statement
-	 * {@code Collections.sort(repeatDays)}. It seems that even if repeat is ON, the repeat days list is null. That is why we are re-reading the
-	 * repeat days
-	 * from the database as a temporary fix. For details, see https://github.com/WrichikBasu/ShakeAlarmClock/issues/39
+	 * I have received some crash reports from Google Play stating that {@code NullPointerException} is being thrown in {@code dismissAlarm()} at the
+	 * statement {@code Collections.sort(repeatDays)}. It seems that even if repeat is ON, the repeat days list is null. That is why we are
+	 * re-reading
+	 * the repeat days from the database as a temporary fix. For details, see https://github.com/WrichikBasu/ShakeAlarmClock/issues/39
 	 * </p>
 	 */
 	private void loadRepeatDays() {
@@ -191,17 +189,14 @@ public class Service_SnoozeAlarm extends Service {
 				.setSmallIcon(R.drawable.ic_notif)
 				.setContentIntent(contentPendingIntent);
 
-		if (alarmDetails != null) {
+		String alarmMessage = alarmDetails.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
 
-			String alarmMessage = alarmDetails.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
-
-			if (alarmMessage != null) {
-				builder.setContentTitle(getString(R.string.app_name) + ": " + "Tap to dismiss snoozed alarm.")
-				       .setContentText(alarmMessage.substring(10))
-				       .setStyle(new NotificationCompat.BigTextStyle().bigText(alarmMessage));
-			}
-
+		if (alarmMessage != null) {
+			builder.setContentTitle(getString(R.string.app_name))
+			       .setContentText(alarmMessage)
+			       .setStyle(new NotificationCompat.BigTextStyle().bigText(alarmMessage));
 		}
+
 
 		return builder.build();
 	}
