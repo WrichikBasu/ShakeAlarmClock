@@ -8,8 +8,8 @@ android {
         applicationId "in.basulabs.shakealarmclock"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 24
-        versionName "2.0.2-beta"
+        versionCode 25
+        versionName "2.0.3-beta"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
