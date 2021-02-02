@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.os.PowerManager;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -48,6 +49,8 @@ public class Service_SnoozeAlarm extends Service {
 
 	private ArrayList<Integer> repeatDays;
 
+	private PowerManager.WakeLock wakeLock;
+
 	//--------------------------------------------------------------------------------------------------
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -72,6 +75,9 @@ public class Service_SnoozeAlarm extends Service {
 		startSelfForeground();
 		preMatureDeath = true;
 
+		PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,	"in.basulabs.shakealarmclock::AlarmSnoozeServiceWakelockTag");
+
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
 		alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
@@ -95,7 +101,11 @@ public class Service_SnoozeAlarm extends Service {
 		ZonedDateTime newAlarmDateTime = alarmDateTime.plusMinutes(numberOfTimesTheAlarmhasBeenSnoozed *
 				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS));
 
-		snoozeTimer = new CountDownTimer(Math.abs(Duration.between(ZonedDateTime.now(), newAlarmDateTime).toMillis()), 60000) {
+		long millisInFuture = Math.abs(Duration.between(ZonedDateTime.now(), newAlarmDateTime).toMillis());
+
+		wakeLock.acquire(millisInFuture + 5000);
+
+		snoozeTimer = new CountDownTimer(millisInFuture, 60000) {
 
 			@Override
 			public void onTick(long millisUntilFinished) {
@@ -324,6 +334,8 @@ public class Service_SnoozeAlarm extends Service {
 			snoozeTimer.cancel();
 		} catch (Exception ignored) {
 		}
+
+		wakeLock.release();
 
 		unregisterReceiver(broadcastReceiver);
 		isThisServiceRunning = false;
