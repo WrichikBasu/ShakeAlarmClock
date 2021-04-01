@@ -116,7 +116,8 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 				R.array.shakeAndPowerOptions, android.R.layout.simple_spinner_item);
 		arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		shakeOpSpinner.setAdapter(arrayAdapter);
-		shakeOpSpinner.setSelection(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,ConstantsAndStatics.SNOOZE));
+		shakeOpSpinner.setSelection(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
+				ConstantsAndStatics.SNOOZE));
 		shakeOpSpinner.setOnItemSelectedListener(this);
 
 		/////////////////////////////////////////////////////////
@@ -308,6 +309,8 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 
 	}
 
+	//-----------------------------------------------------------------------------------------------------
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -315,6 +318,8 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 			sensorManager.registerListener(this, acclerometer, SensorManager.SENSOR_DELAY_UI, new Handler());
 		}
 	}
+
+	//-----------------------------------------------------------------------------------------------------
 
 	@Override
 	protected void onPause() {
@@ -342,8 +347,12 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	 * @return {@code true} if the file exists, otherwise {@code false}.
 	 */
 	private boolean doesFileExist(Uri uri) {
-		try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-			return cursor != null;
+		try {
+			try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+				return cursor != null;
+			}
+		} catch (java.lang.SecurityException exception) {
+			return false;
 		}
 	}
 
@@ -420,7 +429,7 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 	//-----------------------------------------------------------------------------------------------------
 
 	/**
-	 * Sets the volume in the {@link #volumeImageView} as per the progress in the volume seekbar.
+	 * Sets the image in the {@link #volumeImageView} as per the progress in the volume seekbar.
 	 *
 	 * @param volume The current volume (or progress in volume SeekBar.
 	 */
@@ -434,6 +443,12 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 
 	//----------------------------------------------------------------------------------------------------
 
+	/**
+	 * Change the image in {@link #shakeImageView}.
+	 *
+	 * @param state The state of the shake ExpandableLayout. Either {@link ExpandableLayout.State#EXPANDED} or {@link
+	 * ExpandableLayout.State#COLLAPSED}.
+	 */
 	private void setShakeImageView(int state) {
 		if (state == ExpandableLayout.State.EXPANDED) {
 			shakeImageView.setImageResource(R.drawable.ic_collapse);
@@ -444,6 +459,12 @@ public class Activity_Settings extends AppCompatActivity implements AdapterView.
 
 	//----------------------------------------------------------------------------------------------------
 
+	/**
+	 * Change the image in {@link #snoozeImageView}.
+	 *
+	 * @param state The state of the snooze ExpandableLayout. Either {@link ExpandableLayout.State#EXPANDED} or {@link
+	 * ExpandableLayout.State#COLLAPSED}.
+	 */
 	private void setSnoozeImageView(int state) {
 		if (state == ExpandableLayout.State.EXPANDED) {
 			snoozeImageView.setImageResource(R.drawable.ic_collapse);
