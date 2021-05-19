@@ -47,23 +47,17 @@ import static android.media.RingtoneManager.TITLE_COLUMN_INDEX;
 import static android.media.RingtoneManager.TYPE_ALL;
 import static android.media.RingtoneManager.URI_COLUMN_INDEX;
 
-public class Activity_RingtonePicker extends AppCompatActivity implements View.OnClickListener,	AlertDialog_PermissionReason.DialogListener {
+public class Activity_RingtonePicker extends AppCompatActivity implements View.OnClickListener, AlertDialog_PermissionReason.DialogListener {
 
 	private AudioAttributes audioAttributes;
-
 	private Bundle savedInstanceState;
-
 	private MediaPlayer mediaPlayer;
-
 	private RadioGroup radioGroup;
-
 	private static final int DEFAULT_RADIO_BTN_ID = View.generateViewId(), SILENT_RADIO_BTN_ID = View.generateViewId();
-
 	private static final int FILE_REQUEST_CODE = 4937, PERMISSIONS_REQUEST_CODE = 3720;
-
 	private SharedPreferences sharedPreferences;
-
 	private ViewModel_RingtonePicker viewModel;
+	private ConstraintLayout chooseToneLayout;
 
 	//----------------------------------------------------------------------------------------------------
 
@@ -72,17 +66,14 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_ringtonepicker);
 
+		sharedPreferences = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
+
 		viewModel = new ViewModelProvider(this).get(ViewModel_RingtonePicker.class);
 
 		this.savedInstanceState = savedInstanceState;
 
-		setSupportActionBar(findViewById(R.id.toolbar4));
-		Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-
 		radioGroup = findViewById(R.id.ringtonePickerRadioGroup);
-		ConstraintLayout chooseToneLayout = findViewById(R.id.chooseCustomToneConstarintLayout);
-
-		sharedPreferences = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
+		chooseToneLayout = findViewById(R.id.chooseCustomToneConstarintLayout);
 
 		mediaPlayer = new MediaPlayer();
 		audioAttributes = new AudioAttributes.Builder()
@@ -90,98 +81,17 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 				.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
 				.build();
 
-		if (savedInstanceState == null) {
+		chooseToneLayout.setVisibility(View.GONE);
 
-			RingtoneManager ringtoneManager = new RingtoneManager(this);
+		if (Objects.equals(getIntent().getAction(), ACTION_RINGTONE_PICKER) && !viewModel.getPermissionRationaleBeingShown()) {
 
-			Intent intent = getIntent();
-
-			Cursor allTonesCursor;
-
-			if (Objects.equals(getIntent().getAction(), ACTION_RINGTONE_PICKER)) {
-
-				int type;
-				if (intent.hasExtra(EXTRA_RINGTONE_TYPE)) {
-					type = Objects.requireNonNull(intent.getExtras()).getInt(EXTRA_RINGTONE_TYPE);
-				} else {
-					type = TYPE_ALL;
-				}
-				ringtoneManager.setType(type);
-				allTonesCursor = ringtoneManager.getCursor();
-
-				Thread thread = new Thread(() -> {
-					if (allTonesCursor.moveToFirst()) {
-						do {
-							int id = allTonesCursor.getInt(ID_COLUMN_INDEX);
-							String uri = allTonesCursor.getString(URI_COLUMN_INDEX);
-
-							viewModel.getToneUriList().add(Uri.parse(uri + "/" + id));
-							viewModel.getToneNameList().add(allTonesCursor.getString(TITLE_COLUMN_INDEX));
-							viewModel.getToneIdList().add(View.generateViewId());
-						} while (allTonesCursor.moveToNext());
-					}
-				});
-				thread.start();
-
-				if (intent.hasExtra(EXTRA_RINGTONE_SHOW_DEFAULT)) {
-					viewModel.setShowDefault(Objects.requireNonNull(intent.getExtras()).getBoolean(EXTRA_RINGTONE_SHOW_DEFAULT));
-				} else {
-					viewModel.setShowDefault(true);
-				}
-
-				if (intent.hasExtra(EXTRA_RINGTONE_SHOW_SILENT)) {
-					viewModel.setShowSilent(Objects.requireNonNull(intent.getExtras()).getBoolean(EXTRA_RINGTONE_SHOW_SILENT));
-				} else {
-					viewModel.setShowSilent(false);
-				}
-
-				if (viewModel.getShowDefault()) {
-					if (intent.hasExtra(EXTRA_RINGTONE_DEFAULT_URI)) {
-						viewModel.setDefaultUri(Objects.requireNonNull(intent.getExtras()).getParcelable(EXTRA_RINGTONE_DEFAULT_URI));
-					} else {
-						if (type == RingtoneManager.TYPE_ALARM) {
-							viewModel.setDefaultUri(Settings.System.DEFAULT_ALARM_ALERT_URI);
-						} else if (type == RingtoneManager.TYPE_NOTIFICATION) {
-							viewModel.setDefaultUri(Settings.System.DEFAULT_NOTIFICATION_URI);
-						} else if (type == RingtoneManager.TYPE_RINGTONE) {
-							viewModel.setDefaultUri(Settings.System.DEFAULT_RINGTONE_URI);
-						} else {
-							viewModel.setDefaultUri(RingtoneManager.getActualDefaultRingtoneUri(this, type));
-						}
-					}
-				} else {
-					viewModel.setDefaultUri(null);
-				}
-
-				if (intent.hasExtra(EXTRA_RINGTONE_EXISTING_URI)) {
-					viewModel.setExistingUri(Objects.requireNonNull(intent.getExtras()).getParcelable(EXTRA_RINGTONE_EXISTING_URI));
-					viewModel.setWasExistingUriGiven(true);
-				} else {
-					viewModel.setExistingUri(null);
-					viewModel.setWasExistingUriGiven(false);
-				}
-
-				if (intent.hasExtra(EXTRA_RINGTONE_TITLE)) {
-					viewModel.setTitle((CharSequence) Objects.requireNonNull(intent.getExtras()).get(EXTRA_RINGTONE_TITLE));
-				} else {
-					viewModel.setTitle((CharSequence) getResources().getString(R.string.ringtonePicker_defaultTitle));
-				}
-
-				if (intent.hasExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE)) {
-					viewModel.setPlayTone(Objects.requireNonNull(intent.getExtras()).getBoolean(ConstantsAndStatics.EXTRA_PLAY_RINGTONE));
-				} else {
-					viewModel.setPlayTone(true);
-				}
-
-				try {
-					thread.join();
-				} catch (InterruptedException ignored) {
-				}
-
+			if (isPermissionAvailable()) {
+				initialise();
+			} else {
+				viewModel.setPermissionRationaleBeingShown(true);
+				checkAndRequestPermission();
 			}
 		}
-		populateRadioGroup();
-		chooseToneLayout.setOnClickListener(this);
 	}
 
 	//----------------------------------------------------------------------------------------------------
@@ -196,7 +106,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 		actionView.setChecked(viewModel.getPlayTone());
 		actionView.setOnCheckedChangeListener((buttonView, isChecked) -> {
 			viewModel.setPlayTone(isChecked);
-			if (! isChecked) {
+			if (!isChecked) {
 				try {
 					mediaPlayer.stop();
 				} catch (IllegalStateException ignored) {
@@ -211,10 +121,16 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (! isPermissionAvailable()) {
-			checkAndRequestPermission();
+		if (! viewModel.getPermissionRationaleBeingShown() && ! viewModel.getIsInitialised()) {
+			viewModel.setPermissionRationaleBeingShown(false);
+			if (isPermissionAvailable()) {
+				initialise();
+			} else {
+				onPermissionDenied();
+			}
 		}
 	}
+
 
 	//----------------------------------------------------------------------------------------------------
 
@@ -235,8 +151,6 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	 * Populate {@link #radioGroup} by creating and adding appropriate {@link RadioButton}.
 	 */
 	private void populateRadioGroup() {
-
-		Objects.requireNonNull(getSupportActionBar()).setTitle(viewModel.getTitle());
 
 		if (viewModel.getShowDefault()) {
 			createOneRadioButton(DEFAULT_RADIO_BTN_ID, getResources().getString(R.string.defaultTone));
@@ -271,7 +185,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 				// Find index of existingUri in toneUriList
 				int index = viewModel.getToneUriList().indexOf(viewModel.getExistingUri());
 
-				if (index != - 1) {
+				if (index != -1) {
 
 					// toneUriList has existingUri. Check the corresponding RadioButton.
 					((RadioButton) findViewById(viewModel.getToneIdList().get(index))).setChecked(true);
@@ -291,7 +205,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 
 							String fileNameWithExt;
 							int columnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-							if (columnIndex != - 1) {
+							if (columnIndex != -1) {
 								fileNameWithExt = cursor.getString(columnIndex);
 							} else {
 								fileNameWithExt = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
@@ -343,9 +257,9 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	 * Creates one {@link RadioButton} and adds it to {@link #radioGroup}.
 	 *
 	 * @param id The id to be assigned to the {@link RadioButton}.
-	 * @param text The text to be set in the {@link RadioButton}.
+	 * @param text The text to be set in the {@link RadioButton}. Cannot be {@code null}.
 	 */
-	private void createOneRadioButton(int id, String text) {
+	private void createOneRadioButton(int id, @NonNull String text) {
 		RadioGroup.LayoutParams params = new RadioGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		params.setMargins(5, 24, 5, 24);
 
@@ -432,7 +346,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	 * @return {@code true} if the permission is available, otherwise {@code false}.
 	 */
 	private boolean isPermissionAvailable() {
-		return ContextCompat.checkSelfPermission(this,	Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+		return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -441,7 +355,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
 				/////////////////////////////////////////////////////////////////
-				//User has denied the permission once or more than once, but
+				// User has denied the permission once or more than once, but
 				// never clicked on "Don't ask again" before denying.
 				////////////////////////////////////////////////////////////////
 				showPermissionExplanationDialog();
@@ -451,22 +365,23 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 				// 1. We are asking for the permission the first time.
 				// 2. User has clicked on "Don't ask again".
 				///////////////////////////////////////////////////////////////
-				if (! sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE, false)) {
+				if (!sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE, false)) {
 					// Permission was never asked before.
 					sharedPreferences.edit()
-							.remove(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE)
-							.putBoolean(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE, true)
-							.commit();
+					                 .remove(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE)
+					                 .putBoolean(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE, true)
+					                 .commit();
 
 					ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE);
 
 				} else {
-					////////////////////////////////////////////////////////////////////////////////
+					////////////////////////////////////////////
 					// User had chosen "Don't ask again".
-					////////////////////////////////////////////////////////////////////////////////
+					////////////////////////////////////////////
 					showPermissionExplanationDialog();
 				}
 			}
+			viewModel.setPermissionRationaleBeingShown(true);
 		}
 	}
 
@@ -476,7 +391,8 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	 * Shows an {@code AlertDialog} explaining why the permission is necessary.
 	 */
 	private void showPermissionExplanationDialog() {
-		DialogFragment dialogPermissionReason = new AlertDialog_PermissionReason(getResources().getString(R.string.permissionReasonExp_ringtonePicker));
+		DialogFragment dialogPermissionReason =
+				AlertDialog_PermissionReason.getInstance(getResources().getString(R.string.permissionReasonExp_ringtonePicker));
 		dialogPermissionReason.setCancelable(false);
 		dialogPermissionReason.show(getSupportFragmentManager(), "");
 	}
@@ -486,8 +402,12 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 		if (requestCode == PERMISSIONS_REQUEST_CODE) {
+			viewModel.setPermissionRationaleBeingShown(false);
 			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-				Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "Permission granted.", Toast.LENGTH_SHORT).show();
+				initialise();
+			} else {
+				onPermissionDenied();
 			}
 		}
 	}
@@ -522,7 +442,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 							String fileName = cursor.getString(nameIndex);
 
 							int indexOfDot = fileName.lastIndexOf(".");
-							if (indexOfDot != -1){
+							if (indexOfDot != -1) {
 								fileName = fileName.substring(0, indexOfDot);
 							}
 							int toneId = View.generateViewId();
@@ -547,9 +467,10 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 
 	@Override
 	public void onDialogPositiveClick(DialogFragment dialogFragment) {
+
 		if (dialogFragment.getClass().equals(AlertDialog_PermissionReason.class)) {
 
-			if ((! ActivityCompat.shouldShowRequestPermissionRationale(this,	Manifest.permission.READ_EXTERNAL_STORAGE)) &&
+			if ((!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) &&
 					(sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE, false))) {
 
 				////////////////////////////////////////////////////////////////////////////////
@@ -560,8 +481,10 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 				Uri uri = Uri.fromParts("package", getPackageName(), null);
 				intent.setData(uri);
 				startActivity(intent);
+				viewModel.setPermissionRationaleBeingShown(false);
 
 			} else {
+
 				ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE);
 			}
 		}
@@ -572,9 +495,125 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	@Override
 	public void onDialogNegativeClick(DialogFragment dialogFragment) {
 		if (dialogFragment.getClass().equals(AlertDialog_PermissionReason.class)) {
-			Toast.makeText(this, "Operation not possible without the permission.", Toast.LENGTH_LONG).show();
-			onBackPressed();
+			onPermissionDenied();
 		}
+	}
+
+	//----------------------------------------------------------------------------------------------------
+
+	private void onPermissionDenied() {
+		viewModel.setPermissionRationaleBeingShown(false);
+		Toast.makeText(this, "Operation not possible without the permission.", Toast.LENGTH_LONG).show();
+		setResult(RESULT_CANCELED);
+		finish();
+	}
+
+	//----------------------------------------------------------------------------------------------------
+
+	private void initialise() {
+
+		if (!viewModel.getIsInitialised()) {
+
+			RingtoneManager ringtoneManager = new RingtoneManager(this);
+
+			Intent intent = getIntent();
+
+			Cursor allTonesCursor;
+
+			int type;
+			if (intent.hasExtra(EXTRA_RINGTONE_TYPE)) {
+				type = Objects.requireNonNull(intent.getExtras()).getInt(EXTRA_RINGTONE_TYPE);
+			} else {
+				type = TYPE_ALL;
+			}
+			ringtoneManager.setType(type);
+			allTonesCursor = ringtoneManager.getCursor();
+
+			Thread thread = new Thread(() -> {
+				if (allTonesCursor.moveToFirst()) {
+					do {
+						int id = allTonesCursor.getInt(ID_COLUMN_INDEX);
+						String uri = allTonesCursor.getString(URI_COLUMN_INDEX);
+
+						viewModel.getToneUriList().add(Uri.parse(uri + "/" + id));
+						viewModel.getToneNameList().add(allTonesCursor.getString(TITLE_COLUMN_INDEX));
+						viewModel.getToneIdList().add(View.generateViewId());
+					} while (allTonesCursor.moveToNext());
+				}
+			});
+			thread.start();
+
+			if (intent.hasExtra(EXTRA_RINGTONE_SHOW_DEFAULT)) {
+				viewModel.setShowDefault(Objects.requireNonNull(intent.getExtras()).getBoolean(EXTRA_RINGTONE_SHOW_DEFAULT));
+			} else {
+				viewModel.setShowDefault(true);
+			}
+
+			if (intent.hasExtra(EXTRA_RINGTONE_SHOW_SILENT)) {
+				viewModel.setShowSilent(Objects.requireNonNull(intent.getExtras()).getBoolean(EXTRA_RINGTONE_SHOW_SILENT));
+			} else {
+				viewModel.setShowSilent(false);
+			}
+
+			if (viewModel.getShowDefault()) {
+				if (intent.hasExtra(EXTRA_RINGTONE_DEFAULT_URI)) {
+					viewModel.setDefaultUri(Objects.requireNonNull(intent.getExtras()).getParcelable(EXTRA_RINGTONE_DEFAULT_URI));
+				} else {
+					if (type == RingtoneManager.TYPE_ALARM) {
+						viewModel.setDefaultUri(Settings.System.DEFAULT_ALARM_ALERT_URI);
+					} else if (type == RingtoneManager.TYPE_NOTIFICATION) {
+						viewModel.setDefaultUri(Settings.System.DEFAULT_NOTIFICATION_URI);
+					} else if (type == RingtoneManager.TYPE_RINGTONE) {
+						viewModel.setDefaultUri(Settings.System.DEFAULT_RINGTONE_URI);
+					} else {
+						viewModel.setDefaultUri(RingtoneManager.getActualDefaultRingtoneUri(this, type));
+					}
+				}
+			} else {
+				viewModel.setDefaultUri(null);
+			}
+
+			if (intent.hasExtra(EXTRA_RINGTONE_EXISTING_URI)) {
+				viewModel.setExistingUri(Objects.requireNonNull(intent.getExtras()).getParcelable(EXTRA_RINGTONE_EXISTING_URI));
+				viewModel.setWasExistingUriGiven(true);
+			} else {
+				viewModel.setExistingUri(null);
+				viewModel.setWasExistingUriGiven(false);
+			}
+
+			if (intent.hasExtra(EXTRA_RINGTONE_TITLE)) {
+
+				String title = Objects.requireNonNull(intent.getExtras()).getString(EXTRA_RINGTONE_TITLE);
+				viewModel.setTitle((CharSequence) title != null ? title : getResources().getString(R.string.ringtonePicker_defaultTitle));
+
+			} else {
+				viewModel.setTitle((CharSequence) getResources().getString(R.string.ringtonePicker_defaultTitle));
+			}
+
+			if (intent.hasExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE)) {
+				viewModel.setPlayTone(Objects.requireNonNull(intent.getExtras()).getBoolean(ConstantsAndStatics.EXTRA_PLAY_RINGTONE));
+			} else {
+				viewModel.setPlayTone(true);
+			}
+
+			try {
+				thread.join();
+			} catch (InterruptedException ignored) {
+			}
+
+			viewModel.setIsInitialised(true);
+
+		}
+
+		setSupportActionBar(findViewById(R.id.toolbar4));
+		Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+		Objects.requireNonNull(getSupportActionBar()).setTitle(viewModel.getTitle());
+
+		populateRadioGroup();
+
+		chooseToneLayout.setVisibility(View.VISIBLE);
+		chooseToneLayout.setOnClickListener(this);
+
 	}
 
 	//----------------------------------------------------------------------------------------------------

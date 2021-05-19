@@ -18,13 +18,32 @@ public class ViewModel_RingtonePicker extends ViewModel {
 	private final MutableLiveData<Boolean> showDefault = new MutableLiveData<>();
 	private final MutableLiveData<Boolean> showSilent = new MutableLiveData<>();
 	private final MutableLiveData<Boolean> wasExistingUriGiven = new MutableLiveData<>();
-	private final MutableLiveData<Boolean> playTone = new MutableLiveData<>();
+	private final MutableLiveData<Boolean> playTone = new MutableLiveData<>(true);
 
 	private final MutableLiveData<CharSequence> title = new MutableLiveData<>();
 
 	private final MutableLiveData<ArrayList<Uri>> toneUriList = new MutableLiveData<>(new ArrayList<>());
 	private final MutableLiveData<ArrayList<String>> toneNameList = new MutableLiveData<>(new ArrayList<>());
 	private final MutableLiveData<ArrayList<Integer>> toneIdList = new MutableLiveData<>(new ArrayList<>());
+
+	private final MutableLiveData<Boolean> isInitialised = new MutableLiveData<>(false);
+	private final MutableLiveData<Boolean> permissionRationaleBeingShown = new MutableLiveData<>(false);
+
+	public boolean getPermissionRationaleBeingShown() {
+		return permissionRationaleBeingShown.getValue();
+	}
+
+	public void setPermissionRationaleBeingShown(boolean permissionRationaleBeingShown) {
+		this.permissionRationaleBeingShown.setValue(permissionRationaleBeingShown);
+	}
+
+	public boolean getIsInitialised() {
+		return isInitialised.getValue();
+	}
+
+	public void setIsInitialised(boolean isInitialised) {
+		this.isInitialised.setValue(isInitialised);
+	}
 
 	@Nullable
 	public Uri getDefaultUri() {

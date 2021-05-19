@@ -9,21 +9,31 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import java.util.Objects;
+
 public class AlertDialog_PermissionReason extends DialogFragment {
 
 	private DialogListener listener;
 
-	private final String message;
+	//----------------------------------------------------------------------------------------------------
 
-	public AlertDialog_PermissionReason(String message) {
-		this.message = message;
+	public static AlertDialog_PermissionReason getInstance(String message) {
+		Bundle args = new Bundle();
+		args.putString("message", message);
+		AlertDialog_PermissionReason frag = new AlertDialog_PermissionReason();
+		frag.setArguments(args);
+		return frag;
 	}
+
+	//----------------------------------------------------------------------------------------------------
 
 	public interface DialogListener {
 		void onDialogPositiveClick(DialogFragment dialogFragment);
 
 		void onDialogNegativeClick(DialogFragment dialogFragment);
 	}
+
+	//----------------------------------------------------------------------------------------------------
 
 	@Override
 	public void onAttach(@NonNull Context context) {
@@ -35,23 +45,26 @@ public class AlertDialog_PermissionReason extends DialogFragment {
 		}
 	}
 
+	//----------------------------------------------------------------------------------------------------
+
 	@NonNull
 	@Override
 	public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-		builder.setMessage(message)
-				.setPositiveButton(getResources().getString(R.string.cancelDialog_positive),
-						(dialogInterface, i) -> listener.onDialogPositiveClick(AlertDialog_PermissionReason.this))
-				.setNegativeButton(getResources().getString(R.string.cancelDialog_negative),
-						(dialogInterface, i) -> {
-							listener.onDialogNegativeClick(AlertDialog_PermissionReason.this);
-							dismiss();
-						})
-				.setCancelable(false);
+		builder.setMessage(Objects.requireNonNull(getArguments()).getString("message"))
+		       .setPositiveButton(getResources().getString(R.string.cancelDialog_positive), (dialogInterface, i)
+				       -> listener.onDialogPositiveClick(AlertDialog_PermissionReason.this))
+		       .setNegativeButton(getResources().getString(R.string.cancelDialog_negative), (dialogInterface, i) -> {
+			       listener.onDialogNegativeClick(AlertDialog_PermissionReason.this);
+			       dismiss();
+		       })
+		       .setCancelable(false);
 
 		return builder.create();
 	}
+
+	//----------------------------------------------------------------------------------------------------
 
 	@Override
 	public void onDetach() {
