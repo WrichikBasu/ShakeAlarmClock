@@ -129,17 +129,14 @@ public class Activity_RingAlarm extends AppCompatActivity implements View.OnClic
 
 	@Override
 	public void onClick(View view) {
-		switch (view.getId()) {
-			case R.id.snoozeButton:
-				Intent intent = new Intent(ConstantsAndStatics.ACTION_SNOOZE_ALARM);
-				sendBroadcast(intent);
-				finish();
-				break;
-			case R.id.cancelButton:
-				Intent intent1 = new Intent(ConstantsAndStatics.ACTION_CANCEL_ALARM);
-				sendBroadcast(intent1);
-				finish();
-				break;
+		if (view.getId() == R.id.snoozeButton) {
+			Intent intent = new Intent(ConstantsAndStatics.ACTION_SNOOZE_ALARM);
+			sendBroadcast(intent);
+			finish();
+		} else if (view.getId() == R.id.cancelButton) {
+			Intent intent1 = new Intent(ConstantsAndStatics.ACTION_CANCEL_ALARM);
+			sendBroadcast(intent1);
+			finish();
 		}
 	}
 
