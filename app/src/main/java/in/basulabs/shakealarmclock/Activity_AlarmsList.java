@@ -65,23 +65,13 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	 */
 	private ViewStub viewStub;
 
-	/**
-	 * Request code: Used when {@link Activity_AlarmDetails} is created for adding a new alarm.
-	 */
-	private static final int NEW_ALARM_REQUEST_CODE = 2564;
-
-	/**
-	 * Request code: Used when {@link Activity_AlarmDetails} is created for displaying the details of an existing alarm.
-	 */
-	private static final int EXISTING_ALARM_REQUEST_CODE = 3178;
-
 	private static final int MODE_ADD_NEW_ALARM = 103;
 	private static final int MODE_ACTIVATE_EXISTING_ALARM = 604;
 
 	private static final int MODE_DELETE_ALARM = 504;
 	private static final int MODE_DEACTIVATE_ONLY = 509;
 
-	private ActivityResultLauncher<Intent> actLauncher;
+	private ActivityResultLauncher<Intent> settingsActLauncher, newAlarmActLauncher, oldAlarmActLauncher;
 
 	private String toastText = null;
 
@@ -112,7 +102,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		addAlarmButton.setOnClickListener(view -> {
 			Intent intent = new Intent(this, Activity_AlarmDetails.class);
 			intent.setAction(ConstantsAndStatics.ACTION_NEW_ALARM);
-			startActivityForResult(intent, NEW_ALARM_REQUEST_CODE);
+			newAlarmActLauncher.launch(intent);
 		});
 
 		alarmsRecyclerView = findViewById(R.id.alarmsRecyclerView);
@@ -127,9 +117,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		// Observe the number of alarms in the database, and display the view stub based on that count.
 		viewModel.getLiveAlarmsCount().observe(this, this::manageViewStub);
 
-		actLauncher = registerForActivityResult(
-				new ActivityResultContracts.StartActivityForResult(),
-				result -> viewModel.setIsSettingsActOver(true));
+		initActLaunchers();
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 		// This variable determines whether the update dialog will be displayed or not.
@@ -153,7 +141,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 					intent.putExtras(getIntent().getExtras());
 				}
 
-				startActivityForResult(intent, NEW_ALARM_REQUEST_CODE);
+				newAlarmActLauncher.launch(intent);
 			}
 		}
 
@@ -395,88 +383,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	//--------------------------------------------------------------------------------------------------
 
 	@Override
-	public void onActivityResult(int requestCode, int resultCode, @Nullable Intent intent) {
-		super.onActivityResult(requestCode, resultCode, intent);
-
-		if (requestCode == NEW_ALARM_REQUEST_CODE) {
-
-			if (resultCode == RESULT_OK) {
-
-				if (intent != null) {
-
-					Bundle data = Objects.requireNonNull(intent.getExtras()).getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
-					assert data != null;
-
-					if (viewModel.getAlarmId(alarmDatabase, data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE)) != 0) {
-
-						deleteOrDeactivateAlarm(MODE_DELETE_ALARM,
-								data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
-								data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
-					}
-
-					AlarmEntity alarmEntity = new AlarmEntity(data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE),
-							false,
-							data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME),
-							data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_DAY),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MONTH),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_YEAR),
-							data.getParcelable(ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI),
-							data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE),
-							data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_HAS_USER_CHOSEN_DATE));
-
-					addOrActivateAlarm(MODE_ADD_NEW_ALARM, alarmEntity,
-							data.getIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS));
-				}
-			}
-		} else if (requestCode == EXISTING_ALARM_REQUEST_CODE) {
-
-			if (resultCode == RESULT_OK) {
-
-				if (intent != null) {
-
-					Bundle data = Objects.requireNonNull(intent.getExtras())
-					                     .getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
-					assert data != null;
-
-					deleteOrDeactivateAlarm(MODE_DELETE_ALARM,
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_OLD_ALARM_HOUR),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_OLD_ALARM_MINUTE));
-
-					AlarmEntity alarmEntity = new AlarmEntity(
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE),
-							false,
-							data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME),
-							data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_DAY),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MONTH),
-							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_YEAR),
-							data.getParcelable(ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI),
-							data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE),
-							data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_HAS_USER_CHOSEN_DATE));
-
-					addOrActivateAlarm(MODE_ADD_NEW_ALARM, alarmEntity,
-							data.getIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS));
-
-				}
-			}
-		}
-	}
-
-	//--------------------------------------------------------------------------------------------------
-
-	@Override
 	public void onOnOffButtonClick(int rowNumber, int hour, int mins, int newAlarmState) {
 		toggleAlarmState(hour, mins, newAlarmState);
 	}
@@ -495,7 +401,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	public void onItemClicked(int rowNumber, int hour, int mins) {
 
 		Context context = this;
-		AppCompatActivity activity = this;
 
 		final String KEY_START_ACTIVITY = "startTheActivity";
 
@@ -513,7 +418,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 					Intent intent = new Intent(context, Activity_AlarmDetails.class)
 							.setAction(ConstantsAndStatics.ACTION_EXISTING_ALARM)
 							.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, bundle);
-					activity.startActivityForResult(intent, EXISTING_ALARM_REQUEST_CODE);
+					oldAlarmActLauncher.launch(intent);
 				}
 			}
 		};
@@ -581,6 +486,10 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	//-------------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Sets the alarm in the Android system.
+	 * @param data The details of the alarm to be set.
+	 */
 	private void setAlarm(@NonNull Bundle data) {
 
 		LocalDateTime alarmDateTime = (LocalDateTime) data.getSerializable(ConstantsAndStatics.BUNDLE_KEY_DATE_TIME);
@@ -691,6 +600,10 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	//-------------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Requests the {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} permission
+	 * by directing the user to go to Settings.
+	 */
 	@RequiresApi(api = Build.VERSION_CODES.S)
 	private void requestExactAlarmPerm() {
 
@@ -704,16 +617,117 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 				.setCancelable(false)
 				.setPositiveButton("Go to Settings", (dialog, which) -> {
 					viewModel.setIsSettingsActOver(false);
-					actLauncher.launch(intent);
+					settingsActLauncher.launch(intent);
 				})
 				.show();
 	}
 
+	//------------------------------------------------------------------------------
+
+	/**
+	 * Shows a toast using the text in {@code toastText} variable.
+	 */
 	private void showToast() {
 		if (toastText != null) {
 			Toast.makeText(this, toastText, Toast.LENGTH_SHORT).show();
 			toastText = null;
 		}
+	}
+
+	//------------------------------------------------------------------------------
+
+	/**
+	 * Initializes all activity launchers.
+	 */
+	private void initActLaunchers(){
+
+		settingsActLauncher = registerForActivityResult(
+				new ActivityResultContracts.StartActivityForResult(),
+				result -> viewModel.setIsSettingsActOver(true));
+
+		newAlarmActLauncher = registerForActivityResult(
+				new ActivityResultContracts.StartActivityForResult(), (result) -> {
+					if (result.getResultCode() == RESULT_OK) {
+
+						Intent intent = result.getData();
+
+						if (intent != null) {
+
+							Bundle data = Objects.requireNonNull(intent.getExtras()).getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
+							assert data != null;
+
+							if (viewModel.getAlarmId(alarmDatabase, data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE)) != 0) {
+
+								deleteOrDeactivateAlarm(MODE_DELETE_ALARM,
+										data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+										data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+							}
+
+							AlarmEntity alarmEntity = new AlarmEntity(data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE),
+									false,
+									data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME),
+									data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_DAY),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MONTH),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_YEAR),
+									data.getParcelable(ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI),
+									data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE),
+									data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_HAS_USER_CHOSEN_DATE));
+
+							addOrActivateAlarm(MODE_ADD_NEW_ALARM, alarmEntity,
+									data.getIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS));
+						}
+					}
+				});
+
+		oldAlarmActLauncher = registerForActivityResult(
+				new ActivityResultContracts.StartActivityForResult(), (result) -> {
+
+					if (result.getResultCode() == RESULT_OK) {
+
+						Intent intent = result.getData();
+
+						if (intent != null) {
+
+							Bundle data = Objects.requireNonNull(intent.getExtras())
+							                     .getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
+							assert data != null;
+
+							deleteOrDeactivateAlarm(MODE_DELETE_ALARM,
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_OLD_ALARM_HOUR),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_OLD_ALARM_MINUTE));
+
+							AlarmEntity alarmEntity = new AlarmEntity(
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE),
+									false,
+									data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME),
+									data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_DAY),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MONTH),
+									data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_YEAR),
+									data.getParcelable(ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI),
+									data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE),
+									data.getBoolean(ConstantsAndStatics.BUNDLE_KEY_HAS_USER_CHOSEN_DATE));
+
+							addOrActivateAlarm(MODE_ADD_NEW_ALARM, alarmEntity,
+									data.getIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS));
+
+						}
+					}
+
+				});
+
 	}
 
 }
