@@ -36,6 +36,8 @@ final class ConstantsAndStatics {
 	 */
 	static final String BUNDLE_KEY_ALARM_HOUR = "in.basulabs.shakealarmclock.ALARM_HOUR";
 
+	static final String BUNDLE_KEY_DATE_TIME = "in.basulabs.shakealarmclock.ALARM_DATE_TIME";
+
 	/**
 	 * Bundle key for the alarm minute. The value is an integer.
 	 */

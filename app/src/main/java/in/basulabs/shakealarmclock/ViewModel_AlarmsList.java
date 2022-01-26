@@ -1,5 +1,7 @@
 package in.basulabs.shakealarmclock;
 
+import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
@@ -19,6 +21,9 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 	private MutableLiveData<ArrayList<AlarmData>> alarmDataArrayList;
 	private MutableLiveData<Integer> alarmsCount;
+	private MutableLiveData<Boolean> alarmPending = new MutableLiveData<>(false);
+	private MutableLiveData<Bundle> pendingAlarmDetails;
+	private MutableLiveData<Boolean> isSettingsActOver = new MutableLiveData<>(false);
 
 	//--------------------------------------------------------------------------------------------------
 
@@ -318,8 +323,12 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minutes.
+	 *
+	 * @return The position in the {@code #alarmDataArrayList} from where the alarm was removed.
 	 */
-	public void removeAlarm(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
+	public int removeAlarm(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
+
+		int position = -1;
 
 		AtomicInteger alarmId = new AtomicInteger();
 
@@ -334,6 +343,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 			if (alarmData.getAlarmTime().equals(LocalTime.of(hour, mins))) {
 				alarmDataArrayList.getValue().remove(i);
+				position = i;
 				break;
 			}
 		}
@@ -345,14 +355,15 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 		decrementAlarmsCount();
 
+		return position;
+
 	}
 
 	//--------------------------------------------------------------------------------------------------
 
 	/**
 	 * Toggles the ON/OFF state of an alarm.
-	 *
-	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
+	 *  @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minute.
 	 * @param newAlarmState The new alarm state. 0 means OFF and 1 means ON.
@@ -368,12 +379,19 @@ public class ViewModel_AlarmsList extends ViewModel {
 		});
 		thread.start();
 
+		// Toggle the alarm status in the alarmDataArrayList:
+		int index = isAlarmInTheList(hour, mins);
+		AlarmData alarmData = Objects.requireNonNull(alarmDataArrayList.getValue()).get(index);
+		alarmData.setSwitchedOn(newAlarmState == 1);
+		alarmDataArrayList.getValue().set(index, alarmData);
+
 		try {
 			thread.join();
 		} catch (InterruptedException ignored) {
 		}
 
-		return isAlarmInTheList(hour, mins);
+		return index;
+
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -478,5 +496,71 @@ public class ViewModel_AlarmsList extends ViewModel {
 		return -1;
 	}
 
+	//--------------------------------------------------------------------------------------------------
 
+	/**
+	 * Returns whether there is a pending alarm that has to be switched on.
+	 *
+	 * The alarm is pending because {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM}
+	 * has not been granted to the app.
+	 *
+	 * @return {@code true} if an alarm is pending to be switched on, otherwise {@code false}.
+	 */
+	public boolean getPendingStatus(){
+		if (alarmPending == null || alarmPending.getValue() == null){
+			alarmPending = new MutableLiveData<>(false);
+		}
+		return Objects.requireNonNull(alarmPending.getValue());
+	}
+
+	//--------------------------------------------------------------------------------------------------
+
+	/**
+	 * Set whether an alarm is pending to be switched on.
+	 *
+	 * The alarm is pending because {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM}
+	 * has not been granted to the app.
+	 *
+	 * @param status {@code true} if an alarm is pending to be switched on, otherwise {@code false}.
+	 */
+	public void setPendingStatus(boolean status){
+		if (alarmPending == null || alarmPending.getValue() == null){
+			alarmPending = new MutableLiveData<>(false);
+		}
+		alarmPending.setValue(status);
+	}
+
+	//--------------------------------------------------------------------------------------------------
+
+	/**
+	 * Save the details of a pending alarm.
+	 * @param data The details of the pending alarm. May be {@code null}.
+	 */
+	public void savePendingAlarm(@Nullable Bundle data){
+		pendingAlarmDetails = new MutableLiveData<>();
+		pendingAlarmDetails.setValue(data);
+	}
+
+	//--------------------------------------------------------------------------------------------------
+
+	/**
+	 * Get the details of a pending alarm.
+	 * @return A {@link Bundle} with the details of the pending alarm.
+	 */
+	@Nullable
+	public Bundle getPendingALarmData(){
+		return pendingAlarmDetails.getValue();
+	}
+
+	//--------------------------------------------------------------------------------------------------
+
+	public void setIsSettingsActOver(boolean isSettingsActOver) {
+		this.isSettingsActOver.setValue(isSettingsActOver);
+	}
+
+	//--------------------------------------------------------------------------------------------------
+
+	public boolean getIsSettingsActOver(){
+			return Objects.requireNonNull(isSettingsActOver.getValue());
+	}
 }

@@ -185,12 +185,8 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 			int newAlarmState;
 			if (!alarmData.isSwitchedOn()) {
 				newAlarmState = 1;
-				alarmData.setSwitchedOn(true);
-				holder.alarmOnOffImgBtn.setImageResource(R.drawable.ic_alarm_on);
 			} else {
 				newAlarmState = 0;
-				alarmData.setSwitchedOn(false);
-				holder.alarmOnOffImgBtn.setImageResource(R.drawable.ic_alarm_off);
 			}
 			listener.onOnOffButtonClick(holder.getLayoutPosition(),
 					alarmData.getAlarmTime().getHour(), alarmData.getAlarmTime().getMinute(), newAlarmState);
