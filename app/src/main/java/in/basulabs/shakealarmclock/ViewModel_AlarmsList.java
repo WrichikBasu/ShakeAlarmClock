@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ViewModel_AlarmsList extends ViewModel {
 
+
 	private MutableLiveData<ArrayList<AlarmData>> alarmDataArrayList;
 	private MutableLiveData<Integer> alarmsCount;
 	private MutableLiveData<Boolean> alarmPending = new MutableLiveData<>(false);

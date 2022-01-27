@@ -76,7 +76,7 @@ public class Service_SnoozeAlarm extends Service {
 		preMatureDeath = true;
 
 		PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,	"in.basulabs.shakealarmclock::AlarmSnoozeServiceWakelockTag");
+		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "in.basulabs.shakealarmclock::AlarmSnoozeServiceWakelockTag");
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
@@ -98,7 +98,7 @@ public class Service_SnoozeAlarm extends Service {
 				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE), 0, 0),
 				ZoneId.systemDefault());
 
-		ZonedDateTime newAlarmDateTime = alarmDateTime.plusMinutes(numberOfTimesTheAlarmhasBeenSnoozed *
+		ZonedDateTime newAlarmDateTime = alarmDateTime.plusMinutes((long) numberOfTimesTheAlarmhasBeenSnoozed *
 				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS));
 
 		long millisInFuture = Math.abs(Duration.between(ZonedDateTime.now(), newAlarmDateTime).toMillis());
@@ -186,10 +186,18 @@ public class Service_SnoozeAlarm extends Service {
 	 * @return The notification that can be used with {@link Service#startForeground(int, Notification)}.
 	 */
 	private Notification buildSnoozeNotification() {
+
 		createNotificationChannel();
 
 		Intent intent = new Intent().setAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
-		PendingIntent contentPendingIntent = PendingIntent.getBroadcast(this, 5017, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ?
+				PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT : PendingIntent.FLAG_UPDATE_CURRENT;
+
+		PendingIntent contentPendingIntent = PendingIntent.getBroadcast(this, 5017, intent, flags);
+
+		NotificationCompat.Action notifAction = new NotificationCompat.Action.Builder(R.drawable.ic_notif,
+				getString(R.string.notifAction), contentPendingIntent).build();
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(NOTIFICATION_ID))
 				.setContentTitle(getString(R.string.app_name))
@@ -197,7 +205,8 @@ public class Service_SnoozeAlarm extends Service {
 				.setPriority(NotificationCompat.PRIORITY_HIGH)
 				.setCategory(NotificationCompat.CATEGORY_ALARM)
 				.setSmallIcon(R.drawable.ic_notif)
-				.setContentIntent(contentPendingIntent);
+				//.setContentIntent(contentPendingIntent)
+				.addAction(notifAction);
 
 		String alarmMessage = alarmDetails.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
 
@@ -234,9 +243,11 @@ public class Service_SnoozeAlarm extends Service {
 				.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM)
 				.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
+		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ?
+				PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_NO_CREATE : PendingIntent.FLAG_NO_CREATE;
+
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
-				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
-				intent, PendingIntent.FLAG_NO_CREATE);
+				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), intent, flags);
 
 		if (pendingIntent != null) {
 			alarmManager.cancel(pendingIntent);
@@ -275,7 +286,11 @@ public class Service_SnoozeAlarm extends Service {
 
 			intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
-			PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this, alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), intent, 0);
+			flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ?
+					PendingIntent.FLAG_IMMUTABLE : 0;
+
+			PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this, alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
+					intent, flags);
 
 			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
 
@@ -306,7 +321,10 @@ public class Service_SnoozeAlarm extends Service {
 				.setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
 				.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmID, intent, PendingIntent.FLAG_NO_CREATE);
+		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ?
+				PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_NO_CREATE : PendingIntent.FLAG_NO_CREATE;
+
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, alarmID, intent, flags);
 
 		if (pendingIntent != null) {
 			alarmManager.cancel(pendingIntent);

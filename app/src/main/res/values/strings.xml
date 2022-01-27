@@ -104,7 +104,10 @@
 
     <!-- Service_RingAlarm -->
     <string name="notifContent_ring">Alarm ringing. Tap to launch alarm screen.</string>
-    <string name="notifContent_snooze">Alarm snoozed. Tap to dismiss it.</string>
+
+    <!-- Service_SnoozeAlarm -->
+    <string name="notifContent_snooze">Alarm snoozed.</string>
+    <string name="notifAction">Dismiss alarm.</string>
 
     <!-- Activity_RingtonePicker -->
     <string name="chooseCustomTone">Choose from storage</string>

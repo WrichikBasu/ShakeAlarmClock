@@ -15,7 +15,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -255,9 +254,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
 		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-			Log.e(this.getClass().getSimpleName(), "Perm available:" + alarmManager.canScheduleExactAlarms());
-		}
 
 		if (repeatDays != null) {
 			Collections.sort(repeatDays);
@@ -279,7 +275,13 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 			alarmEntity.alarmID = result[0];
 
-			alarmAdapter.notifyItemChanged(result[1]);
+			if (viewModel.getAlarmsCount(alarmDatabase) == 1) {
+				alarmAdapter = new AlarmAdapter(viewModel.getAlarmDataArrayList(), this, this);
+				alarmsRecyclerView.swapAdapter(alarmAdapter, false);
+			} else {
+				alarmAdapter.notifyItemChanged(result[1]);
+			}
+
 			alarmsRecyclerView.scrollToPosition(result[1]);
 
 		}
@@ -323,8 +325,11 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		int alarmID = viewModel.getAlarmId(alarmDatabase, hour, mins);
 
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID, intent,
-				PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE);
+		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ?
+				PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE :
+				PendingIntent.FLAG_NO_CREATE;
+
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID, intent, flags);
 
 		if (pendingIntent != null) {
 			alarmManager.cancel(pendingIntent);
@@ -488,6 +493,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	/**
 	 * Sets the alarm in the Android system.
+	 *
 	 * @param data The details of the alarm to be set.
 	 */
 	private void setAlarm(@NonNull Bundle data) {
@@ -508,7 +514,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		int alarmID = data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
 
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID, intent, PendingIntent.FLAG_IMMUTABLE);
+		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID, intent, flags);
 
 		ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
 
@@ -601,8 +608,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	//-------------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Requests the {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} permission
-	 * by directing the user to go to Settings.
+	 * Requests the {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} permission by directing the user to go to Settings.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.S)
 	private void requestExactAlarmPerm() {
@@ -639,7 +645,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	/**
 	 * Initializes all activity launchers.
 	 */
-	private void initActLaunchers(){
+	private void initActLaunchers() {
 
 		settingsActLauncher = registerForActivityResult(
 				new ActivityResultContracts.StartActivityForResult(),

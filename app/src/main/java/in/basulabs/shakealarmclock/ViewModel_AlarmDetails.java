@@ -118,6 +118,7 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	 *
 	 * @return Same as in description.
 	 */
+	@SuppressWarnings("SimplifiableConditionalExpression")
 	public boolean getHasUserChosenDate() {
 		if (hasUserChosenDate == null) {
 			hasUserChosenDate = new MutableLiveData<>(false);
@@ -289,6 +290,7 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	 *
 	 * @return {@code true} is snooze is ON, otherwise {@code false}. Default: {@code true}.
 	 */
+	@SuppressWarnings("SimplifiableConditionalExpression")
 	public boolean getIsSnoozeOn() {
 		if (isSnoozeOn == null) {
 			isSnoozeOn = new MutableLiveData<>(true);
@@ -318,6 +320,7 @@ public class ViewModel_AlarmDetails extends ViewModel {
 	 *
 	 * @return {@code true} is repeat is ON, otherwise {@code false}. Default: {@code false}.
 	 */
+	@SuppressWarnings("SimplifiableConditionalExpression")
 	public boolean getIsRepeatOn() {
 		if (isRepeatOn == null) {
 			isRepeatOn = new MutableLiveData<>(false);

@@ -297,7 +297,10 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 				.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
 				.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY).putExtras(alarmDetails);
 
-		PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 3054, fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ?
+				PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT : PendingIntent.FLAG_UPDATE_CURRENT;
+
+		PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 3054, fullScreenIntent, flags);
 
 		String alarmMessage = alarmDetails.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
 
@@ -521,7 +524,9 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 				.setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
 				.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID, intent, 0);
+		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
+
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID, intent, flags);
 
 		ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0), ZoneId.systemDefault());
 
@@ -543,7 +548,10 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 				.setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
 				.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID, intent, PendingIntent.FLAG_NO_CREATE);
+		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ?
+				PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_NO_CREATE : PendingIntent.FLAG_NO_CREATE;
+
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID, intent, flags);
 
 		if (pendingIntent != null) {
 			alarmManager.cancel(pendingIntent);
