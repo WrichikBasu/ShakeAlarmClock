@@ -446,4 +446,16 @@ final class ConstantsAndStatics {
 		return alarmDateTime.withSecond(0).withNano(0);
 	}
 
+	//---------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Notification ID for the channels used for ringing alarms.
+	 */
+	static final int NOTIF_ID_ALARM = 621;
+
+	/**
+	 * Notification ID for the channel used during snooze.
+	 */
+	static final int NOTIF_ID_SNOOZE = 622;
+
 }

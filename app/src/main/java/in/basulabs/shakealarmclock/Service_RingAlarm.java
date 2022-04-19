@@ -53,8 +53,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 
 	private MediaPlayer mediaPlayer;
 
-	private static final int NOTIFICATION_ID = 20153;
-
 	private AlarmDatabase alarmDatabase;
 
 	private CountDownTimer ringTimer;
@@ -126,9 +124,9 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 		alarmDetails = Objects.requireNonNull(Objects.requireNonNull(intent.getExtras()).getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(NOTIFICATION_ID, buildRingNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+			startForeground(ConstantsAndStatics.NOTIF_ID_ALARM, buildRingNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
 		} else {
-			startForeground(NOTIFICATION_ID, buildRingNotification());
+			startForeground(ConstantsAndStatics.NOTIF_ID_ALARM, buildRingNotification());
 		}
 		isThisServiceRunning = true;
 		preMatureDeath = true;
@@ -270,8 +268,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	private void createNotificationChannel() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
-			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID), "in.basulabs.shakealarmclock Notifications",
-					importance);
+			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_ID_ALARM),
+					"Alarm Notification",	importance);
 			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
 			assert notificationManager != null;
@@ -304,7 +302,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 
 		String alarmMessage = alarmDetails.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(NOTIFICATION_ID))
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(ConstantsAndStatics.NOTIF_ID_ALARM))
 				.setContentTitle(getResources().getString(R.string.app_name))
 				.setContentText("Initialising alarm...")
 				.setPriority(NotificationCompat.PRIORITY_MAX)
@@ -332,7 +330,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	 */
 	private void ringAlarm() {
 
-		notificationManager.notify(NOTIFICATION_ID, buildRingNotification());
+		notificationManager.notify(ConstantsAndStatics.NOTIF_ID_ALARM, buildRingNotification());
 		initialiseShakeSensor();
 
 		if (!(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) == ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY)) {
@@ -513,6 +511,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	/**
 	 * Sets the next alarn in case of a repeat alarm.
 	 *
+	 *
+	 *
 	 * @param alarmDateTime The date and time when the alarm is to be set.
 	 */
 	private void setAlarm(@NonNull LocalDateTime alarmDateTime) {
@@ -524,7 +524,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 				.setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
 				.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
 
-		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
+		int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
 
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID, intent, flags);
 
