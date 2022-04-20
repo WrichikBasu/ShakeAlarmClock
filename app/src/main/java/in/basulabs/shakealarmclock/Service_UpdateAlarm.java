@@ -6,6 +6,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
@@ -58,8 +59,14 @@ public class Service_UpdateAlarm extends Service {
 
 		if (alarmEntityArrayList != null && alarmEntityArrayList.size() > 0) {
 
-			cancelActiveAlarms(alarmEntityArrayList);
-			activateAlarms(alarmEntityArrayList);
+			AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+				displayErrorNoif();
+			} else {
+				cancelActiveAlarms(alarmEntityArrayList);
+				activateAlarms(alarmEntityArrayList);
+			}
 		}
 
 		stopSelf();
@@ -88,7 +95,7 @@ public class Service_UpdateAlarm extends Service {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
 			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID),
-					"in.basulabs.shakealarmclock Notification", importance);
+					"Update alarms", importance);
 			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			assert notificationManager != null;
 			notificationManager.createNotificationChannel(channel);
@@ -98,27 +105,22 @@ public class Service_UpdateAlarm extends Service {
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Creates a notification that can be shown when the alarm is ringing. Has a full screen intent to {@link Activity_RingAlarm}. The content intent points to
-	 * {@link Activity_AlarmsList}.
+	 * Creates a notification that can be shown when the alarm is ringing. Has a full screen intent to {@link Activity_RingAlarm}. The content intent
+	 * points to {@link Activity_AlarmsList}.
 	 *
-	 * @return A {@link Notification} that can be used with {@link #startForeground(int, Notification)} or displayed with {@link NotificationManager#notify(int,
-	 *        Notification)}.
+	 * @return A {@link Notification} that can be used with {@link #startForeground(int, Notification)} or displayed with {@link
+	 * NotificationManager#notify(int, Notification)}.
 	 */
 	private Notification buildNotification() {
-		createNotificationChannel(NOTIFICATION_ID);
 
-		Intent contentIntent = new Intent(this, Activity_AlarmsList.class);
-		contentIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		contentIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		PendingIntent contentPendingIntent = PendingIntent.getActivity(this, 5701, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		createNotificationChannel(NOTIFICATION_ID);
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(NOTIFICATION_ID))
 				.setContentTitle(getResources().getString(R.string.app_name))
 				.setContentText(getResources().getString(R.string.updateAlarm_notifMessage))
 				.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 				.setCategory(NotificationCompat.CATEGORY_STATUS)
-				.setSmallIcon(R.drawable.ic_notif)
-				.setContentIntent(contentPendingIntent);
+				.setSmallIcon(R.drawable.ic_notif);
 
 		return builder.build();
 	}
@@ -166,7 +168,10 @@ public class Service_UpdateAlarm extends Service {
 			intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
 			intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(Service_UpdateAlarm.this, alarmEntity.alarmID, intent, PendingIntent.FLAG_NO_CREATE);
+			int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE
+					: PendingIntent.FLAG_NO_CREATE;
+
+			PendingIntent pendingIntent = PendingIntent.getBroadcast(Service_UpdateAlarm.this, alarmEntity.alarmID, intent,	flags);
 
 			if (pendingIntent != null) {
 				alarmManager.cancel(pendingIntent);
@@ -181,7 +186,6 @@ public class Service_UpdateAlarm extends Service {
 	 * Get the list of repeat days for a particular alarm.
 	 *
 	 * @param alarmID The unique alarm ID.
-	 *
 	 * @return An {@link ArrayList} of integers for the days in which the alarm is repeated. The day numbers follow the {@link DayOfWeek} enum.
 	 */
 	@Nullable
@@ -205,8 +209,9 @@ public class Service_UpdateAlarm extends Service {
 	/**
 	 * Activates the alarms that are switched on, if possibe.
 	 * <p>
-	 * If repeat is ON for an alarm, then the alarm is set as usual. If, however, repeat is OFF, then it is first checked whether the time is reachable or not.
-	 * If reachable, the alarm is set, otherwise the alarm is switched off in the database and a notification is posted using {@link
+	 * If repeat is ON for an alarm, then the alarm is set as usual. If, however, repeat is OFF, then it is first checked whether the time is
+	 * reachable or not. If reachable, the alarm is set, otherwise the alarm is switched off in the database and a notification is posted using
+	 * {@link
 	 * #postAlarmMissedNotification(int, LocalTime)}.
 	 * </p>
 	 *
@@ -261,7 +266,7 @@ public class Service_UpdateAlarm extends Service {
 
 				alarmDateTime = LocalDateTime.of(alarmDate, alarmTime);
 
-				if (! alarmDateTime.isAfter(LocalDateTime.now())) {
+				if (!alarmDateTime.isAfter(LocalDateTime.now())) {
 					alarmDateTime = null;
 				}
 
@@ -277,7 +282,9 @@ public class Service_UpdateAlarm extends Service {
 				data.putIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS, repeatDays);
 				intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, data);
 
-				PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmEntity.alarmID, intent, 0);
+				int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
+
+				PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmEntity.alarmID, intent, flags);
 
 				ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime, ZoneId.systemDefault());
 
@@ -316,12 +323,12 @@ public class Service_UpdateAlarm extends Service {
 		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
 		DateTimeFormatter formatter;
-		if (! DateFormat.is24HourFormat(this)) {
+		if (!DateFormat.is24HourFormat(this)) {
 			formatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.getDefault());
 		} else {
 			formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault());
 		}
-		
+
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(alarmID))
 				.setContentTitle(getResources().getString(R.string.updateAlarm_alarmMissedTitle))
 				.setContentText(getString(R.string.updateAlarm_alarmMissedText, alarmTime.format(formatter)))
@@ -333,6 +340,46 @@ public class Service_UpdateAlarm extends Service {
 				.setOngoing(false);
 
 		notificationManager.notify(alarmID, builder.build());
+
+	}
+
+	/**
+	 * Displays a notification when {@link AlarmManager#canScheduleExactAlarms()} returns {@code false}.
+	 * <p>
+	 * The notification opens {@link Activity_RequestPerm}.
+	 */
+	private void displayErrorNoif() {
+
+		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			int importance = NotificationManager.IMPORTANCE_HIGH;
+			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_ID_ERROR),
+					"Error Notification", importance);
+			channel.setSound(null, null);
+			notificationManager.createNotificationChannel(channel);
+		}
+
+		Intent intent = new Intent(getApplicationContext(), Activity_RequestPerm.class);
+
+		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ?
+				PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT : PendingIntent.FLAG_UPDATE_CURRENT;
+
+		PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 255, intent, flags);
+
+		NotificationCompat.Action notifAction = new NotificationCompat.Action.Builder(R.drawable.ic_notif,
+				getString(R.string.error_notif_body), pendingIntent).build();
+
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(ConstantsAndStatics.NOTIF_ID_ERROR))
+				.setContentTitle(getString(R.string.error_notif_title))
+				.setContentText(getString(R.string.error_notif_body))
+				.setPriority(NotificationCompat.PRIORITY_HIGH)
+				.setCategory(NotificationCompat.CATEGORY_ERROR)
+				.setSmallIcon(R.drawable.ic_notif)
+				.setOngoing(true)
+				.addAction(notifAction);
+
+		notificationManager.notify(ConstantsAndStatics.NOTIF_ID_ERROR, builder.build());
 
 	}
 

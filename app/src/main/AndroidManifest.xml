@@ -143,6 +143,12 @@
             </intent-filter>
 
         </activity>
+
+        <activity
+            android:name=".Activity_RequestPerm"
+            android:exported="false"
+            android:enabled="false"/>
+
     </application>
 
 </manifest>

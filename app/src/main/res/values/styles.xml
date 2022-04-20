@@ -20,6 +20,18 @@
         <item name="android:layout_height">wrap_content</item>
     </style>
 
+    <style name="normalButtonStyle">
+        <item name="android:clickable">true</item>
+        <item name="android:linksClickable">false</item>
+        <item name="android:longClickable">false</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
     <style name="labelStyle">
         <item name="android:layout_centerHorizontal">true</item>
         <item name="android:fontFamily">arial</item>

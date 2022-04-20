@@ -187,4 +187,13 @@
 
     <string name="defaultAlarmToneText">Default alarm tone</string>
 
+    <string name="require_permission_exact_alarms">Require permission to set exact alarms</string>
+    <string name="request_exact_alarm_perm">On Android S and higher, the app needs permission to schedule exact alarms. Without this, no alarm can
+        be set. Please go to Settings and enable this permission to continue setting an alarm.</string>
+    <string name="grant_permission">Missing permission</string>
+
+    <string name="error_notif_title">Error in setting alarms!</string>
+    <string name="error_notif_body">Alarms could not be set due to missing permission. Tap to see details.</string>
+    <string name="perm_granted">Thanks for the permission. Setting up alarms. You may close the app.</string>
+
 </resources>

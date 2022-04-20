@@ -7,6 +7,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.work.Configuration;
+import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
@@ -26,8 +27,8 @@ import java.util.concurrent.TimeUnit;
 final class ConstantsAndStatics {
 
 	/**
-	 * Bundle key for the Bundle that is passed with intent from {@link Activity_AlarmDetails} to {@link Activity_AlarmsList} containing the data set by the
-	 * user.
+	 * Bundle key for the Bundle that is passed with intent from {@link Activity_AlarmDetails} to {@link Activity_AlarmsList} containing the data set
+	 * by the user.
 	 */
 	static final String BUNDLE_KEY_ALARM_DETAILS = "in.basulabs.shakealarmclock.ALARM_DETAILS_BUNDLE";
 
@@ -160,14 +161,15 @@ final class ConstantsAndStatics {
 	static final String ACTION_EXISTING_ALARM = "in.basulabs.shakealarmclock.ACTION_EXISTING_ALARM";
 
 	/**
-	 * Intent action indicating that a new alarm is being requested to be created from a direct intent to the app rather than the user clicking on the "Add"
-	 * button.
+	 * Intent action indicating that a new alarm is being requested to be created from a direct intent to the app rather than the user clicking on
+	 * the
+	 * "Add" button.
 	 */
-	static final String ACTION_NEW_ALARM_FROM_INTENT =	"in.basulabs.shakealarmclock.ACTION_NEW_ALARM_FROM_INTENT";
+	static final String ACTION_NEW_ALARM_FROM_INTENT = "in.basulabs.shakealarmclock.ACTION_NEW_ALARM_FROM_INTENT";
 
 	/**
-	 * Indicates whether {@link Activity_RingtonePicker} should play the ringtone when the user clicks on a {@link android.widget.RadioButton}. Default: {@code
-	 * true}.
+	 * Indicates whether {@link Activity_RingtonePicker} should play the ringtone when the user clicks on a {@link android.widget.RadioButton}.
+	 * Default: {@code true}.
 	 */
 	static final String EXTRA_PLAY_RINGTONE = "in.basulabs.shakealarmclock.EXTRA_PLAY_RINGTONE";
 
@@ -204,8 +206,9 @@ final class ConstantsAndStatics {
 	static final String ACTION_DESTROY_RING_ALARM_ACTIVITY = "in.basulabs.shakealarmclock.DESTROY_RING_ALARM_ACTIVITY";
 
 	/**
-	 * {@link android.content.SharedPreferences} key indicating whether the read storage permission was asked before. This is used to determine if the user had
-	 * chosen "Don't ask again" before denying the permission. The value is {@code boolean}.
+	 * {@link android.content.SharedPreferences} key indicating whether the read storage permission was asked before. This is used to determine if
+	 * the
+	 * user had chosen "Don't ask again" before denying the permission. The value is {@code boolean}.
 	 */
 	static final String SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE = "in.basulabs.shakealarmclock.PERMISSION_WAS_ASKED_BEFORE";
 
@@ -225,8 +228,8 @@ final class ConstantsAndStatics {
 	static final String SHARED_PREF_KEY_SHAKE_SENSITIVITY = "in.basulabs.shakealarmclock.SHAKE_SENSITIVITY";
 
 	/**
-	 * {@link android.content.SharedPreferences} key indicating whether {@link AlertDialog_BatteryOptimizations} should be shown in
-	 * {@link Activity_AlarmsList}. Data type is {@code boolean}.
+	 * {@link android.content.SharedPreferences} key indicating whether {@link AlertDialog_BatteryOptimizations} should be shown in {@link
+	 * Activity_AlarmsList}. Data type is {@code boolean}.
 	 */
 	static final String SHARED_PREF_KEY_SHOW_BATTERY_OPTIM_DIALOG = "in.basulabs.shakealarmclock.SHOW_BATTERY_OPTIM_DIALOG";
 
@@ -258,14 +261,14 @@ final class ConstantsAndStatics {
 	static final String SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL = "in.basulabs.shakealarmclock.DEFAULT_SNOOZE_INTERVAL";
 
 	/**
-	 * {@link android.content.SharedPreferences} key to store the default snooze frequency, i.e. the number of times the alarm will ring before being cancelled
-	 * automatically.
+	 * {@link android.content.SharedPreferences} key to store the default snooze frequency, i.e. the number of times the alarm will ring before being
+	 * cancelled automatically.
 	 */
 	static final String SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ = "in.basulabs.shakealarmclock.DEFAULT_SNOOZE_FREQUENCY";
 
 	/**
-	 * {@link android.content.SharedPreferences} key to store the default alarm tone Uri. If the file is unavailable, it will be replaced by the default alarm
-	 * tone during runtime. The value is {@code String}; should be converted to Uri using {@link android.net.Uri#parse(String)}.
+	 * {@link android.content.SharedPreferences} key to store the default alarm tone Uri. If the file is unavailable, it will be replaced by the
+	 * default alarm tone during runtime. The value is {@code String}; should be converted to Uri using {@link android.net.Uri#parse(String)}.
 	 */
 	static final String SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI = "in.basulabs.shakealarmclock.DEFAULT_ALARM_TONE_URI";
 
@@ -290,33 +293,33 @@ final class ConstantsAndStatics {
 	static final int THEME_DARK = 2;
 
 	/**
-	 * Indicates that the theme of the app should be light. Corresponds to {@link androidx.appcompat.app.AppCompatDelegate#MODE_NIGHT_FOLLOW_SYSTEM}. Available
-	 * only on Android Q+.
+	 * Indicates that the theme of the app should be light. Corresponds to {@link androidx.appcompat.app.AppCompatDelegate#MODE_NIGHT_FOLLOW_SYSTEM}.
+	 * Available only on Android Q+.
 	 */
 	static final int THEME_SYSTEM = 3;
 
 	/**
-	 * {@link android.content.SharedPreferences} key to store the current theme. Can only have the values {@link #THEME_AUTO_TIME}, {@link #THEME_LIGHT}, {@link
-	 * #THEME_DARK} or {@link #THEME_SYSTEM}.
+	 * {@link android.content.SharedPreferences} key to store the current theme. Can only have the values {@link #THEME_AUTO_TIME}, {@link
+	 * #THEME_LIGHT}, {@link #THEME_DARK} or {@link #THEME_SYSTEM}.
 	 */
 	static final String SHARED_PREF_KEY_THEME = "in.basulabs.shakealarmclock.THEME";
 
 	/**
-	 * {@link android.content.SharedPreferences} key indicating whether a new alarm tone chosen by the user should be set as the default tone for future
-	 * alarms. Data type: {@code boolean}.
+	 * {@link android.content.SharedPreferences} key indicating whether a new alarm tone chosen by the user should be set as the default tone for
+	 * future alarms. Data type: {@code boolean}.
 	 */
 	static final String SHARED_PREF_KEY_AUTO_SET_TONE = "in.basulabs.shakealarmclock.AUTO_SET_TONE";
 
 	/**
 	 * Unique name for work.
 	 */
-	static final String WORK_NAME_ACTIVATE_ALARMS = "in.basulabs.WORK_ACTIVATE_ALARMS";
+	static final String WORK_TAG_ACTIVATE_ALARMS = "in.basulabs.WORK_ACTIVATE_ALARMS";
 
 	//---------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Creates a {@link PeriodicWorkRequest} and enqueues a unique work using {@link WorkManager#enqueueUniquePeriodicWork(String, ExistingPeriodicWorkPolicy,
-	 * PeriodicWorkRequest)}.
+	 * Creates a {@link PeriodicWorkRequest} and enqueues a unique work using {@link WorkManager#enqueueUniquePeriodicWork(String,
+	 * ExistingPeriodicWorkPolicy, PeriodicWorkRequest)}.
 	 *
 	 * @param context The {@link Context} that is scheduling the work.
 	 */
@@ -327,9 +330,17 @@ final class ConstantsAndStatics {
 		} catch (Exception ignored) {
 		}
 
-		PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(Worker_ActivateAlarms.class, 15, TimeUnit.MINUTES).build();
+		Constraints constraint = new Constraints.Builder()
+				.setRequiresBatteryNotLow(true)
+				.build();
 
-		WorkManager.getInstance(context).enqueueUniquePeriodicWork(WORK_NAME_ACTIVATE_ALARMS, ExistingPeriodicWorkPolicy.REPLACE, periodicWorkRequest);
+		PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(Worker_ActivateAlarms.class, 1, TimeUnit.HOURS)
+				.setInitialDelay(30, TimeUnit.MINUTES)
+				.setConstraints(constraint)
+				.build();
+
+		WorkManager.getInstance(context)
+		           .enqueueUniquePeriodicWork(WORK_TAG_ACTIVATE_ALARMS, ExistingPeriodicWorkPolicy.REPLACE,	periodicWorkRequest);
 	}
 
 	//---------------------------------------------------------------------------------------------------------
@@ -346,7 +357,7 @@ final class ConstantsAndStatics {
 		} catch (Exception ignored) {
 		}
 
-		WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME_ACTIVATE_ALARMS);
+		WorkManager.getInstance(context).cancelUniqueWork(WORK_TAG_ACTIVATE_ALARMS);
 	}
 
 	//---------------------------------------------------------------------------------------------------------
@@ -355,10 +366,9 @@ final class ConstantsAndStatics {
 	 * Get the theme that can be applied using {@link AppCompatDelegate#setDefaultNightMode(int)}.
 	 *
 	 * @param theme The theme value as stored in {@link android.content.SharedPreferences}. Can only have the values {@link #THEME_AUTO_TIME}, {@link
-	 *        #THEME_LIGHT}, {@link #THEME_DARK} or {@link #THEME_SYSTEM}.
-	 *
+	 * #THEME_LIGHT}, {@link #THEME_DARK} or {@link #THEME_SYSTEM}.
 	 * @return Can have the values {@link AppCompatDelegate#MODE_NIGHT_YES}, {@link AppCompatDelegate#MODE_NIGHT_NO} or {@link
-	 *        AppCompatDelegate#MODE_NIGHT_FOLLOW_SYSTEM}.
+	 * AppCompatDelegate#MODE_NIGHT_FOLLOW_SYSTEM}.
 	 */
 	static int getTheme(int theme) {
 		switch (theme) {
@@ -399,9 +409,8 @@ final class ConstantsAndStatics {
 	 * @param alarmTime The alarm time as chosen by the user.
 	 * @param isRepeatOn Whether repeat is on or off.
 	 * @param repeatDays The days when the alarm should be repeated. Should follow {@link DayOfWeek} enum.
-	 *
-	 * @return A {@link LocalDateTime} object representing when the alarm should ring. This should be transformed into a {@link java.time.ZonedDateTime} object
-	 * 		and then passed to {@link android.app.AlarmManager}.
+	 * @return A {@link LocalDateTime} object representing when the alarm should ring. This should be transformed into a {@link
+	 * java.time.ZonedDateTime} object and then passed to {@link android.app.AlarmManager}.
 	 */
 	static LocalDateTime getAlarmDateTime(LocalDate alarmDate, LocalTime alarmTime, boolean isRepeatOn, @Nullable ArrayList<Integer> repeatDays) {
 
@@ -438,7 +447,7 @@ final class ConstantsAndStatics {
 
 			alarmDateTime = LocalDateTime.of(alarmDate, alarmTime);
 
-			if (! alarmDateTime.isAfter(LocalDateTime.now())) {
+			if (!alarmDateTime.isAfter(LocalDateTime.now())) {
 				alarmDateTime = alarmDateTime.plusDays(1);
 			}
 		}
@@ -457,5 +466,10 @@ final class ConstantsAndStatics {
 	 * Notification ID for the channel used during snooze.
 	 */
 	static final int NOTIF_ID_SNOOZE = 622;
+
+	/**
+	 * Notification ID for error channel.
+	 */
+	static final int NOTIF_ID_ERROR = 623;
 
 }

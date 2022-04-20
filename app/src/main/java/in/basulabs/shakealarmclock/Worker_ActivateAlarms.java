@@ -1,12 +1,16 @@
 package in.basulabs.shakealarmclock;
 
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -61,6 +65,13 @@ public class Worker_ActivateAlarms extends Worker {
 
 		if (list != null && list.size() > 0) {
 
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+				if (!alarmManager.canScheduleExactAlarms()) {
+					displayErrorNoif();
+					return Result.failure();
+				}
+			}
+
 			for (AlarmEntity alarmEntity : list) {
 
 				AtomicReference<ArrayList<Integer>> repeatDaysAtomic = new AtomicReference<>();
@@ -77,22 +88,29 @@ public class Worker_ActivateAlarms extends Worker {
 				data.putIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS, repeatDays);
 				intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, data);
 
-				PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), alarmEntity.alarmID, intent,	PendingIntent.FLAG_NO_CREATE);
+				int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE
+						: PendingIntent.FLAG_NO_CREATE;
+
+				PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), alarmEntity.alarmID, intent, flags);
 
 				if (pendingIntent == null) {
 
 					LocalDateTime alarmDateTime = ConstantsAndStatics.getAlarmDateTime(LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth,
-							alarmEntity.alarmDay), LocalTime.of(alarmEntity.alarmHour, alarmEntity.alarmMinutes), alarmEntity.isRepeatOn, repeatDays);
+							alarmEntity.alarmDay), LocalTime.of(alarmEntity.alarmHour, alarmEntity.alarmMinutes), alarmEntity.isRepeatOn,
+							repeatDays);
 
 					ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime, ZoneId.systemDefault());
 
-					PendingIntent pendingIntent1 = PendingIntent.getBroadcast(context.getApplicationContext(), alarmEntity.alarmID, intent, 0);
+					int flags2 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
 
-					alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent1), pendingIntent1);
+					PendingIntent pendingIntent1 = PendingIntent.getBroadcast(context.getApplicationContext(), alarmEntity.alarmID, intent, flags2);
+
+					alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent1),
+							pendingIntent1);
 
 				}
 
-				if ((stopExecuting && ! isStopped()) || Service_RingAlarm.isThisServiceRunning || Service_SnoozeAlarm.isThisServiceRunning) {
+				if ((stopExecuting && !isStopped()) || Service_RingAlarm.isThisServiceRunning || Service_SnoozeAlarm.isThisServiceRunning) {
 					return Result.failure();
 				}
 			}
@@ -101,6 +119,47 @@ public class Worker_ActivateAlarms extends Worker {
 	}
 
 	//----------------------------------------------------------------------------------------------------
+
+	/**
+	 * Displays a notification when {@link AlarmManager#canScheduleExactAlarms()} returns {@code false}.
+	 * <p>
+	 * The notification opens {@link Activity_RequestPerm}.
+	 */
+	private void displayErrorNoif() {
+
+		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			int importance = NotificationManager.IMPORTANCE_HIGH;
+			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_ID_ERROR),
+					"Error Notification", importance);
+			channel.setSound(null, null);
+			notificationManager.createNotificationChannel(channel);
+		}
+
+		Intent intent = new Intent(context.getApplicationContext(), Activity_RequestPerm.class);
+
+		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ?
+				PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT : PendingIntent.FLAG_UPDATE_CURRENT;
+
+		PendingIntent pendingIntent = PendingIntent.getActivity(context.getApplicationContext(), 255, intent, flags);
+
+		NotificationCompat.Action notifAction = new NotificationCompat.Action.Builder(R.drawable.ic_notif,
+				context.getString(R.string.error_notif_body), pendingIntent).build();
+
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Integer.toString(ConstantsAndStatics.NOTIF_ID_ERROR))
+				.setContentTitle(context.getString(R.string.error_notif_title))
+				.setContentText(context.getString(R.string.error_notif_body))
+				.setPriority(NotificationCompat.PRIORITY_HIGH)
+				.setCategory(NotificationCompat.CATEGORY_ERROR)
+				.setSmallIcon(R.drawable.ic_notif)
+				.setOngoing(true)
+				.addAction(notifAction);
+
+		notificationManager.notify(ConstantsAndStatics.NOTIF_ID_ERROR, builder.build());
+
+	}
+
 
 	@Override
 	public void onStopped() {
