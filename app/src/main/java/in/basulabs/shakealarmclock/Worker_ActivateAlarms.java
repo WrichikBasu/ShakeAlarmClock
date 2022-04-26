@@ -131,9 +131,8 @@ public class Worker_ActivateAlarms extends Worker {
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
-			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_ID_ERROR),
-					"Error Notification", importance);
-			channel.setSound(null, null);
+			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ERROR),
+					context.getString(R.string.notif_channel_error), importance);
 			notificationManager.createNotificationChannel(channel);
 		}
 
@@ -147,16 +146,18 @@ public class Worker_ActivateAlarms extends Worker {
 		NotificationCompat.Action notifAction = new NotificationCompat.Action.Builder(R.drawable.ic_notif,
 				context.getString(R.string.error_notif_body), pendingIntent).build();
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Integer.toString(ConstantsAndStatics.NOTIF_ID_ERROR))
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ERROR))
 				.setContentTitle(context.getString(R.string.error_notif_title))
 				.setContentText(context.getString(R.string.error_notif_body))
 				.setPriority(NotificationCompat.PRIORITY_HIGH)
 				.setCategory(NotificationCompat.CATEGORY_ERROR)
 				.setSmallIcon(R.drawable.ic_notif)
 				.setOngoing(true)
+				.setAutoCancel(true)
+				.setOnlyAlertOnce(true)
 				.addAction(notifAction);
 
-		notificationManager.notify(ConstantsAndStatics.NOTIF_ID_ERROR, builder.build());
+		notificationManager.notify(UniqueNotifID.getID(), builder.build());
 
 	}
 

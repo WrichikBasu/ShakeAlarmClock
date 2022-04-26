@@ -124,9 +124,9 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 		alarmDetails = Objects.requireNonNull(Objects.requireNonNull(intent.getExtras()).getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(ConstantsAndStatics.NOTIF_ID_ALARM, buildRingNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+			startForeground(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), buildRingNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
 		} else {
-			startForeground(ConstantsAndStatics.NOTIF_ID_ALARM, buildRingNotification());
+			startForeground(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), buildRingNotification());
 		}
 		isThisServiceRunning = true;
 		preMatureDeath = true;
@@ -268,8 +268,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	private void createNotificationChannel() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
-			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_ID_ALARM),
-					"Alarm Notification",	importance);
+			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM),
+					getString(R.string.notif_channel_alarms),	importance);
 			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
 			assert notificationManager != null;
@@ -302,7 +302,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 
 		String alarmMessage = alarmDetails.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(ConstantsAndStatics.NOTIF_ID_ALARM))
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM))
 				.setContentTitle(getResources().getString(R.string.app_name))
 				.setContentText("Initialising alarm...")
 				.setPriority(NotificationCompat.PRIORITY_MAX)
@@ -319,7 +319,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 			builder.setContentText(getString(R.string.notifContent_ring));
 		}
 
-
 		return builder.build();
 	}
 
@@ -330,7 +329,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	 */
 	private void ringAlarm() {
 
-		notificationManager.notify(ConstantsAndStatics.NOTIF_ID_ALARM, buildRingNotification());
+		notificationManager.notify(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM, buildRingNotification());
 		initialiseShakeSensor();
 
 		if (!(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) == ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY)) {

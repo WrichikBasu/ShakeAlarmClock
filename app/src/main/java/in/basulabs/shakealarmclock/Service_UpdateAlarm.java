@@ -33,6 +33,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Service_UpdateAlarm extends Service {
 
+	/**
+	 * The Notification ID for the foreground notification of this service,
+	 */
 	private static final int NOTIFICATION_ID = 903;
 
 	private AlarmDatabase alarmDatabase;
@@ -45,9 +48,9 @@ public class Service_UpdateAlarm extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(NOTIFICATION_ID, buildNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+			startForeground(NOTIFICATION_ID, buildForegroundNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
 		} else {
-			startForeground(NOTIFICATION_ID, buildNotification());
+			startForeground(NOTIFICATION_ID, buildForegroundNotification());
 		}
 		isThisServiceRunning = true;
 
@@ -87,15 +90,13 @@ public class Service_UpdateAlarm extends Service {
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Creates a notification channel.
-	 *
-	 * @param NOTIFICATION_ID The ID of the notification channel.
+	 * Creates the notification channel for the foreground notification of this service.
 	 */
-	private void createNotificationChannel(final int NOTIFICATION_ID) {
+	private void createForegroundNotificationChannel() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
-			NotificationChannel channel = new NotificationChannel(Integer.toString(NOTIFICATION_ID),
-					"Update alarms", importance);
+			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_UPDATE),
+					getString(R.string.notif_channel_update), importance);
 			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			assert notificationManager != null;
 			notificationManager.createNotificationChannel(channel);
@@ -105,17 +106,32 @@ public class Service_UpdateAlarm extends Service {
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Creates a notification that can be shown when the alarm is ringing. Has a full screen intent to {@link Activity_RingAlarm}. The content intent
-	 * points to {@link Activity_AlarmsList}.
+	 * Creates the error notification channel.
+	 */
+	private void createErrorNotificationChannel() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			int importance = NotificationManager.IMPORTANCE_HIGH;
+			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ERROR),
+					getString(R.string.notif_channel_error), importance);
+			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+			assert notificationManager != null;
+			notificationManager.createNotificationChannel(channel);
+		}
+	}
+
+	//--------------------------------------------------------------------------------------------------
+
+	/**
+	 * Builds the foreground notification for this service.
 	 *
 	 * @return A {@link Notification} that can be used with {@link #startForeground(int, Notification)} or displayed with {@link
 	 * NotificationManager#notify(int, Notification)}.
 	 */
-	private Notification buildNotification() {
+	private Notification buildForegroundNotification() {
 
-		createNotificationChannel(NOTIFICATION_ID);
+		createForegroundNotificationChannel();
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(NOTIFICATION_ID))
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_UPDATE))
 				.setContentTitle(getResources().getString(R.string.app_name))
 				.setContentText(getResources().getString(R.string.updateAlarm_notifMessage))
 				.setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -171,7 +187,7 @@ public class Service_UpdateAlarm extends Service {
 			int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE
 					: PendingIntent.FLAG_NO_CREATE;
 
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(Service_UpdateAlarm.this, alarmEntity.alarmID, intent,	flags);
+			PendingIntent pendingIntent = PendingIntent.getBroadcast(Service_UpdateAlarm.this, alarmEntity.alarmID, intent, flags);
 
 			if (pendingIntent != null) {
 				alarmManager.cancel(pendingIntent);
@@ -211,8 +227,7 @@ public class Service_UpdateAlarm extends Service {
 	 * <p>
 	 * If repeat is ON for an alarm, then the alarm is set as usual. If, however, repeat is OFF, then it is first checked whether the time is
 	 * reachable or not. If reachable, the alarm is set, otherwise the alarm is switched off in the database and a notification is posted using
-	 * {@link
-	 * #postAlarmMissedNotification(int, LocalTime)}.
+	 * {@link #postAlarmMissedNotification(LocalTime)}.
 	 * </p>
 	 *
 	 * @param alarmEntityArrayList The list of active alarms.
@@ -300,7 +315,7 @@ public class Service_UpdateAlarm extends Service {
 				} catch (InterruptedException ignored) {
 				}
 
-				postAlarmMissedNotification(alarmEntity.alarmID, alarmTime);
+				postAlarmMissedNotification(alarmTime);
 
 			}
 
@@ -313,12 +328,11 @@ public class Service_UpdateAlarm extends Service {
 	/**
 	 * Posts a notification informing the user that an alarm has been missed.
 	 *
-	 * @param alarmID The unique alarm ID — will be used as notification ID.
 	 * @param alarmTime The alarm time.
 	 */
-	private void postAlarmMissedNotification(int alarmID, LocalTime alarmTime) {
+	private void postAlarmMissedNotification(LocalTime alarmTime) {
 
-		createNotificationChannel(alarmID);
+		createErrorNotificationChannel();
 
 		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -329,7 +343,7 @@ public class Service_UpdateAlarm extends Service {
 			formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault());
 		}
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(alarmID))
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ERROR))
 				.setContentTitle(getResources().getString(R.string.updateAlarm_alarmMissedTitle))
 				.setContentText(getString(R.string.updateAlarm_alarmMissedText, alarmTime.format(formatter)))
 				.setSmallIcon(R.drawable.ic_notif)
@@ -339,7 +353,7 @@ public class Service_UpdateAlarm extends Service {
 				.setAutoCancel(true)
 				.setOngoing(false);
 
-		notificationManager.notify(alarmID, builder.build());
+		notificationManager.notify(UniqueNotifID.getID(), builder.build());
 
 	}
 
@@ -352,13 +366,7 @@ public class Service_UpdateAlarm extends Service {
 
 		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			int importance = NotificationManager.IMPORTANCE_HIGH;
-			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_ID_ERROR),
-					"Error Notification", importance);
-			channel.setSound(null, null);
-			notificationManager.createNotificationChannel(channel);
-		}
+		createErrorNotificationChannel();
 
 		Intent intent = new Intent(getApplicationContext(), Activity_RequestPerm.class);
 
@@ -370,16 +378,17 @@ public class Service_UpdateAlarm extends Service {
 		NotificationCompat.Action notifAction = new NotificationCompat.Action.Builder(R.drawable.ic_notif,
 				getString(R.string.error_notif_body), pendingIntent).build();
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(ConstantsAndStatics.NOTIF_ID_ERROR))
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ERROR))
 				.setContentTitle(getString(R.string.error_notif_title))
 				.setContentText(getString(R.string.error_notif_body))
 				.setPriority(NotificationCompat.PRIORITY_HIGH)
 				.setCategory(NotificationCompat.CATEGORY_ERROR)
 				.setSmallIcon(R.drawable.ic_notif)
 				.setOngoing(true)
+				.setAutoCancel(true)
 				.addAction(notifAction);
 
-		notificationManager.notify(ConstantsAndStatics.NOTIF_ID_ERROR, builder.build());
+		notificationManager.notify(UniqueNotifID.getID(), builder.build());
 
 	}
 

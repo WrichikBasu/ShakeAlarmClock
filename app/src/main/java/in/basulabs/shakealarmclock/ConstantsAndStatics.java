@@ -458,18 +458,18 @@ final class ConstantsAndStatics {
 	//---------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Notification ID for the channels used for ringing alarms.
+	 * Notification ID for the channels used for ringing and snoozed alarms.
 	 */
-	static final int NOTIF_ID_ALARM = 621;
-
-	/**
-	 * Notification ID for the channel used during snooze.
-	 */
-	static final int NOTIF_ID_SNOOZE = 622;
+	static final int NOTIF_CHANNEL_ID_ALARM = 621;
 
 	/**
 	 * Notification ID for error channel.
 	 */
-	static final int NOTIF_ID_ERROR = 623;
+	static final int NOTIF_CHANNEL_ID_ERROR = 623;
+
+	/**
+	 * Notification Channel ID for update service.
+	 */
+	static final int NOTIF_CHANNEL_ID_UPDATE = 625;
 
 }

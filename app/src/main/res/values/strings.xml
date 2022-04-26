@@ -196,4 +196,9 @@
     <string name="error_notif_body">Alarms could not be set due to missing permission. Tap to see details.</string>
     <string name="perm_granted">Thanks for the permission. Setting up alarms. You may close the app.</string>
 
+    <!-- Notification Channel Names -->
+    <string name="notif_channel_alarms">Ringing &amp; snoozed alarms</string>
+    <string name="notif_channel_error">Errors</string>
+    <string name="notif_channel_update">Updating alarms</string>
+
 </resources>
