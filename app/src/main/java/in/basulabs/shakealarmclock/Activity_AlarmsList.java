@@ -7,7 +7,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,10 +33,6 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.github.javiersantos.appupdater.AppUpdater;
-import com.github.javiersantos.appupdater.enums.Display;
-import com.github.javiersantos.appupdater.enums.UpdateFrom;
 
 import java.text.NumberFormat;
 import java.time.Duration;
@@ -549,64 +544,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 				DialogFragment dialogFragment = new AlertDialog_BatteryOptimizations();
 				dialogFragment.setCancelable(false);
 				dialogFragment.show(getSupportFragmentManager(), "");
-				return;
 			}
 		}
-		checkForUpdatesFromGooglePlay();
-	}
-
-	//-------------------------------------------------------------------------------------------------------------
-
-	/**
-	 * Checks for updates from Google Play.
-	 * <p>
-	 * Courtsey: https://github.com/javiersantos/AppUpdater
-	 * </p>
-	 */
-	private void checkForUpdatesFromGooglePlay() {
-		Context context = this;
-
-		new AppUpdater(this)
-				.setUpdateFrom(UpdateFrom.GOOGLE_PLAY)
-				.setDisplay(Display.DIALOG)
-				.setCancelable(true)
-				.setButtonDoNotShowAgain(null)
-				.setButtonUpdateClickListener((dialog, which) -> {
-					dialog.cancel();
-
-					try {
-						context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=in.basulabs.shakealarmclock")));
-					} catch (android.content.ActivityNotFoundException exception) {
-						context.startActivity(new Intent(Intent.ACTION_VIEW,
-								Uri.parse("https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock")));
-					}
-				})
-				.start();
-	}
-
-	//-------------------------------------------------------------------------------------------------------------
-
-	/**
-	 * Checks for updates from Github.
-	 * <p>
-	 * Courtsey: https://github.com/javiersantos/AppUpdater
-	 * </p>
-	 */
-	@SuppressWarnings({"unused", "RedundantSuppression"})
-	private void checkForUpdatesFromGitHub() {
-		Context context = this;
-
-		new AppUpdater(this)
-				.setUpdateFrom(UpdateFrom.GITHUB)
-				.setGitHubUserAndRepo("WrichikBasu", "ShakeAlarmClock")
-				.setDisplay(Display.DIALOG)
-				.setCancelable(true)
-				.setButtonDoNotShowAgain(null)
-				.setButtonUpdateClickListener((dialog, which) -> {
-					dialog.cancel();
-					context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/WrichikBasu/ShakeAlarmClock/releases")));
-				})
-				.start();
 	}
 
 	//-------------------------------------------------------------------------------------------------------------
