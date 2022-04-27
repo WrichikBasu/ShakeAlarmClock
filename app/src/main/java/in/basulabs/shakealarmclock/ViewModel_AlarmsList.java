@@ -27,8 +27,20 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 	private MutableLiveData<Bundle> pendingAlarmDetails;
 	private final MutableLiveData<Boolean> isSettingsActOver = new MutableLiveData<>(false);
 
+	/**
+	 * Denotes whether the data on alarms is already in the memory.
+	 * <p>
+	 * This relies on the fact that if the ViewModel is not initialized, then this variable will also have default value.
+	 */
+	private final MutableLiveData<Boolean> alreadyInitialized = new MutableLiveData<>(false);
+
 	//--------------------------------------------------------------------------------------------------
 
+	/**
+	 * Get an observable instance of the number of alarms.
+	 *
+	 * @return A {@link LiveData} instance of the number of alarms.
+	 */
 	public LiveData<Integer> getLiveAlarmsCount() {
 		return alarmsCount;
 	}
@@ -66,7 +78,7 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 	 * @param alarmDatabase The {@link AlarmDatabase} object.
 	 * @return The total number of alarms in the database.
 	 */
-	public int getAlarmsCount(AlarmDatabase alarmDatabase) {
+	public int getAlarmsCount(@NonNull AlarmDatabase alarmDatabase) {
 
 		AtomicInteger count = new AtomicInteger(0);
 
@@ -89,12 +101,12 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 	 * Updates the date of the alarm to the next feasible date, and then reads data into {@link #alarmDataArrayList}.
 	 *
 	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read from/write to the database.
-	 * @param force Whether the operation is to be forced. If this is {@code true}, the method will not return until the thread has completed
-	 * execution. Otherwise the thread will run in the background.
+	 * @param wait If this is {@code true}, the method will not return until the background thread has completed execution. Otherwise the background
+	 * thread will be started and not waited upon for completion.
 	 */
-	private void init(AlarmDatabase alarmDatabase, boolean force) {
+	private void init(@NonNull AlarmDatabase alarmDatabase, boolean wait) {
 
-		if (alarmDataArrayList == null || alarmDataArrayList.getValue() == null || force) {
+		if (alarmDataArrayList == null || alarmDataArrayList.getValue() == null || wait) {
 
 			alarmDataArrayList = new MutableLiveData<>(new ArrayList<>());
 
@@ -151,13 +163,14 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 					}
 
 					alarmsCount.postValue(alarmEntityList.size());
+					alreadyInitialized.postValue(true);
 				}
 
 			});
 
 			thread.start();
 
-			if (force) {
+			if (wait) {
 				try {
 					thread.join();
 				} catch (InterruptedException ignored) {
@@ -172,23 +185,38 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 	//-------------------------------------------------------------------------------------------------
 
 	/**
-	 * Forces a re-read of data from the database.
+	 * Re-reads data from the database if and only if the data is not in the memory, and waits for the background thread to be completed.
 	 *
 	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read the database.
 	 */
-	public void forceInit(AlarmDatabase alarmDatabase) {
-		init(alarmDatabase, true);
+	public void initAndWait(@NonNull AlarmDatabase alarmDatabase) {
+		if (alreadyInitialized.getValue() == null || !alreadyInitialized.getValue()) {
+			init(alarmDatabase, true);
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
 
 	/**
-	 * Initialises {@link #alarmDataArrayList} and reads data into it from the database.
+	 * Reads from the database if and only if the ArrayList hasn't been initialized yet. Doesn't wait for background thread to be completed.
 	 *
 	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read the database.
 	 */
-	public void init(AlarmDatabase alarmDatabase) {
-		init(alarmDatabase, false);
+	public void init(@NonNull AlarmDatabase alarmDatabase) {
+		if (alreadyInitialized.getValue() == null || !alreadyInitialized.getValue()) {
+			init(alarmDatabase, false);
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+
+	/**
+	 * Re-reads data from the database regardless of whether the data is already in the memory.
+	 *
+	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read the database.
+	 */
+	public void forceInitAndWait(@NonNull AlarmDatabase alarmDatabase) {
+		init(alarmDatabase, true);
 	}
 
 	//--------------------------------------------------------------------------------------------------

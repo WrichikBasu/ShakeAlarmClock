@@ -226,7 +226,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	 * Kept for future reference.
 	 *
 	private void onDateChanged() {
-		viewModel.forceInit(alarmDatabase);
+		viewModel.forceInitAndWait(alarmDatabase);
 		alarmAdapter = new AlarmAdapter(viewModel.getAlarmDataArrayList(), this, this);
 		alarmsRecyclerView.swapAdapter(alarmAdapter, false);
 	}*/
