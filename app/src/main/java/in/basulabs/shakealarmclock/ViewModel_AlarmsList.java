@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -17,14 +18,14 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ViewModel_AlarmsList extends ViewModel {
+public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver {
 
 
 	private MutableLiveData<ArrayList<AlarmData>> alarmDataArrayList;
-	private MutableLiveData<Integer> alarmsCount;
+	private final MutableLiveData<Integer> alarmsCount = new MutableLiveData<>(0);
 	private MutableLiveData<Boolean> alarmPending = new MutableLiveData<>(false);
 	private MutableLiveData<Bundle> pendingAlarmDetails;
-	private MutableLiveData<Boolean> isSettingsActOver = new MutableLiveData<>(false);
+	private final MutableLiveData<Boolean> isSettingsActOver = new MutableLiveData<>(false);
 
 	//--------------------------------------------------------------------------------------------------
 
@@ -38,8 +39,8 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * Increments the number of alarms by 1.
 	 */
 	private void incrementAlarmsCount() {
-		if (alarmsCount == null || alarmsCount.getValue() == null) {
-			alarmsCount = new MutableLiveData<>();
+
+		if (alarmsCount.getValue() == null) {
 			alarmsCount.setValue(1);
 		} else {
 			alarmsCount.setValue(alarmsCount.getValue() + 1);
@@ -52,7 +53,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * Decrements the number of alarms by 1.
 	 */
 	private void decrementAlarmsCount() {
-		if ((alarmsCount != null) && (alarmsCount.getValue() != null) && (alarmsCount.getValue() > 0)) {
+		if (alarmsCount.getValue() != null && alarmsCount.getValue() > 0) {
 			alarmsCount.setValue(alarmsCount.getValue() - 1);
 		}
 	}
@@ -77,7 +78,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 		} catch (InterruptedException ignored) {
 		}
 
-		alarmsCount = new MutableLiveData<>(count.get());
+		alarmsCount.setValue(count.get());
 
 		return count.get();
 	}
@@ -89,8 +90,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 *
 	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read from/write to the database.
 	 * @param force Whether the operation is to be forced. If this is {@code true}, the method will not return until the thread has completed
-	 * execution.
-	 * Otherwise the thread will run in the background.
+	 * execution. Otherwise the thread will run in the background.
 	 */
 	private void init(AlarmDatabase alarmDatabase, boolean force) {
 
@@ -149,6 +149,8 @@ public class ViewModel_AlarmsList extends ViewModel {
 						Objects.requireNonNull(alarmDataArrayList.getValue()).add(getAlarmDataObject(entity, alarmDateTime, repeatDays));
 
 					}
+
+					alarmsCount.postValue(alarmEntityList.size());
 				}
 
 			});
@@ -161,6 +163,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 				} catch (InterruptedException ignored) {
 				}
 			}
+
 
 		}
 
@@ -212,8 +215,9 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * @param alarmEntity The {@link AlarmEntity} object that contanins all the alarm details.
 	 * @param repeatDays The days in which the alarm is to be repeated, if repeat is ON. Otherwise, this value can be null.
 	 * @return An array consiting of TWO elements: the alarm ID at index 0 and the position at which the alarm was inserted at index 1. The latter
-	 * can be used
-	 * to scroll the {@link androidx.recyclerview.widget.RecyclerView} using {@link androidx.recyclerview.widget.RecyclerView#scrollToPosition(int)}.
+	 * can
+	 * be used to scroll the {@link androidx.recyclerview.widget.RecyclerView} using
+	 * {@link androidx.recyclerview.widget.RecyclerView#scrollToPosition(int)}.
 	 */
 	public int[] addAlarm(@NonNull AlarmDatabase alarmDatabase, @NonNull AlarmEntity alarmEntity, @Nullable ArrayList<Integer> repeatDays) {
 
@@ -324,7 +328,6 @@ public class ViewModel_AlarmsList extends ViewModel {
 	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minutes.
-	 *
 	 * @return The position in the {@code #alarmDataArrayList} from where the alarm was removed.
 	 */
 	public int removeAlarm(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
@@ -364,7 +367,8 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 	/**
 	 * Toggles the ON/OFF state of an alarm.
-	 *  @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
+	 *
+	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minute.
 	 * @param newAlarmState The new alarm state. 0 means OFF and 1 means ON.
@@ -501,14 +505,13 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 	/**
 	 * Returns whether there is a pending alarm that has to be switched on.
-	 *
-	 * The alarm is pending because {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM}
-	 * has not been granted to the app.
+	 * <p>
+	 * The alarm is pending because {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} has not been granted to the app.
 	 *
 	 * @return {@code true} if an alarm is pending to be switched on, otherwise {@code false}.
 	 */
-	public boolean getPendingStatus(){
-		if (alarmPending == null || alarmPending.getValue() == null){
+	public boolean getPendingStatus() {
+		if (alarmPending == null || alarmPending.getValue() == null) {
 			alarmPending = new MutableLiveData<>(false);
 		}
 		return Objects.requireNonNull(alarmPending.getValue());
@@ -518,14 +521,13 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 	/**
 	 * Set whether an alarm is pending to be switched on.
-	 *
-	 * The alarm is pending because {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM}
-	 * has not been granted to the app.
+	 * <p>
+	 * The alarm is pending because {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} has not been granted to the app.
 	 *
 	 * @param status {@code true} if an alarm is pending to be switched on, otherwise {@code false}.
 	 */
-	public void setPendingStatus(boolean status){
-		if (alarmPending == null || alarmPending.getValue() == null){
+	public void setPendingStatus(boolean status) {
+		if (alarmPending == null || alarmPending.getValue() == null) {
 			alarmPending = new MutableLiveData<>(false);
 		}
 		alarmPending.setValue(status);
@@ -535,9 +537,10 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 	/**
 	 * Save the details of a pending alarm.
+	 *
 	 * @param data The details of the pending alarm. May be {@code null}.
 	 */
-	public void savePendingAlarm(@Nullable Bundle data){
+	public void savePendingAlarm(@Nullable Bundle data) {
 		pendingAlarmDetails = new MutableLiveData<>();
 		pendingAlarmDetails.setValue(data);
 	}
@@ -546,10 +549,11 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 	/**
 	 * Get the details of a pending alarm.
+	 *
 	 * @return A {@link Bundle} with the details of the pending alarm.
 	 */
 	@Nullable
-	public Bundle getPendingALarmData(){
+	public Bundle getPendingALarmData() {
 		return pendingAlarmDetails.getValue();
 	}
 
@@ -561,7 +565,7 @@ public class ViewModel_AlarmsList extends ViewModel {
 
 	//--------------------------------------------------------------------------------------------------
 
-	public boolean getIsSettingsActOver(){
-			return Objects.requireNonNull(isSettingsActOver.getValue());
+	public boolean getIsSettingsActOver() {
+		return Objects.requireNonNull(isSettingsActOver.getValue());
 	}
 }

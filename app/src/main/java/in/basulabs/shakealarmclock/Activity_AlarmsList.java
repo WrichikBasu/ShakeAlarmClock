@@ -113,6 +113,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		manageViewStub(viewModel.getAlarmsCount(alarmDatabase));
 
+		getLifecycle().addObserver(viewModel);
+
 		// Observe the number of alarms in the database, and display the view stub based on that count.
 		viewModel.getLiveAlarmsCount().observe(this, this::manageViewStub);
 
@@ -148,6 +150,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 			showDialogs();
 		}
 	}
+
+	//--------------------------------------------------------------------------------------------------
 
 	@Override
 	protected void onResume() {
@@ -279,7 +283,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 				alarmAdapter = new AlarmAdapter(viewModel.getAlarmDataArrayList(), this, this);
 				alarmsRecyclerView.swapAdapter(alarmAdapter, false);
 			} else {
-				alarmAdapter.notifyItemChanged(result[1]);
+				alarmAdapter.notifyItemInserted(result[1]);
 			}
 
 			alarmsRecyclerView.scrollToPosition(result[1]);
@@ -301,7 +305,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		setAlarm(data);
 
-		//ConstantsAndStatics.schedulePeriodicWork(this);
+		ConstantsAndStatics.schedulePeriodicWork(this);
 	}
 
 	//------------------------------------------------------------------------------------------------------
@@ -359,7 +363,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 			toastText = getString(R.string.toast_alarmSwitchedOff, alarmTime.format(formatter));
 		}
 
-		//ConstantsAndStatics.schedulePeriodicWork(this);
+		ConstantsAndStatics.schedulePeriodicWork(this);
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -617,9 +621,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		intent.setAction(ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
 
 		new AlertDialog.Builder(this)
-				.setMessage("On Android S and higher, the app needs permission to schedule exact alarms. Without this, no alarm can be set. Please" +
-						" " +
-						"go to Settings and enable this permission to continue setting an alarm.")
+				.setMessage(R.string.request_exact_alarm_perm)
 				.setCancelable(false)
 				.setPositiveButton("Go to Settings", (dialog, which) -> {
 					viewModel.setIsSettingsActOver(false);
