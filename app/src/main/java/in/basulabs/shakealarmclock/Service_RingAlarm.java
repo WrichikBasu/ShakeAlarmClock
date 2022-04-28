@@ -28,6 +28,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
@@ -103,6 +104,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	 */
 	private boolean alarmRingingStarted;
 
+	private int notifID;
+
 	//--------------------------------------------------------------------------------------------------
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -121,12 +124,14 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
+		notifID = UniqueNotifID.getID();
+
 		alarmDetails = Objects.requireNonNull(Objects.requireNonNull(intent.getExtras()).getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), buildRingNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+			startForeground(notifID, buildRingNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
 		} else {
-			startForeground(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), buildRingNotification());
+			startForeground(notifID, buildRingNotification());
 		}
 		isThisServiceRunning = true;
 		preMatureDeath = true;
@@ -269,7 +274,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
 			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM),
-					getString(R.string.notif_channel_alarms),	importance);
+					getString(R.string.notif_channel_name_ring_alarms), importance);
 			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
 			assert notificationManager != null;
@@ -288,6 +293,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	 * @return A {@link Notification} instance that can be displayed to the user.
 	 */
 	private Notification buildRingNotification() {
+
 		createNotificationChannel();
 
 		Intent fullScreenIntent = new Intent(this, Activity_RingAlarm.class)
@@ -304,11 +310,11 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM))
 				.setContentTitle(getResources().getString(R.string.app_name))
-				.setContentText("Initialising alarm...")
 				.setPriority(NotificationCompat.PRIORITY_MAX)
 				.setCategory(NotificationCompat.CATEGORY_ALARM)
 				.setSmallIcon(R.drawable.ic_notif)
 				.setContentIntent(fullScreenPendingIntent)
+				.setOnlyAlertOnce(true)
 				.setFullScreenIntent(fullScreenPendingIntent, true);
 
 		if (alarmMessage != null) {
@@ -329,7 +335,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	 */
 	private void ringAlarm() {
 
-		notificationManager.notify(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM, buildRingNotification());
+		notificationManager.notify(notifID, buildRingNotification());
 		initialiseShakeSensor();
 
 		if (!(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) == ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY)) {
@@ -341,6 +347,10 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 					.build();
 
 			audioManager.setStreamVolume(AudioManager.STREAM_ALARM, alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME), 0);
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+				Log.e(getClass().getSimpleName(), "volume = " + audioManager.getStreamMinVolume(AudioManager.STREAM_ALARM));
+			}
 
 			try {
 				mediaPlayer.setDataSource(this, alarmToneUri);
@@ -509,8 +519,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 
 	/**
 	 * Sets the next alarn in case of a repeat alarm.
-	 *
-	 *
 	 *
 	 * @param alarmDateTime The date and time when the alarm is to be set.
 	 */

@@ -50,6 +50,8 @@ public class Service_SnoozeAlarm extends Service {
 
 	private PowerManager.WakeLock wakeLock;
 
+	private int notifID;
+
 	//--------------------------------------------------------------------------------------------------
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -70,6 +72,8 @@ public class Service_SnoozeAlarm extends Service {
 
 		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		assert notificationManager != null;
+
+		notifID = UniqueNotifID.getID();
 
 		startSelfForeground();
 		preMatureDeath = true;
@@ -133,9 +137,9 @@ public class Service_SnoozeAlarm extends Service {
 
 	private void startSelfForeground() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), buildSnoozeNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+			startForeground(notifID, buildSnoozeNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
 		} else {
-			startForeground(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), buildSnoozeNotification());
+			startForeground(notifID, buildSnoozeNotification());
 		}
 		isThisServiceRunning = true;
 	}
@@ -170,8 +174,8 @@ public class Service_SnoozeAlarm extends Service {
 	private void createNotificationChannel() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
-			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM),
-					getString(R.string.notif_channel_alarms), importance);
+			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_SNOOZE),
+					getString(R.string.notif_channel_name_snoozed_alarms), importance);
 			channel.setSound(null, null);
 			notificationManager.createNotificationChannel(channel);
 		}
@@ -198,13 +202,13 @@ public class Service_SnoozeAlarm extends Service {
 		NotificationCompat.Action notifAction = new NotificationCompat.Action.Builder(R.drawable.ic_notif,
 				getString(R.string.notifAction), contentPendingIntent).build();
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM))
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_SNOOZE))
 				.setContentTitle(getString(R.string.app_name))
 				.setContentText(getString(R.string.notifContent_snooze))
 				.setPriority(NotificationCompat.PRIORITY_HIGH)
 				.setCategory(NotificationCompat.CATEGORY_ALARM)
 				.setSmallIcon(R.drawable.ic_notif)
-				//.setContentIntent(contentPendingIntent)
+				.setOnlyAlertOnce(true)
 				.addAction(notifAction);
 
 		String alarmMessage = alarmDetails.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
@@ -356,7 +360,7 @@ public class Service_SnoozeAlarm extends Service {
 		unregisterReceiver(broadcastReceiver);
 		isThisServiceRunning = false;
 		alarmID = -1;
-		notificationManager.cancel(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID));
+		notificationManager.cancel(notifID);
 	}
 
 

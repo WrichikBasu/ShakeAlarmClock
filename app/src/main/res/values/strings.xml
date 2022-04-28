@@ -176,7 +176,7 @@
     <string name="message_shakeDetectionTest">Shake your phone. A vibration will tell you that a shake event has
     been detected. Change the sensitivity as per your choice.</string>
     <string name="negative_shakeDetectionTest">Stop</string>
-    
+
     <!-- AlertDialog_BatteryOptimizations -->
     <string name="batteryOptim_message">Please disable battery optimizations for this app. If this app is 
         optimized, it might not be able to ring the alarm.</string>
@@ -197,7 +197,8 @@
     <string name="perm_granted">Thanks for the permission. Setting up alarms. You may close the app.</string>
 
     <!-- Notification Channel Names -->
-    <string name="notif_channel_alarms">Ringing &amp; snoozed alarms</string>
+    <string name="notif_channel_name_ring_alarms">Ringing alarms</string>
+    <string name="notif_channel_name_snoozed_alarms">Snoozed alarms</string>
     <string name="notif_channel_error">Errors</string>
     <string name="notif_channel_update">Updating alarms</string>
 

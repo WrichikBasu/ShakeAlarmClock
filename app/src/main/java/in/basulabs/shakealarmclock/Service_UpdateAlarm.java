@@ -184,8 +184,8 @@ public class Service_UpdateAlarm extends Service {
 			intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
 			intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
-			int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE
-					: PendingIntent.FLAG_NO_CREATE;
+			int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_NO_CREATE :
+					PendingIntent.FLAG_NO_CREATE;
 
 			PendingIntent pendingIntent = PendingIntent.getBroadcast(Service_UpdateAlarm.this, alarmEntity.alarmID, intent, flags);
 
@@ -227,7 +227,8 @@ public class Service_UpdateAlarm extends Service {
 	 * <p>
 	 * If repeat is ON for an alarm, then the alarm is set as usual. If, however, repeat is OFF, then it is first checked whether the time is
 	 * reachable or not. If reachable, the alarm is set, otherwise the alarm is switched off in the database and a notification is posted using
-	 * {@link #postAlarmMissedNotification(LocalTime)}.
+	 * {@link
+	 * #postAlarmMissedNotification(LocalTime)}.
 	 * </p>
 	 *
 	 * @param alarmEntityArrayList The list of active alarms.

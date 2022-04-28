@@ -340,7 +340,7 @@ final class ConstantsAndStatics {
 				.build();
 
 		WorkManager.getInstance(context)
-		           .enqueueUniquePeriodicWork(WORK_TAG_ACTIVATE_ALARMS, ExistingPeriodicWorkPolicy.REPLACE,	periodicWorkRequest);
+		           .enqueueUniquePeriodicWork(WORK_TAG_ACTIVATE_ALARMS, ExistingPeriodicWorkPolicy.REPLACE, periodicWorkRequest);
 	}
 
 	//---------------------------------------------------------------------------------------------------------
@@ -458,9 +458,14 @@ final class ConstantsAndStatics {
 	//---------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Notification ID for the channels used for ringing and snoozed alarms.
+	 * Notification ID for the channels used for ringing alarms.
 	 */
 	static final int NOTIF_CHANNEL_ID_ALARM = 621;
+
+	/**
+	 * Notification ID for the channels used for snooze alarms.
+	 */
+	static final int NOTIF_CHANNEL_ID_SNOOZE = 622;
 
 	/**
 	 * Notification ID for error channel.
@@ -471,5 +476,6 @@ final class ConstantsAndStatics {
 	 * Notification Channel ID for update service.
 	 */
 	static final int NOTIF_CHANNEL_ID_UPDATE = 625;
+
 
 }
