@@ -28,7 +28,6 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
@@ -106,6 +105,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 
 	private int notifID;
 
+	private int powerBtnAction;
+
 	//--------------------------------------------------------------------------------------------------
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -115,6 +116,12 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 				snoozeAlarm();
 			} else if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_CANCEL_ALARM)) {
 				dismissAlarm();
+			} else if (Objects.equals(intent.getAction(), Intent.ACTION_SCREEN_OFF)) {
+				if (powerBtnAction == ConstantsAndStatics.DISMISS) {
+					dismissAlarm();
+				} else if (powerBtnAction == ConstantsAndStatics.SNOOZE) {
+					snoozeAlarm();
+				}
 			}
 		}
 	};
@@ -190,9 +197,13 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 
 		initialAlarmStreamVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
 
+		powerBtnAction = sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION, ConstantsAndStatics.DISMISS);
+
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ConstantsAndStatics.ACTION_SNOOZE_ALARM);
 		intentFilter.addAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
+		intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+		intentFilter.addAction(Intent.ACTION_SCREEN_ON);
 		registerReceiver(broadcastReceiver, intentFilter);
 
 		audioFocusController.requestFocus();
@@ -277,7 +288,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 					getString(R.string.notif_channel_name_ring_alarms), importance);
 			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
-			assert notificationManager != null;
 			notificationManager.createNotificationChannel(channel);
 		}
 	}
@@ -347,10 +357,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 					.build();
 
 			audioManager.setStreamVolume(AudioManager.STREAM_ALARM, alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME), 0);
-
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-				Log.e(getClass().getSimpleName(), "volume = " + audioManager.getStreamMinVolume(AudioManager.STREAM_ALARM));
-			}
 
 			try {
 				mediaPlayer.setDataSource(this, alarmToneUri);

@@ -4,15 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.TypedValue;
-import android.view.Display;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -27,20 +23,11 @@ import java.util.Objects;
 
 public class Activity_RingAlarm extends AppCompatActivity implements View.OnClickListener {
 
-	private SharedPreferences sharedPreferences;
-
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_DESTROY_RING_ALARM_ACTIVITY)) {
 				finish();
-			} else if (Objects.equals(intent.getAction(), Intent.ACTION_SCREEN_OFF)) {
-				DisplayManager displayManager = (DisplayManager) context.getSystemService(DISPLAY_SERVICE);
-				for (Display display : displayManager.getDisplays()) {
-					if (display.getState() == Display.STATE_OFF) {
-						onPowerButtonPressed();
-					}
-				}
 			}
 		}
 	};
@@ -62,8 +49,6 @@ public class Activity_RingAlarm extends AppCompatActivity implements View.OnClic
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_ringalarm);
-
-		sharedPreferences = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
 
 		TextView alarmTimeTextView = findViewById(R.id.alarmTimeTextView2);
 		TextView alarmMessageTextView = findViewById(R.id.alarmmessageTextView);
@@ -111,8 +96,6 @@ public class Activity_RingAlarm extends AppCompatActivity implements View.OnClic
 
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ConstantsAndStatics.ACTION_DESTROY_RING_ALARM_ACTIVITY);
-		intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-		intentFilter.addAction(Intent.ACTION_SCREEN_ON);
 		registerReceiver(broadcastReceiver, intentFilter);
 
 	}
@@ -140,33 +123,4 @@ public class Activity_RingAlarm extends AppCompatActivity implements View.OnClic
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
-
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_POWER) {
-			onPowerButtonPressed();
-			return true;
-		} else if (keyCode == KeyEvent.KEYCODE_HOME || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-			return true;
-		}
-		return super.onKeyDown(keyCode, event);
-	}
-
-	//---------------------------------------------------------------------------------------------------
-
-	private void onPowerButtonPressed() {
-		Intent intent;
-		int powerBtnAction = sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION, ConstantsAndStatics.DISMISS);
-		if (powerBtnAction == ConstantsAndStatics.DISMISS) {
-			intent = new Intent(ConstantsAndStatics.ACTION_CANCEL_ALARM);
-			sendBroadcast(intent);
-			finish();
-		} else if (powerBtnAction == ConstantsAndStatics.SNOOZE) {
-			intent = new Intent(ConstantsAndStatics.ACTION_SNOOZE_ALARM);
-			sendBroadcast(intent);
-			finish();
-		}
-
-	}
 }
