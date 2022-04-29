@@ -384,15 +384,14 @@ public class Service_RingAlarm extends Service implements SensorEventListener, A
 	 * Vibrate the phone for the alarm.
 	 */
 	private void alarmVibration() {
+
 		long[] vibrationPattern = new long[]{0, 600, 200, 600, 200, 800, 200, 1000};
 		int[] vibrationAmplitudes = new int[]{0, 255, 0, 255, 0, 255, 0, 255};
 		// -1 : Play exactly once
 
 		if (vibrator.hasVibrator()) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-				if (vibrator.hasAmplitudeControl()) {
-					vibrator.vibrate(VibrationEffect.createWaveform(vibrationPattern, vibrationAmplitudes, 0));
-				}
+				vibrator.vibrate(VibrationEffect.createWaveform(vibrationPattern, vibrationAmplitudes, 0));
 			} else {
 				vibrator.vibrate(vibrationPattern, 0);
 			}
