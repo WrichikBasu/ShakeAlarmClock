@@ -3,6 +3,8 @@ package in.basulabs.shakealarmclock;
 import static android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM;
 
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -144,6 +146,11 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 		if (savedInstanceState == null && canShowDialogs) {
 			showDialogs();
 		}
+
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+			deleteNotifChannels();
+		}
+
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -674,6 +681,39 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 					}
 
 				});
+
+	}
+
+	/**
+	 * Deletes all notification channels created by the app.
+	 * <p>
+	 * In the last release of the app, many notification channels were created without proper description and names. This method deletes all
+	 * notification channels created by the app so that the mess is removed, and we can start afresh.
+	 * <p>
+	 * The work is done in a background thread so that the UI thread is not burdened.
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.O)
+	private void deleteNotifChannels() {
+
+		new Thread(() -> {
+
+			SharedPreferences sharedPref = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
+
+			if (!sharedPref.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_NOTIF_CHANNELS_DELETED, false)) {
+
+				sharedPref.edit().putBoolean(ConstantsAndStatics.SHARED_PREF_KEY_NOTIF_CHANNELS_DELETED, true).apply();
+
+				NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+				List<NotificationChannel> channelList = notificationManager.getNotificationChannels();
+				if (channelList != null && !channelList.isEmpty()) {
+					for (NotificationChannel channel : channelList) {
+						String id = channel.getId();
+						notificationManager.deleteNotificationChannel(id);
+					}
+				}
+			}
+
+		}).start();
 
 	}
 

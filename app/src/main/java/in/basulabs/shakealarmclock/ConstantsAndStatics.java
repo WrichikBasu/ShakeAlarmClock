@@ -477,5 +477,11 @@ final class ConstantsAndStatics {
 	 */
 	static final int NOTIF_CHANNEL_ID_UPDATE = 625;
 
+	/**
+	 * {@link android.content.SharedPreferences} key to store whether existing notification
+	 * channels have been deleted once after the update.
+	 */
+	static final String SHARED_PREF_KEY_NOTIF_CHANNELS_DELETED = "in.basulabs.shakealarmclock.NotifChannelsDeleted";
+
 
 }
