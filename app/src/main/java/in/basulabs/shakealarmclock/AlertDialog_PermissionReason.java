@@ -9,8 +9,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
-import java.util.Objects;
-
 public class AlertDialog_PermissionReason extends DialogFragment {
 
 	private DialogListener listener;
@@ -52,7 +50,7 @@ public class AlertDialog_PermissionReason extends DialogFragment {
 	public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-		builder.setMessage(Objects.requireNonNull(getArguments()).getString("message"))
+		builder.setMessage(requireArguments().getString("message"))
 		       .setPositiveButton(getResources().getString(R.string.cancelDialog_positive), (dialogInterface, i)
 				       -> listener.onDialogPositiveClick(AlertDialog_PermissionReason.this))
 		       .setNegativeButton(getResources().getString(R.string.cancelDialog_negative), (dialogInterface, i) -> {
