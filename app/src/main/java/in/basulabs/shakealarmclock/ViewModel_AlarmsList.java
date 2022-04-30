@@ -23,7 +23,7 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 
 	private MutableLiveData<ArrayList<AlarmData>> alarmDataArrayList;
 	private final MutableLiveData<Integer> alarmsCount = new MutableLiveData<>(0);
-	private MutableLiveData<Boolean> alarmPending = new MutableLiveData<>(false);
+	private final MutableLiveData<Boolean> isAlarmPending = new MutableLiveData<>(false);
 	private MutableLiveData<Bundle> pendingAlarmDetails;
 	private final MutableLiveData<Boolean> isSettingsActOver = new MutableLiveData<>(false);
 
@@ -539,10 +539,7 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 	 * @return {@code true} if an alarm is pending to be switched on, otherwise {@code false}.
 	 */
 	public boolean getPendingStatus() {
-		if (alarmPending == null || alarmPending.getValue() == null) {
-			alarmPending = new MutableLiveData<>(false);
-		}
-		return Objects.requireNonNull(alarmPending.getValue());
+		return isAlarmPending.getValue() != null && isAlarmPending.getValue();
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -555,10 +552,7 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 	 * @param status {@code true} if an alarm is pending to be switched on, otherwise {@code false}.
 	 */
 	public void setPendingStatus(boolean status) {
-		if (alarmPending == null || alarmPending.getValue() == null) {
-			alarmPending = new MutableLiveData<>(false);
-		}
-		alarmPending.setValue(status);
+		isAlarmPending.setValue(status);
 	}
 
 	//--------------------------------------------------------------------------------------------------
