@@ -1,5 +1,18 @@
 package in.basulabs.shakealarmclock;
 
+import static android.media.RingtoneManager.ACTION_RINGTONE_PICKER;
+import static android.media.RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI;
+import static android.media.RingtoneManager.EXTRA_RINGTONE_EXISTING_URI;
+import static android.media.RingtoneManager.EXTRA_RINGTONE_PICKED_URI;
+import static android.media.RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT;
+import static android.media.RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT;
+import static android.media.RingtoneManager.EXTRA_RINGTONE_TITLE;
+import static android.media.RingtoneManager.EXTRA_RINGTONE_TYPE;
+import static android.media.RingtoneManager.ID_COLUMN_INDEX;
+import static android.media.RingtoneManager.TITLE_COLUMN_INDEX;
+import static android.media.RingtoneManager.TYPE_ALL;
+import static android.media.RingtoneManager.URI_COLUMN_INDEX;
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,6 +35,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,19 +49,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import java.util.Objects;
 
-import static android.media.RingtoneManager.ACTION_RINGTONE_PICKER;
-import static android.media.RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI;
-import static android.media.RingtoneManager.EXTRA_RINGTONE_EXISTING_URI;
-import static android.media.RingtoneManager.EXTRA_RINGTONE_PICKED_URI;
-import static android.media.RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT;
-import static android.media.RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT;
-import static android.media.RingtoneManager.EXTRA_RINGTONE_TITLE;
-import static android.media.RingtoneManager.EXTRA_RINGTONE_TYPE;
-import static android.media.RingtoneManager.ID_COLUMN_INDEX;
-import static android.media.RingtoneManager.TITLE_COLUMN_INDEX;
-import static android.media.RingtoneManager.TYPE_ALL;
-import static android.media.RingtoneManager.URI_COLUMN_INDEX;
-
 public class Activity_RingtonePicker extends AppCompatActivity implements View.OnClickListener, AlertDialog_PermissionReason.DialogListener {
 
 	private AudioAttributes audioAttributes;
@@ -54,10 +56,11 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	private MediaPlayer mediaPlayer;
 	private RadioGroup radioGroup;
 	private static final int DEFAULT_RADIO_BTN_ID = View.generateViewId(), SILENT_RADIO_BTN_ID = View.generateViewId();
-	private static final int FILE_REQUEST_CODE = 4937, PERMISSIONS_REQUEST_CODE = 3720;
+	private static final int PERMISSIONS_REQUEST_CODE = 3720;
 	private SharedPreferences sharedPreferences;
 	private ViewModel_RingtonePicker viewModel;
 	private ConstraintLayout chooseToneLayout;
+	private ActivityResultLauncher<Intent> fileActLauncher;
 
 	//----------------------------------------------------------------------------------------------------
 
@@ -82,6 +85,8 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 				.build();
 
 		chooseToneLayout.setVisibility(View.GONE);
+
+		initActLaunchers();
 
 		if (Objects.equals(getIntent().getAction(), ACTION_RINGTONE_PICKER) && !viewModel.getPermissionRationaleBeingShown()) {
 
@@ -121,7 +126,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (! viewModel.getPermissionRationaleBeingShown() && ! viewModel.getIsInitialised()) {
+		if (!viewModel.getPermissionRationaleBeingShown() && !viewModel.getIsInitialised()) {
 			viewModel.setPermissionRationaleBeingShown(false);
 			if (isPermissionAvailable()) {
 				initialise();
@@ -335,7 +340,9 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 				.setType("*/*")
 				.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
 
-		startActivityForResult(intent, FILE_REQUEST_CODE);
+		fileActLauncher.launch(intent);
+
+		//startActivityForResult(intent, FILE_REQUEST_CODE);
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -401,6 +408,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 		if (requestCode == PERMISSIONS_REQUEST_CODE) {
 			viewModel.setPermissionRationaleBeingShown(false);
 			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -414,53 +422,57 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 
 	//----------------------------------------------------------------------------------------------------
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
+	private void initActLaunchers() {
 
-		if (requestCode == FILE_REQUEST_CODE) {
+		fileActLauncher = registerForActivityResult(
+				new ActivityResultContracts.StartActivityForResult(), (result) -> {
 
-			if (resultCode == RESULT_OK && data != null) {
+					int resultCode = result.getResultCode();
+					Intent data = result.getData();
 
-				Uri toneUri = data.getData();
-				assert toneUri != null;
+					if (resultCode == RESULT_OK && data != null) {
 
-				try (Cursor cursor = getContentResolver().query(toneUri, null, null, null, null)) {
+						Uri toneUri = data.getData();
+						assert toneUri != null;
 
-					if (cursor != null) {
+						try (Cursor cursor = getContentResolver().query(toneUri, null, null, null, null)) {
 
-						if (viewModel.getToneUriList().contains(toneUri)) {
+							if (cursor != null) {
 
-							int index = viewModel.getToneUriList().indexOf(toneUri);
-							((RadioButton) findViewById(viewModel.getToneIdList().get(index))).setChecked(true);
+								if (viewModel.getToneUriList().contains(toneUri)) {
 
-						} else {
+									int index = viewModel.getToneUriList().indexOf(toneUri);
+									((RadioButton) findViewById(viewModel.getToneIdList().get(index))).setChecked(true);
 
-							int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-							cursor.moveToFirst();
+								} else {
 
-							String fileName = cursor.getString(nameIndex);
+									int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+									cursor.moveToFirst();
 
-							int indexOfDot = fileName.lastIndexOf(".");
-							if (indexOfDot != -1) {
-								fileName = fileName.substring(0, indexOfDot);
+									String fileName = cursor.getString(nameIndex);
+
+									int indexOfDot = fileName.lastIndexOf(".");
+									if (indexOfDot != -1) {
+										fileName = fileName.substring(0, indexOfDot);
+									}
+									int toneId = View.generateViewId();
+
+									viewModel.getToneNameList().add(fileName);
+									viewModel.getToneUriList().add(toneUri);
+									viewModel.getToneIdList().add(toneId);
+
+									createOneRadioButton(toneId, fileName);
+
+									((RadioButton) findViewById(toneId)).setChecked(true);
+								}
+								viewModel.setPickedUri(toneUri);
+								playChosenTone();
 							}
-							int toneId = View.generateViewId();
-
-							viewModel.getToneNameList().add(fileName);
-							viewModel.getToneUriList().add(toneUri);
-							viewModel.getToneIdList().add(toneId);
-
-							createOneRadioButton(toneId, fileName);
-
-							((RadioButton) findViewById(toneId)).setChecked(true);
 						}
-						viewModel.setPickedUri(toneUri);
-						playChosenTone();
 					}
-				}
-			}
-		}
+
+				});
+
 	}
 
 	//----------------------------------------------------------------------------------------------------
