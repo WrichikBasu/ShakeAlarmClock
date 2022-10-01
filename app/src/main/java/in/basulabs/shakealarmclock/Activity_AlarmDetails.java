@@ -99,7 +99,7 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 				               .addToBackStack(BACK_STACK_TAG)
 				               .commit();
 
-			} else if (getIntent().getAction().equals(ACTION_EXISTING_ALARM)) {
+			} else if (Objects.requireNonNull(getIntent().getAction()).equals(ACTION_EXISTING_ALARM)) {
 
 				Bundle data = Objects.requireNonNull(getIntent().getExtras()).getBundle(BUNDLE_KEY_ALARM_DETAILS);
 
