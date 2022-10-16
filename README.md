@@ -6,12 +6,11 @@
 ![GitHub license](https://img.shields.io/github/license/WrichikBasu/ShakeAlarmClock)
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/WrichikBasu/ShakeAlarmClock)
-
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/WrichikBasu/ShakeAlarmClock)](https://github.com/WrichikBasu/ShakeAlarmClock/releases/latest)
 ![GitHub Release Date](https://img.shields.io/github/release-date/WrichikBasu/ShakeAlarmClock)
 
-![Minimum SDK version](https://img.shields.io/badge/minimum%20sdk%20version-Lollipop%20(API%2021)-brightgreen)
-![Target SDK version](https://img.shields.io/badge/target%20SDK%20version-Android%2012%20(API%2031)-brightgreen)
+![Minimum SDK version](https://img.shields.io/badge/minimum%20SDK%20version-Lollipop%20(API%2021)-blueviolet)
+![Target SDK version](https://img.shields.io/badge/target%20SDK%20version-Android%2012%20(API%2031)-9cf)
 
 Tired of pressing the power button/swiping the screen every time an alarm rings? Does your phone's UI have a tendency to freeze, thereby making it impossible to dismiss an alarm? No worries! You have come to the right place. With this app, you can simply shake your phone and dismiss the alarm.
 
@@ -32,9 +31,6 @@ Tired of pressing the power button/swiping the screen every time an alarm rings?
 
 
 <a href="https://github.com/WrichikBasu/ShakeAlarmClock/releases/latest"><img src="github.png" alt="Download from Github icon" width="200"/></a>
-
-
-
 <a href='https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=200/></a>
 
 
