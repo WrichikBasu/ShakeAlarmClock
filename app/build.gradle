@@ -20,8 +20,8 @@ apply plugin: 'com.android.application'
 android {
 	namespace 'in.basulabs.shakealarmclock'
 	
-    compileSdkVersion 33
-    buildToolsVersion "31.0.0"
+    compileSdk 33
+    //buildTools "31.0.0"
 
     defaultConfig {
         applicationId "in.basulabs.shakealarmclock"
@@ -68,6 +68,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'com.github.cachapa:ExpandableLayout:2.9.2'
+    implementation 'com.google.code.gson:gson:2.10.1'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
