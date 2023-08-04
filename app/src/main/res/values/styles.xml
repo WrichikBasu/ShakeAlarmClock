@@ -58,6 +58,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <item name="android:textColor">@color/defaultLabelColor</item>
     </style>
 
+    <style name="normalTextViewStyle">
+        <item name="android:fontFamily">arial</item>
+        <item name="android:gravity">start</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/defaultLabelColor</item>
+    </style>
+
     <style name="Theme.AppCompat.Translucent">
         <item name="android:windowNoTitle">true</item>
         <item name="windowNoTitle">true</item>

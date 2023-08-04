@@ -65,22 +65,22 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             tools:node="remove"/>-->
 
         <provider
-            android:name=".MyWorkManagerInitializer"
-            android:authorities="in.basulabs.shakealarmclock.MyWorkManagerInitializer"
+            android:name=".backend.MyWorkManagerInitializer"
+            android:authorities="in.basulabs.shakealarmclock.backend.MyWorkManagerInitializer"
             android:exported="false" />
 
         <service
-            android:name=".Service_SnoozeAlarm"
+            android:name=".backend.Service_SnoozeAlarm"
             android:enabled="true"
             android:exported="false"/>
 
         <service
-            android:name=".Service_RingAlarm"
+            android:name=".backend.Service_RingAlarm"
             android:enabled="true"
             android:exported="false"/>
 
         <receiver
-            android:name=".AlarmBroadcastReceiver"
+            android:name=".backend.AlarmBroadcastReceiver"
             android:enabled="true"
             android:exported="true"
             tools:ignore="ExportedReceiver">
@@ -92,7 +92,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             </intent-filter>
         </receiver>
 
-        <activity android:name=".Activity_AlarmsList"
+        <activity android:name=".frontend.Activity_AlarmsList"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -106,13 +106,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         </activity>
 
         <activity
-            android:name=".Activity_AlarmDetails"
+            android:name=".frontend.Activity_AlarmDetails"
             android:enabled="true"
             android:exported="false"
-            android:parentActivityName=".Activity_AlarmsList" />
+            android:parentActivityName=".frontend.Activity_AlarmsList" />
 
         <activity
-            android:name=".Activity_RingAlarm"
+            android:name=".frontend.Activity_RingAlarm"
             android:enabled="true"
             android:exported="false"
             android:configChanges="orientation|keyboard"
@@ -124,7 +124,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <activity
-            android:name=".Activity_RingtonePicker"
+            android:name=".frontend.Activity_RingtonePicker"
             android:enabled="true"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
@@ -135,18 +135,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         </activity>
 
         <activity
-            android:name=".Activity_Settings"
+            android:name=".frontend.Activity_Settings"
             android:enabled="true"
             android:exported="false"
-            android:parentActivityName=".Activity_AlarmsList" />
+            android:parentActivityName=".frontend.Activity_AlarmsList" />
 
         <service
-            android:name=".Service_UpdateAlarm"
+            android:name=".backend.Service_UpdateAlarm"
             android:enabled="true"
             android:exported="true"
             android:permission="in.basulabs.shakealarmclock.PLUGIN_PERMISSION" />
 
-        <activity android:name=".Activity_IntentManager"
+        <activity android:name=".frontend.Activity_IntentManager"
             android:enabled="true"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Translucent"
@@ -163,7 +163,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         </activity>
 
         <activity
-            android:name=".Activity_RequestPerm"
+            android:name=".frontend.Activity_RequestPerm"
             android:exported="false"
             android:enabled="false"/>
 
