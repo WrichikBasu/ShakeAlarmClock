@@ -14,7 +14,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package in.basulabs.shakealarmclock.backend;
+package in.basulabs.shakealarmclock.frontend;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,6 +26,10 @@ import androidx.core.content.ContextCompat;
 import java.util.Objects;
 
 import static android.content.Context.POWER_SERVICE;
+
+import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
+import in.basulabs.shakealarmclock.backend.Service_RingAlarm;
+import in.basulabs.shakealarmclock.backend.Service_UpdateAlarm;
 
 public class AlarmBroadcastReceiver extends BroadcastReceiver {
 

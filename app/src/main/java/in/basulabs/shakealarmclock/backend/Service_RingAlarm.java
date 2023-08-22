@@ -65,6 +65,7 @@ import in.basulabs.audiofocuscontroller.AudioFocusController;
 import in.basulabs.shakealarmclock.R;
 import in.basulabs.shakealarmclock.frontend.Activity_AlarmsList;
 import in.basulabs.shakealarmclock.frontend.Activity_RingAlarm;
+import in.basulabs.shakealarmclock.frontend.AlarmBroadcastReceiver;
 
 public class Service_RingAlarm extends Service implements SensorEventListener, AudioFocusController.OnAudioFocusChangeListener {
 

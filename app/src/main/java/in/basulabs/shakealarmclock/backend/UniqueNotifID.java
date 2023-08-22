@@ -25,8 +25,8 @@ public class UniqueNotifID {
 
 	/**
 	 * Get a unique notification ID.
-	 *
-	 * Code courtsey: https://stackoverflow.com/questions/12978184/android-get-unique-id-of-notification#comment51322954_28251192
+	 * <p>
+	 * <a href="https://stackoverflow.com/questions/12978184/android-get-unique-id-of-notification#comment51322954_28251192">Courtesy</a>
 	 *
 	 * @return A unique notification ID.
 	 */

@@ -16,6 +16,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 package in.basulabs.shakealarmclock.frontend;
 
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.*;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
@@ -39,35 +41,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.ACTION_EXISTING_ALARM;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.ACTION_NEW_ALARM;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.ACTION_NEW_ALARM_FROM_INTENT;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.ALARM_TYPE_SOUND_ONLY;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_ALARM_DAY;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_ALARM_MONTH;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_ALARM_YEAR;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_HAS_USER_CHOSEN_DATE;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_OLD_ALARM_HOUR;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_OLD_ALARM_MINUTE;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.SHARED_PREF_FILE_NAME;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL;
-import static in.basulabs.shakealarmclock.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_IS_ON;
+import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 
-import in.basulabs.shakealarmclock.ConstantsAndStatics;
 import in.basulabs.shakealarmclock.R;
 
 public class Activity_AlarmDetails extends AppCompatActivity implements Fragment_AlarmDetails_Main.FragmentGUIListener,

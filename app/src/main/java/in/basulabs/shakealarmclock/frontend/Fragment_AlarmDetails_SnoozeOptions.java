@@ -66,43 +66,43 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 		onOffSwitch.setOnCheckedChangeListener(this);
 
 		switch (viewModel.getSnoozeFreq()) {
-			case 3:
+			case 3 -> {
 				freqRadioGroup.check(R.id.freqRadioButton_three);
 				snoozeFreqEditText.setEnabled(false);
-				break;
-			case 5:
+			}
+			case 5 -> {
 				freqRadioGroup.check(R.id.freqRadioButton_five);
 				snoozeFreqEditText.setEnabled(false);
-				break;
-			case 10:
+			}
+			case 10 -> {
 				freqRadioGroup.check(R.id.freqRadioButton_ten);
 				snoozeFreqEditText.setEnabled(false);
-				break;
-			default:
+			}
+			default -> {
 				freqRadioGroup.check(R.id.freqRadioButton_custom);
 				snoozeFreqEditText.setEnabled(true);
 				snoozeFreqEditText.setText(String.valueOf(viewModel.getSnoozeFreq()));
-				break;
+			}
 		}
 
 		switch (viewModel.getSnoozeIntervalInMins()) {
-			case 5:
+			case 5 -> {
 				intervalRadioGroup.check(R.id.intervalRadioButton_five);
 				snoozeIntervalEditText.setEnabled(false);
-				break;
-			case 10:
+			}
+			case 10 -> {
 				intervalRadioGroup.check(R.id.intervalRadioButton_ten);
 				snoozeIntervalEditText.setEnabled(false);
-				break;
-			case 15:
+			}
+			case 15 -> {
 				intervalRadioGroup.check(R.id.intervalRadioButton_fifteen);
 				snoozeIntervalEditText.setEnabled(false);
-				break;
-			default:
+			}
+			default -> {
 				intervalRadioGroup.check(R.id.intervalRadioButton_custom);
 				snoozeIntervalEditText.setEnabled(true);
 				snoozeIntervalEditText.setText(String.valueOf(viewModel.getSnoozeIntervalInMins()));
-				break;
+			}
 		}
 
 		onSwitchCheckedChanged();
@@ -208,42 +208,32 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 
 		if (radioGroup.getId() == R.id.snoozeFreqRadioGroup) {
 
-			switch (checkedId) {
-				case R.id.freqRadioButton_three:
-					viewModel.setSnoozeFreq(3);
-					snoozeFreqEditText.setEnabled(false);
-					break;
-				case R.id.freqRadioButton_five:
-					viewModel.setSnoozeFreq(5);
-					snoozeFreqEditText.setEnabled(false);
-					break;
-				case R.id.freqRadioButton_ten:
-					viewModel.setSnoozeFreq(10);
-					snoozeFreqEditText.setEnabled(false);
-					break;
-				default:
-					snoozeFreqEditText.setEnabled(true);
-					break;
+			if (checkedId == R.id.freqRadioButton_three) {
+				viewModel.setSnoozeFreq(3);
+				snoozeFreqEditText.setEnabled(false);
+			} else if (checkedId == R.id.freqRadioButton_five) {
+				viewModel.setSnoozeFreq(5);
+				snoozeFreqEditText.setEnabled(false);
+			} else if (checkedId == R.id.freqRadioButton_ten) {
+				viewModel.setSnoozeFreq(10);
+				snoozeFreqEditText.setEnabled(false);
+			} else {
+				snoozeFreqEditText.setEnabled(true);
 			}
 
 		} else if (radioGroup.getId() == R.id.snoozeIntervalRadioGroup) {
 
-			switch (checkedId) {
-				case R.id.intervalRadioButton_five:
-					viewModel.setSnoozeIntervalInMins(5);
-					snoozeIntervalEditText.setEnabled(false);
-					break;
-				case R.id.intervalRadioButton_ten:
-					viewModel.setSnoozeIntervalInMins(10);
-					snoozeIntervalEditText.setEnabled(false);
-					break;
-				case R.id.intervalRadioButton_fifteen:
-					viewModel.setSnoozeIntervalInMins(15);
-					snoozeIntervalEditText.setEnabled(false);
-					break;
-				default:
-					snoozeIntervalEditText.setEnabled(true);
-					break;
+			if (checkedId == R.id.intervalRadioButton_five) {
+				viewModel.setSnoozeIntervalInMins(5);
+				snoozeIntervalEditText.setEnabled(false);
+			} else if (checkedId == R.id.intervalRadioButton_ten) {
+				viewModel.setSnoozeIntervalInMins(10);
+				snoozeIntervalEditText.setEnabled(false);
+			} else if (checkedId == R.id.intervalRadioButton_fifteen) {
+				viewModel.setSnoozeIntervalInMins(15);
+				snoozeIntervalEditText.setEnabled(false);
+			} else {
+				snoozeIntervalEditText.setEnabled(true);
 			}
 		}
 	}

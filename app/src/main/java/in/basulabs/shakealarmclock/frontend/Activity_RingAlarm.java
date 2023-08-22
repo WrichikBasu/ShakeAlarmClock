@@ -37,7 +37,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.time.LocalTime;
 import java.util.Objects;
 
-import in.basulabs.shakealarmclock.ConstantsAndStatics;
+import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 import in.basulabs.shakealarmclock.R;
 
 public class Activity_RingAlarm extends AppCompatActivity implements View.OnClickListener {

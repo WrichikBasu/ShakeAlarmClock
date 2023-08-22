@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import in.basulabs.shakealarmclock.ConstantsAndStatics;
+import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 
 public class ViewModel_AlarmDetails extends ViewModel {
 

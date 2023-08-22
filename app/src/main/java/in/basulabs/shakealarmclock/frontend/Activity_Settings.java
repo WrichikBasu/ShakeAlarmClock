@@ -64,7 +64,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
-import in.basulabs.shakealarmclock.ConstantsAndStatics;
+import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 import in.basulabs.shakealarmclock.R;
 
 public class Activity_Settings extends AppCompatActivity implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener,

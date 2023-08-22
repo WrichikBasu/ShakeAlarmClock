@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import in.basulabs.shakealarmclock.backend.AlarmData;
-import in.basulabs.shakealarmclock.ConstantsAndStatics;
+import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 import in.basulabs.shakealarmclock.R;
 
 public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> {

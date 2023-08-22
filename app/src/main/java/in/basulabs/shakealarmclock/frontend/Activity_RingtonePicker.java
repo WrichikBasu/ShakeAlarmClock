@@ -65,7 +65,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import java.util.Objects;
 
-import in.basulabs.shakealarmclock.ConstantsAndStatics;
+import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 import in.basulabs.shakealarmclock.R;
 
 public class Activity_RingtonePicker extends AppCompatActivity implements View.OnClickListener, AlertDialog_PermissionReason.DialogListener {

@@ -56,7 +56,7 @@ import java.util.Objects;
 
 import static android.app.Activity.RESULT_OK;
 
-import in.basulabs.shakealarmclock.ConstantsAndStatics;
+import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 import in.basulabs.shakealarmclock.R;
 
 public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClickListener,
