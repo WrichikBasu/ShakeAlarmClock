@@ -92,10 +92,9 @@ public class Activity_IntentManager extends AppCompatActivity {
 		Intent intent = getIntent();
 
 		switch (Objects.requireNonNull(intent.getAction())) {
-
-			case AlarmClock.ACTION_SET_ALARM:
-
-				if (!intent.hasExtra(AlarmClock.EXTRA_HOUR) || !intent.hasExtra(AlarmClock.EXTRA_MINUTES)) {
+			case AlarmClock.ACTION_SET_ALARM -> {
+				if (!intent.hasExtra(AlarmClock.EXTRA_HOUR) || !intent.hasExtra(
+						AlarmClock.EXTRA_MINUTES)) {
 					///////////////////////////////////////////////////////////////////////
 					// These two extras are necessary for an alarm to be set. Without
 					// these, the user will be redirected to Activity_AlarmsList.
@@ -103,18 +102,21 @@ public class Activity_IntentManager extends AppCompatActivity {
 
 					Intent intent1 = new Intent(this, Activity_AlarmsList.class);
 					intent1.setAction(ACTION_NEW_ALARM_FROM_INTENT)
-					       .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-					       .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+							.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+							.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 					startActivity(intent1);
 
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 						if (isVoiceInteraction()) {
 
 							Bundle status = new Bundle();
-							VoiceInteractor.Prompt prompt = new VoiceInteractor.Prompt(new String[]{"You can do that in the app."},
+							VoiceInteractor.Prompt prompt = new VoiceInteractor.Prompt(
+									new String[]{"You can do that in the app."},
 									"You can do that in the app.");
 
-							VoiceInteractor.Request request = new VoiceInteractor.CompleteVoiceRequest(prompt, status);
+							VoiceInteractor.Request request =
+									new VoiceInteractor.CompleteVoiceRequest(
+									prompt, status);
 							getVoiceInteractor().submitRequest(request);
 						}
 					}
@@ -125,19 +127,20 @@ public class Activity_IntentManager extends AppCompatActivity {
 						if (isVoiceInteraction()) {
 
 							Bundle status = new Bundle();
-							VoiceInteractor.Prompt prompt = new VoiceInteractor.Prompt(new String[]{"Your alarm has been set by Shake Alarm Clock."},
+							VoiceInteractor.Prompt prompt = new VoiceInteractor.Prompt(
+									new String[]{"Your alarm has been set by Shake Alarm" +
+											" Clock."},
 									"Your alarm has been set by Shake Alarm Clock.");
 
-							VoiceInteractor.Request request = new VoiceInteractor.CompleteVoiceRequest(prompt, status);
+							VoiceInteractor.Request request =
+									new VoiceInteractor.CompleteVoiceRequest(
+									prompt, status);
 							getVoiceInteractor().submitRequest(request);
 						}
 					}
 				}
-
-				break;
-
-			case AlarmClock.ACTION_DISMISS_ALARM:
-
+			}
+			case AlarmClock.ACTION_DISMISS_ALARM -> {
 				if (Service_RingAlarm.isThisServiceRunning || Service_SnoozeAlarm.isThisServiceRunning) {
 					sendBroadcast(new Intent(ConstantsAndStatics.ACTION_CANCEL_ALARM));
 				} else {
@@ -146,15 +149,12 @@ public class Activity_IntentManager extends AppCompatActivity {
 							.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 					startActivity(intent2);
 				}
-
-				break;
-
-			case AlarmClock.ACTION_SNOOZE_ALARM:
-
+			}
+			case AlarmClock.ACTION_SNOOZE_ALARM -> {
 				Intent intent1 = new Intent();
 				intent1.setAction(ConstantsAndStatics.ACTION_SNOOZE_ALARM);
 				sendBroadcast(intent1);
-				break;
+			}
 		}
 
 		finish();
@@ -285,7 +285,9 @@ public class Activity_IntentManager extends AppCompatActivity {
 			data.putInt(BUNDLE_KEY_ALARM_ID, alarmID.get());
 			intent1.putExtra(BUNDLE_KEY_ALARM_DETAILS, data);
 
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), alarmID.get(), intent1, 0);
+			PendingIntent pendingIntent =
+					PendingIntent.getBroadcast(getApplicationContext(), alarmID.get(),
+							intent1, PendingIntent.FLAG_IMMUTABLE);
 
 			ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0).withNano(0), ZoneId.systemDefault());
 
