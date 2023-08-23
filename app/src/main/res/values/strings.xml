@@ -242,8 +242,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     <string name="perm_title_post_notif">Post notifications</string>
     <string name="perm_exp_post_notif">This permission allows the app to post notifications. Without this, you will
-    not see the alarm screen when an alarm rings, or dismiss it later from the notification. This is one of the basic permissions
-    and the app will not work without it.</string>
+    not see the alarm screen when an alarm rings, or dismiss it later from the notification.</string>
 
     <string name="perm_title_read_media_audio">Read audio files</string>
     <string name="perm_exp_media_audio">This permission is optional, and will be required if you
@@ -261,5 +260,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     to be optimized to save battery. While this is OK for many apps, this app is an alarm clock app, and often faces trouble
     if set to optimize battery. With this enabled, the Android system can kill the app at any time and/or cancel the alarms it has set, which
     will be detrimental to the working of the app. We recommend you to whitelist this app from battery optimizations.</string>
+
+    <string name="perm_title_exact_alarms">Schedule Alarms</string>
+    <string name="perm_expln_exact_alarms">Android versions S and above need a permission to
+    schedule exact alarms. Without this, the app will not be able to schedule any alarms. </string>
+
+    <string name="perm_requested_twice">Seems you have already denied this permission twice.
+    Android will not allow this app to create the permission request dialog again. Would you
+    like to head to Settings and allow this permission?</string>
+
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
 </resources>

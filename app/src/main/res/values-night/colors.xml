@@ -19,4 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <color name="colorBackgroundFragment">@android:color/transparent</color>
     <color name="colorBackgroundButton">@android:color/transparent</color>
     <color name="defaultLabelColor">#FFFFFF</color>
+
+    <color name="surface">#000000</color>
 </resources>
