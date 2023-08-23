@@ -20,15 +20,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     package="in.basulabs.shakealarmclock"
     android:installLocation="internalOnly">
 
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.SET_ALARM" />
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -80,7 +84,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:exported="false"/>
 
         <receiver
-            android:name=".backend.AlarmBroadcastReceiver"
+            android:name=".frontend.AlarmBroadcastReceiver"
             android:enabled="true"
             android:exported="true"
             tools:ignore="ExportedReceiver">
@@ -163,9 +167,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         </activity>
 
         <activity
-            android:name=".frontend.Activity_RequestPerm"
+            android:name=".frontend.Activity_ListReqPerm"
             android:exported="false"
-            android:enabled="false"/>
+            android:enabled="true"/>
 
     </application>
 
