@@ -52,17 +52,17 @@ public class PermissionAdapter extends RecyclerView.Adapter<PermissionAdapter.Vi
 		holder.permExpTV.setText(permission.permExplanationID());
 
 		switch (permission.permType()) {
-			case ConstantsAndStatics.PERMISSION_TYPE_ESSENTIAL -> {
+			case ConstantsAndStatics.PERMISSION_LEVEL_ESSENTIAL -> {
 				holder.permTypeTV.setText(context.getString(R.string.perm_type_critical));
 				holder.permTypeTV.setTextColor(Color.RED);
 				holder.denyAccessBtn.setVisibility(View.GONE);
 			}
-			case ConstantsAndStatics.PERMISSION_TYPE_RECOMMENDED -> {
+			case ConstantsAndStatics.PERMISSION_LEVEL_RECOMMENDED -> {
 				holder.permTypeTV.setText(context.getString(R.string.perm_type_recom));
 				holder.permTypeTV.setTextColor(Color.CYAN);
 				holder.denyAccessBtn.setVisibility(View.VISIBLE);
 			}
-			case ConstantsAndStatics.PERMISSION_TYPE_OPTIONAL -> {
+			case ConstantsAndStatics.PERMISSION_LEVEL_OPTIONAL -> {
 				holder.permTypeTV.setText(context.getString(R.string.perm_type_optional));
 				holder.permTypeTV.setTextColor(Color.GREEN);
 				holder.denyAccessBtn.setVisibility(View.VISIBLE);

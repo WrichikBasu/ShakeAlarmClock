@@ -2,6 +2,7 @@ package in.basulabs.shakealarmclock.frontend;
 
 import android.Manifest;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,6 +16,7 @@ import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Set;
 
 import in.basulabs.shakealarmclock.R;
 import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
@@ -24,78 +26,101 @@ public class ViewModel_ListReqPerm extends ViewModel {
 
 	private MutableLiveData<ArrayList<String>> permsRequested = null;
 
+	private final MutableLiveData<HashMap<String, Integer>> permsLevelMap =
+		new MutableLiveData<>(new HashMap<>());
+
 	private final MutableLiveData<ArrayList<Permission>> permsQueue =
-			new MutableLiveData<>(new ArrayList<>());
+		new MutableLiveData<>(new ArrayList<>());
 
 	private final MutableLiveData<Permission> currentPermission =
-			new MutableLiveData<>();
+		new MutableLiveData<>();
 
 	void init(@NonNull SharedPreferences sharedPref) {
 
-		if (permsRequested != null && permsRequested.getValue() != null && Objects.requireNonNull(
-				permsQueue.getValue()).isEmpty()) {
+		if (permsRequested != null && permsRequested.getValue() != null
+			&& Objects.requireNonNull(permsQueue.getValue()).isEmpty()) {
+
 			for (String perm : permsRequested.getValue()) {
+
 				switch (perm) {
 
 					case Manifest.permission.SCHEDULE_EXACT_ALARM ->
-							Objects.requireNonNull(permsQueue.getValue())
-									.add(new Permission(
-											Manifest.permission.SCHEDULE_EXACT_ALARM,
-											R.string.perm_title_exact_alarms,
-											R.string.perm_expln_exact_alarms,
-											ConstantsAndStatics.PERMISSION_TYPE_ESSENTIAL,
-											getPermsRequestStatus(sharedPref,
-													Manifest.permission.SCHEDULE_EXACT_ALARM)));
+						Objects.requireNonNull(permsQueue.getValue())
+							.add(new Permission(
+								Manifest.permission.SCHEDULE_EXACT_ALARM,
+								R.string.perm_title_exact_alarms,
+								R.string.perm_expln_exact_alarms,
+								Objects.requireNonNull(permsLevelMap.getValue())
+									.containsKey(perm) ?
+									permsLevelMap.getValue().get(perm) :
+									ConstantsAndStatics.PERMISSION_LEVEL_ESSENTIAL,
+								getPermsRequestStatus(sharedPref,
+									Manifest.permission.SCHEDULE_EXACT_ALARM)));
 
 					case Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS ->
-							Objects.requireNonNull(permsQueue.getValue())
-									.add(new Permission(
-											Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-											R.string.perm_title_ign_bat_optim,
-											R.string.perm_exp_ign_bat_optim,
-											ConstantsAndStatics.PERMISSION_TYPE_RECOMMENDED,
-											getPermsRequestStatus(sharedPref,
-													Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)));
+						Objects.requireNonNull(permsQueue.getValue())
+							.add(new Permission(
+								Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+								R.string.perm_title_ign_bat_optim,
+								R.string.perm_exp_ign_bat_optim,
+								Objects.requireNonNull(permsLevelMap.getValue())
+									.containsKey(perm) ?
+									permsLevelMap.getValue().get(perm) :
+									ConstantsAndStatics.PERMISSION_LEVEL_RECOMMENDED,
+								getPermsRequestStatus(sharedPref,
+									Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)));
 
 					case Manifest.permission.ACCESS_NOTIFICATION_POLICY ->
-							Objects.requireNonNull(permsQueue.getValue())
-									.add(new Permission(
-											Manifest.permission.ACCESS_NOTIFICATION_POLICY,
-											(R.string.perm_title_notif_policy),
-											(R.string.perm_exp_notif_policy),
-											ConstantsAndStatics.PERMISSION_TYPE_RECOMMENDED,
-											getPermsRequestStatus(sharedPref,
-													Manifest.permission.ACCESS_NOTIFICATION_POLICY)));
+						Objects.requireNonNull(permsQueue.getValue())
+							.add(new Permission(
+								Manifest.permission.ACCESS_NOTIFICATION_POLICY,
+								(R.string.perm_title_notif_policy),
+								(R.string.perm_exp_notif_policy),
+								Objects.requireNonNull(permsLevelMap.getValue())
+									.containsKey(perm) ?
+									permsLevelMap.getValue().get(perm) :
+									ConstantsAndStatics.PERMISSION_LEVEL_RECOMMENDED,
+								getPermsRequestStatus(sharedPref,
+									Manifest.permission.ACCESS_NOTIFICATION_POLICY)));
 
 					case Manifest.permission.READ_MEDIA_AUDIO ->
-							Objects.requireNonNull(permsQueue.getValue())
-									.add(new Permission(
-											Manifest.permission.READ_MEDIA_AUDIO,
-											R.string.perm_title_read_media_audio,
-											R.string.perm_exp_media_audio,
-											ConstantsAndStatics.PERMISSION_TYPE_OPTIONAL,
-											getPermsRequestStatus(sharedPref,
-													Manifest.permission.READ_MEDIA_AUDIO)));
+						Objects.requireNonNull(permsQueue.getValue())
+							.add(new Permission(
+								Manifest.permission.READ_MEDIA_AUDIO,
+								R.string.perm_title_read_media_audio,
+								R.string.perm_exp_media_audio,
+								Objects.requireNonNull(permsLevelMap.getValue())
+									.containsKey(perm) ?
+									permsLevelMap.getValue().get(perm) :
+									ConstantsAndStatics.PERMISSION_LEVEL_OPTIONAL,
+								getPermsRequestStatus(sharedPref,
+									Manifest.permission.READ_MEDIA_AUDIO)));
 
 					case Manifest.permission.POST_NOTIFICATIONS ->
-							Objects.requireNonNull(permsQueue.getValue())
-									.add(new Permission(
-											Manifest.permission.POST_NOTIFICATIONS,
-											R.string.perm_title_post_notif,
-											R.string.perm_exp_post_notif,
-											ConstantsAndStatics.PERMISSION_TYPE_ESSENTIAL,
-											getPermsRequestStatus(sharedPref,
-													Manifest.permission.POST_NOTIFICATIONS)));
+						Objects.requireNonNull(permsQueue.getValue())
+							.add(new Permission(
+								Manifest.permission.POST_NOTIFICATIONS,
+								R.string.perm_title_post_notif,
+								R.string.perm_exp_post_notif,
+								Objects.requireNonNull(permsLevelMap.getValue())
+									.containsKey(perm) ?
+									permsLevelMap.getValue().get(perm) :
+									ConstantsAndStatics.PERMISSION_LEVEL_ESSENTIAL,
+								getPermsRequestStatus(sharedPref,
+									Manifest.permission.POST_NOTIFICATIONS)));
 
 					case Manifest.permission.READ_EXTERNAL_STORAGE ->
-							Objects.requireNonNull(permsQueue.getValue())
-									.add(new Permission(
-											Manifest.permission.READ_EXTERNAL_STORAGE,
-											R.string.perm_title_read_media_audio,
-											R.string.perm_exp_media_audio,
-											ConstantsAndStatics.PERMISSION_TYPE_OPTIONAL,
-											getPermsRequestStatus(sharedPref,
-													Manifest.permission.READ_EXTERNAL_STORAGE)));
+						Objects.requireNonNull(permsQueue.getValue())
+							.add(new Permission(
+								Manifest.permission.READ_EXTERNAL_STORAGE,
+								R.string.perm_title_read_media_audio,
+								R.string.perm_exp_media_audio,
+								Objects.requireNonNull(permsLevelMap.getValue())
+									.containsKey(perm) ?
+									permsLevelMap.getValue().get(perm) :
+									ConstantsAndStatics.PERMISSION_LEVEL_OPTIONAL,
+								getPermsRequestStatus(sharedPref,
+									Manifest.permission.READ_EXTERNAL_STORAGE)));
 
 				}
 			}
@@ -110,7 +135,7 @@ public class ViewModel_ListReqPerm extends ViewModel {
 	 * Get the permissions in the queue that have not been granted yet.
 	 *
 	 * @return Permissions in the queue that have not yet been granted. Can return an
-	 * empty list, but not null.
+	 * 	empty list, but not null.
 	 */
 	@NonNull
 	ArrayList<Permission> getPermsQueue() {
@@ -134,7 +159,7 @@ public class ViewModel_ListReqPerm extends ViewModel {
 	 *
 	 * @param permission The {@link Permission} object to be deleted.
 	 * @return The position of the deleted element in the queue, or -1 if the object is
-	 * absent.
+	 * 	absent.
 	 */
 	int deleteItemFromQueue(@NonNull Permission permission) {
 		ArrayList<Permission> permsQueue = getPermsQueue();
@@ -153,11 +178,11 @@ public class ViewModel_ListReqPerm extends ViewModel {
 	 * Essential permissions are those without which the app won't work.
 	 *
 	 * @return {@code true} is any essential permissions are present, otherwise
-	 * {@code false}.
+	 *    {@code false}.
 	 */
 	boolean areEssentialPermsPresent() {
 		for (Permission permission : getPermsQueue()) {
-			if (permission.permType() == ConstantsAndStatics.PERMISSION_TYPE_ESSENTIAL) {
+			if (permission.permType() == ConstantsAndStatics.PERMISSION_LEVEL_ESSENTIAL) {
 				return true;
 			}
 		}
@@ -178,7 +203,7 @@ public class ViewModel_ListReqPerm extends ViewModel {
 	 *
 	 * @return The {@link Permission} being requested currently. Can be {@code null}
 	 * if no
-	 * permission is being requested.
+	 * 	permission is being requested.
 	 */
 	@Nullable
 	Permission getCurrentPermission() {
@@ -201,20 +226,20 @@ public class ViewModel_ListReqPerm extends ViewModel {
 	 * <a href="https://stackoverflow.com/a/39204743/8387076">Courtesy</a>
 	 *
 	 * @param sharedPref A non-null instance of the {@link SharedPreferences} where this
-	 * data is stored.
+	 * 	data is stored.
 	 * @param permAndroidString The permission string. Eg.
-	 * {@link Manifest.permission#READ_MEDIA_AUDIO}.
+	 *    {@link Manifest.permission#READ_MEDIA_AUDIO}.
 	 * @return How many times a permission has been requested by the app.
 	 */
 	int getPermsRequestStatus(@NonNull SharedPreferences sharedPref,
-	                          @NonNull String permAndroidString) {
+		@NonNull String permAndroidString) {
 		String defValue = new Gson().toJson(new HashMap<String, Integer>());
 		String json = sharedPref.getString(
-				ConstantsAndStatics.SHARED_PREF_KEY_PERMS_REQ_STATUS, defValue);
+			ConstantsAndStatics.SHARED_PREF_KEY_PERMS_REQ_STATUS, defValue);
 		TypeToken<HashMap<String, Integer>> token = new TypeToken<>() {
 		};
 		HashMap<String, Integer> retrievedMap = new Gson().fromJson(json,
-				token.getType());
+			token.getType());
 
 		if (retrievedMap.containsKey(permAndroidString)) {
 			return Objects.requireNonNull(retrievedMap.get(permAndroidString));
@@ -231,25 +256,25 @@ public class ViewModel_ListReqPerm extends ViewModel {
 	 * <a href="https://stackoverflow.com/a/39204743/8387076">Courtesy</a>
 	 *
 	 * @param sharedPref A non-null instance of the {@link SharedPreferences} where this
-	 * data is stored.
+	 * 	data is stored.
 	 * @param permAndroidString The permission string. Eg.
-	 * {@link Manifest.permission#READ_MEDIA_AUDIO}.
+	 *    {@link Manifest.permission#READ_MEDIA_AUDIO}.
 	 */
 	void incrementPermsRequested(@NonNull SharedPreferences sharedPref,
-	                             @NonNull String permAndroidString) {
+		@NonNull String permAndroidString) {
 
 		// First retrieve the entire map
 		String defValue = new Gson().toJson(new HashMap<String, Integer>());
 		String json = sharedPref.getString(
-				ConstantsAndStatics.SHARED_PREF_KEY_PERMS_REQ_STATUS, defValue);
+			ConstantsAndStatics.SHARED_PREF_KEY_PERMS_REQ_STATUS, defValue);
 		TypeToken<HashMap<String, Integer>> token = new TypeToken<>() {
 		};
 		HashMap<String, Integer> retrievedMap = new Gson().fromJson(json,
-				token.getType());
+			token.getType());
 
 		Integer numberOfTimesRequested = Objects.isNull(
-				retrievedMap.get(permAndroidString))
-				? 1 : retrievedMap.get(permAndroidString) + 1;
+			retrievedMap.get(permAndroidString))
+			? 1 : retrievedMap.get(permAndroidString) + 1;
 
 		// Put the new value in it
 		retrievedMap.put(permAndroidString, numberOfTimesRequested);
@@ -258,9 +283,18 @@ public class ViewModel_ListReqPerm extends ViewModel {
 		String jsonString = new Gson().toJson(retrievedMap);
 		SharedPreferences.Editor editor = sharedPref.edit();
 		editor.putString(ConstantsAndStatics.SHARED_PREF_KEY_PERMS_REQ_STATUS,
-				jsonString);
+			jsonString);
 		editor.commit();
 	}
 
-
+	public void setPermsLevelMap(@Nullable Bundle permsLevelBundle) {
+		HashMap<String, Integer> map = new HashMap<>();
+		if (permsLevelBundle != null) {
+			Set<String> bundleKeys = permsLevelBundle.keySet();
+			for (String key : bundleKeys) {
+				map.put(key, permsLevelBundle.getInt(key));
+			}
+		}
+		this.permsLevelMap.setValue(map);
+	}
 }
