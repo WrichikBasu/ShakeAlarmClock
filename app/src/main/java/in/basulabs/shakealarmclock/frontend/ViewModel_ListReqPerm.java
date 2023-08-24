@@ -54,7 +54,7 @@ public class ViewModel_ListReqPerm extends ViewModel {
 									.containsKey(perm) ?
 									permsLevelMap.getValue().get(perm) :
 									ConstantsAndStatics.PERMISSION_LEVEL_ESSENTIAL,
-								getPermsRequestStatus(sharedPref,
+								getTimesPermRequested(sharedPref,
 									Manifest.permission.SCHEDULE_EXACT_ALARM)));
 
 					case Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS ->
@@ -67,7 +67,7 @@ public class ViewModel_ListReqPerm extends ViewModel {
 									.containsKey(perm) ?
 									permsLevelMap.getValue().get(perm) :
 									ConstantsAndStatics.PERMISSION_LEVEL_RECOMMENDED,
-								getPermsRequestStatus(sharedPref,
+								getTimesPermRequested(sharedPref,
 									Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)));
 
 					case Manifest.permission.ACCESS_NOTIFICATION_POLICY ->
@@ -80,7 +80,7 @@ public class ViewModel_ListReqPerm extends ViewModel {
 									.containsKey(perm) ?
 									permsLevelMap.getValue().get(perm) :
 									ConstantsAndStatics.PERMISSION_LEVEL_RECOMMENDED,
-								getPermsRequestStatus(sharedPref,
+								getTimesPermRequested(sharedPref,
 									Manifest.permission.ACCESS_NOTIFICATION_POLICY)));
 
 					case Manifest.permission.READ_MEDIA_AUDIO ->
@@ -93,7 +93,7 @@ public class ViewModel_ListReqPerm extends ViewModel {
 									.containsKey(perm) ?
 									permsLevelMap.getValue().get(perm) :
 									ConstantsAndStatics.PERMISSION_LEVEL_OPTIONAL,
-								getPermsRequestStatus(sharedPref,
+								getTimesPermRequested(sharedPref,
 									Manifest.permission.READ_MEDIA_AUDIO)));
 
 					case Manifest.permission.POST_NOTIFICATIONS ->
@@ -106,7 +106,7 @@ public class ViewModel_ListReqPerm extends ViewModel {
 									.containsKey(perm) ?
 									permsLevelMap.getValue().get(perm) :
 									ConstantsAndStatics.PERMISSION_LEVEL_ESSENTIAL,
-								getPermsRequestStatus(sharedPref,
+								getTimesPermRequested(sharedPref,
 									Manifest.permission.POST_NOTIFICATIONS)));
 
 					case Manifest.permission.READ_EXTERNAL_STORAGE ->
@@ -119,7 +119,7 @@ public class ViewModel_ListReqPerm extends ViewModel {
 									.containsKey(perm) ?
 									permsLevelMap.getValue().get(perm) :
 									ConstantsAndStatics.PERMISSION_LEVEL_OPTIONAL,
-								getPermsRequestStatus(sharedPref,
+								getTimesPermRequested(sharedPref,
 									Manifest.permission.READ_EXTERNAL_STORAGE)));
 
 				}
@@ -222,7 +222,7 @@ public class ViewModel_ListReqPerm extends ViewModel {
 
 	/**
 	 * Returns how many times a particular permission has already been asked by this app.
-	 *
+	 * <p>
 	 * <a href="https://stackoverflow.com/a/39204743/8387076">Courtesy</a>
 	 *
 	 * @param sharedPref A non-null instance of the {@link SharedPreferences} where this
@@ -231,11 +231,12 @@ public class ViewModel_ListReqPerm extends ViewModel {
 	 *    {@link Manifest.permission#READ_MEDIA_AUDIO}.
 	 * @return How many times a permission has been requested by the app.
 	 */
-	int getPermsRequestStatus(@NonNull SharedPreferences sharedPref,
+	int getTimesPermRequested(@NonNull SharedPreferences sharedPref,
 		@NonNull String permAndroidString) {
+
 		String defValue = new Gson().toJson(new HashMap<String, Integer>());
 		String json = sharedPref.getString(
-			ConstantsAndStatics.SHARED_PREF_KEY_PERMS_REQ_STATUS, defValue);
+			ConstantsAndStatics.SHARED_PREF_KEY_TIMES_PERMS_REQUESTED, defValue);
 		TypeToken<HashMap<String, Integer>> token = new TypeToken<>() {
 		};
 		HashMap<String, Integer> retrievedMap = new Gson().fromJson(json,
@@ -252,7 +253,7 @@ public class ViewModel_ListReqPerm extends ViewModel {
 	/**
 	 * Increment by 1 the number of times a particular permission has been requested by
 	 * the app.
-	 *
+	 * <p>
 	 * <a href="https://stackoverflow.com/a/39204743/8387076">Courtesy</a>
 	 *
 	 * @param sharedPref A non-null instance of the {@link SharedPreferences} where this
@@ -260,34 +261,35 @@ public class ViewModel_ListReqPerm extends ViewModel {
 	 * @param permAndroidString The permission string. Eg.
 	 *    {@link Manifest.permission#READ_MEDIA_AUDIO}.
 	 */
-	void incrementPermsRequested(@NonNull SharedPreferences sharedPref,
+	void incrementTimesPermRequested(@NonNull SharedPreferences sharedPref,
 		@NonNull String permAndroidString) {
 
 		// First retrieve the entire map
 		String defValue = new Gson().toJson(new HashMap<String, Integer>());
 		String json = sharedPref.getString(
-			ConstantsAndStatics.SHARED_PREF_KEY_PERMS_REQ_STATUS, defValue);
+			ConstantsAndStatics.SHARED_PREF_KEY_TIMES_PERMS_REQUESTED, defValue);
 		TypeToken<HashMap<String, Integer>> token = new TypeToken<>() {
 		};
 		HashMap<String, Integer> retrievedMap = new Gson().fromJson(json,
 			token.getType());
 
-		Integer numberOfTimesRequested = Objects.isNull(
+		Integer newNumberOfTimesRequested = Objects.isNull(
 			retrievedMap.get(permAndroidString))
 			? 1 : retrievedMap.get(permAndroidString) + 1;
 
 		// Put the new value in it
-		retrievedMap.put(permAndroidString, numberOfTimesRequested);
+		retrievedMap.put(permAndroidString, newNumberOfTimesRequested);
 
 		// Write it to SharedPreferences
 		String jsonString = new Gson().toJson(retrievedMap);
 		SharedPreferences.Editor editor = sharedPref.edit();
-		editor.putString(ConstantsAndStatics.SHARED_PREF_KEY_PERMS_REQ_STATUS,
+		editor.putString(ConstantsAndStatics.SHARED_PREF_KEY_TIMES_PERMS_REQUESTED,
 			jsonString);
 		editor.commit();
 	}
 
 	public void setPermsLevelMap(@Nullable Bundle permsLevelBundle) {
+		// http://www.java2s.com/example/android/android-os/convert-bundle-to-map.html
 		HashMap<String, Integer> map = new HashMap<>();
 		if (permsLevelBundle != null) {
 			Set<String> bundleKeys = permsLevelBundle.keySet();

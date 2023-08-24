@@ -47,6 +47,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -90,6 +91,9 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 	private String toastText = null;
 
+	private SharedPreferences sharedPref;
+	private SharedPreferences.Editor sharedPrefEditor;
+
 	//--------------------------------------------------------------------------------------------------
 
 	@Override
@@ -100,16 +104,20 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		alarmDatabase = AlarmDatabase.getInstance(this);
 		viewModel = new ViewModelProvider(this).get(ViewModel_AlarmsList.class);
-		SharedPreferences sharedPreferences = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
 
 		// Initialise the view model:
 		viewModel.init(alarmDatabase);
 
+		sharedPref = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
+			MODE_PRIVATE);
+		sharedPrefEditor = sharedPref.edit();
+
 		// Find and set the app theme:
-		int defaultTheme = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? ConstantsAndStatics.THEME_SYSTEM : ConstantsAndStatics.THEME_AUTO_TIME;
+		int defaultTheme = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
+			ConstantsAndStatics.THEME_SYSTEM : ConstantsAndStatics.THEME_AUTO_TIME;
 		if (savedInstanceState == null) {
 			AppCompatDelegate
-					.setDefaultNightMode(ConstantsAndStatics.getTheme(sharedPreferences.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME,
+					.setDefaultNightMode(ConstantsAndStatics.getTheme(sharedPref.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME,
 							defaultTheme)));
 		}
 
@@ -136,16 +144,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		initActLaunchers();
 
-		/*
-		 * Determines whether it is a good time to ask for non-essential perms (i.e.
-		 * those specified by {@link ConstantsAndStatics#PERMISSION_LEVEL_RECOMMENDED}
-		 * and {@link ConstantsAndStatics#PERMISSION_LEVEL_OPTIONAL}.
-		 * TODO: Ask FAR less frequently based on SharedPreferences
-		 */
-		viewModel.setCanRequestNonEssentialPerms(! Service_RingAlarm.isThisServiceRunning
-			&& ! Service_SnoozeAlarm.isThisServiceRunning
-			&& ! (getIntent().getAction() != null &&
-			getIntent().getAction().equals(ConstantsAndStatics.ACTION_NEW_ALARM_FROM_INTENT)));
+		setCanAskForNonEssentialPerms();
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 			requestEssentialPerms();
@@ -170,15 +169,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		// Check whether it is a good time to ask for optional perms, and request them.
 		if (savedInstanceState == null && viewModel.getCanRequestNonEssentialPerms()) {
-			viewModel.setCanRequestNonEssentialPerms(false);
-			ArrayList<String> optionalPerms =
-				ConstantsAndStatics.checkRecommendedPerms(this);
-			if (! optionalPerms.isEmpty()) {
-				Intent intent = new Intent(this, Activity_ListReqPerm.class);
-				intent.putStringArrayListExtra(ConstantsAndStatics.EXTRA_PERMS_REQUESTED,
-					optionalPerms);
-				startActivity(intent);
-			}
+			requestNonEssentialPermsOnly();
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -558,7 +549,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	//-------------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Requests the {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} permission by directing the user to go to Settings.
+	 * Requests essential permissions from the user. Also requests non-essential
+	 * permissions if they have not been granted.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.S)
 	private void requestEssentialPerms() {
@@ -574,11 +566,45 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 			// Don't ask for optional perms again in this session.
 			viewModel.setCanRequestNonEssentialPerms(false);
 
+			// Non-essential perms have been checked/asked recently.
+			sharedPrefEditor.putBoolean(
+				ConstantsAndStatics.SHARED_PREF_KEY_REQUESTED_NON_ESSENTIAL_PERMS_RECENTLY, true).apply();
+
 			Intent intent = new Intent(this, Activity_ListReqPerm.class);
 			intent.putStringArrayListExtra(ConstantsAndStatics.EXTRA_PERMS_REQUESTED,
 				perms);
 			startActivity(intent);
 		}
+	}
+
+	/**
+	 * Requests only the non-essential permissions.
+	 * <p>
+	 * Assumes it is fine to ask for the
+	 * permissions, so make sure you invoke {@link #setCanAskForNonEssentialPerms()}
+	 * and check the value of
+	 * {@link ViewModel_AlarmsList#getCanRequestNonEssentialPerms()} before calling
+	 * this function.
+	 */
+	private void requestNonEssentialPermsOnly(){
+
+		// Don't ask for optional perms again in this session.
+		viewModel.setCanRequestNonEssentialPerms(false);
+
+		// Non-essential perms have been checked/asked recently.
+		sharedPrefEditor.putBoolean(
+			ConstantsAndStatics.SHARED_PREF_KEY_REQUESTED_NON_ESSENTIAL_PERMS_RECENTLY, true).apply();
+
+		ArrayList<String> optionalPerms =
+			ConstantsAndStatics.checkRecommendedPerms(this);
+
+		if (! optionalPerms.isEmpty()) {
+			Intent intent = new Intent(this, Activity_ListReqPerm.class);
+			intent.putStringArrayListExtra(ConstantsAndStatics.EXTRA_PERMS_REQUESTED,
+				optionalPerms);
+			startActivity(intent);
+		}
+
 	}
 
 	//------------------------------------------------------------------------------
@@ -717,6 +743,61 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 					}
 				}
 			}
+
+		}).start();
+
+	}
+
+	/**
+	 * Decides whether it is a good idea to ask for non-essential permissions in this
+	 * session.
+	 * <p>
+	 * The following criteria have to be satisfied for requesting non-essential
+	 * permissions:<br>
+	 * 1. {@link Service_RingAlarm} must NOT be running.<br>
+	 * 2. {@link Service_SnoozeAlarm} must NOT be running.<br>
+	 * 3. The activity must NOT have been launched by {@link Activity_IntentManager}.<br>
+	 * 4. Permissions must not have been asked in the last 100 app sessions.
+	 */
+	private void setCanAskForNonEssentialPerms() {
+
+		new Thread(() -> {
+
+			long numberOfTimesAppOpened =
+				sharedPref.getLong(ConstantsAndStatics.SHARED_PREF_KEY_NO_OF_TIMES_APP_OPENED,
+					0L) + 1L;
+
+			BigDecimal calc = BigDecimal.valueOf(numberOfTimesAppOpened / 100.0);
+
+			// https://stackoverflow.com/a/10038770/8387076
+			BigDecimal fracPart = calc.remainder(BigDecimal.ONE);
+
+			// https://stackoverflow.com/a/48119203/8387076
+			if (fracPart.compareTo(BigDecimal.valueOf(0.0)) >= 0
+				&& fracPart.compareTo(BigDecimal.valueOf(0.1)) <= 0) {
+
+				boolean askedPermsRecently =
+					sharedPref.getBoolean(
+						ConstantsAndStatics.SHARED_PREF_KEY_REQUESTED_NON_ESSENTIAL_PERMS_RECENTLY,
+						false);
+
+				viewModel.setCanRequestNonEssentialPerms(
+					!Service_RingAlarm.isThisServiceRunning
+						&& !Service_SnoozeAlarm.isThisServiceRunning
+						&& ( !(getIntent().getAction() != null
+						&& getIntent().getAction()
+							.equals(ConstantsAndStatics.ACTION_NEW_ALARM_FROM_INTENT)))
+						&& !askedPermsRecently);
+
+			} else {
+				sharedPrefEditor.putBoolean(
+					ConstantsAndStatics.SHARED_PREF_KEY_REQUESTED_NON_ESSENTIAL_PERMS_RECENTLY,
+					false).commit();
+			}
+
+			sharedPrefEditor.putLong(
+				ConstantsAndStatics.SHARED_PREF_KEY_NO_OF_TIMES_APP_OPENED,
+				numberOfTimesAppOpened).commit();
 
 		}).start();
 

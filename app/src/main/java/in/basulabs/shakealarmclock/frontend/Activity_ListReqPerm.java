@@ -76,12 +76,10 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 		viewModel = new ViewModelProvider(this).get(ViewModel_ListReqPerm.class);
 
 		viewModel.setPermsRequested(getIntent()
-			.getStringArrayListExtra(
-				ConstantsAndStatics.EXTRA_PERMS_REQUESTED));
+			.getStringArrayListExtra(ConstantsAndStatics.EXTRA_PERMS_REQUESTED));
 
 		viewModel.setPermsLevelMap(getIntent()
-			.getBundleExtra(
-				ConstantsAndStatics.EXTRA_PERMS_REQUESTED_LEVEL));
+			.getBundleExtra(ConstantsAndStatics.EXTRA_PERMS_REQUESTED_LEVEL));
 
 		viewModel.init(sharedPreferences);
 
@@ -188,12 +186,12 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 	public void onGrantBtnClick(@NonNull Permission permission) {
 
 		viewModel.setCurrentPermission(permission);
-		viewModel.incrementPermsRequested(sharedPreferences, permission.androidString());
+		viewModel.incrementTimesPermRequested(sharedPreferences, permission.androidString());
 
 		Log.println(Log.ERROR, getClass().getSimpleName(),
 			"Set current permission = " + viewModel.getCurrentPermission());
 
-		int numberOfTimesRequested = viewModel.getPermsRequestStatus(sharedPreferences,
+		int numberOfTimesRequested = viewModel.getTimesPermRequested(sharedPreferences,
 			permission.androidString());
 
 		switch (permission.androidString()) {

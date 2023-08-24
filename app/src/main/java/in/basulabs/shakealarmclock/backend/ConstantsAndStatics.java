@@ -630,17 +630,38 @@ public final class ConstantsAndStatics {
 		"in.basulabs.shakealarmclock.PERMS_TO_BE_REQUESTED";
 
 	/**
-	 * A {@code HashMap<String, Integer>} denoting the level or type of permission.
+	 * A {@code Bundle} containing the level of the permissions being requested.
 	 * <p>
-	 * The key in the HashMap should be {@link Permission#androidString()}. The
-	 * corresponding value should be one of {@link #PERMISSION_LEVEL_ESSENTIAL},
-	 * {@link #PERMISSION_LEVEL_RECOMMENDED} or {@link #PERMISSION_LEVEL_OPTIONAL}.
+	 * Key-value pairs expected in the {@code Bundle} should be of the following form:<br>
+	 * <b>Key:</b> {@link Permission#androidString()}.<br>
+	 * <b>Corresponding value:</b> One of
+	 * {@link #PERMISSION_LEVEL_ESSENTIAL}, {@link #PERMISSION_LEVEL_RECOMMENDED} or
+	 * {@link #PERMISSION_LEVEL_OPTIONAL}.
 	 */
 	public static final String EXTRA_PERMS_REQUESTED_LEVEL =
 		"in.basulabs.shakealarmclock.PERMS_REQUESTED_LEVEL";
 
-	public static final String SHARED_PREF_KEY_PERMS_REQ_STATUS =
-		"in.basulabs.shakealarmclock.SHARED_PREF_KEY_PERMISSIONS_REQUEST_STATUS";
+	/**
+	 * {@link android.content.SharedPreferences} key for a {@code HashMap<String,
+	 * Integer>} that stores how many times a permission has been requested by this
+	 * app since installation/data clear.
+	 * <p>
+	 * Key-value pairs expected in the {@code Bundle} should be of the following form:<br>
+	 * <b>Key:</b> {@link Permission#androidString()}.<br>
+	 * <b>Corresponding value:</b> Number of times this particular permission has been
+	 * requested by the app (any component) in the past.
+	 * <p>
+	 * An entry should be cleared when a certain permission has been given.
+	 */
+	public static final String SHARED_PREF_KEY_TIMES_PERMS_REQUESTED =
+		"in.basulabs.shakealarmclock.SHARED_PREF_KEY_TIMES_PERMS_REQUESTED";
+
+	public static final String SHARED_PREF_KEY_NO_OF_TIMES_APP_OPENED =
+		"in.basulabs.shakealarmclock.SHARED_PREF_KEY_NUMBER_OF_TIMES_APP_OPENED";
+
+	public static final String SHARED_PREF_KEY_REQUESTED_NON_ESSENTIAL_PERMS_RECENTLY =
+		"in.basulabs.shakealarmclock" +
+			".SHARED_PREF_KEY_REQUESTED_NON_ESSENTIAL_PERMS_RECENTLY";
 
 	@NonNull
 	public static ArrayList<String> checkEssentialPerms(@NonNull Context context) {
