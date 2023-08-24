@@ -45,16 +45,19 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 	private final MutableLiveData<Integer> alarmsCount = new MutableLiveData<>(0);
 	private final MutableLiveData<Boolean> isAlarmPending = new MutableLiveData<>(false);
 	private MutableLiveData<Bundle> pendingAlarmDetails;
-	private final MutableLiveData<Boolean> isSettingsActOver = new MutableLiveData<>(false);
+	private final MutableLiveData<Boolean> isSettingsActOver = new MutableLiveData<>(
+		false);
 	private final MutableLiveData<Boolean> canRequestNonEssentialPerms =
 		new MutableLiveData<>(false);
 
 	/**
 	 * Denotes whether the data on alarms is already in the memory.
 	 * <p>
-	 * This relies on the fact that if the ViewModel is not initialized, then this variable will also have default value.
+	 * This relies on the fact that if the ViewModel is not initialized, then this
+	 * variable will also have default value.
 	 */
-	private final MutableLiveData<Boolean> alreadyInitialized = new MutableLiveData<>(false);
+	private final MutableLiveData<Boolean> alreadyInitialized = new MutableLiveData<>(
+		false);
 
 	//--------------------------------------------------------------------------------------------------
 
@@ -81,7 +84,7 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Decrements the number of alarms by 1.
@@ -92,8 +95,7 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
-
+	//----------------------------------------------------------------------------------
 	/**
 	 * Get the total number of alarms in the database.
 	 *
@@ -104,7 +106,8 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 
 		AtomicInteger count = new AtomicInteger(0);
 
-		Thread thread = new Thread(() -> count.set(alarmDatabase.alarmDAO().getNumberOfAlarms()));
+		Thread thread = new Thread(
+			() -> count.set(alarmDatabase.alarmDAO().getNumberOfAlarms()));
 		thread.start();
 
 		try {
@@ -117,14 +120,18 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		return count.get();
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------
 
 	/**
-	 * Updates the date of the alarm to the next feasible date, and then reads data into {@link #alarmDataArrayList}.
+	 * Updates the date of the alarm to the next feasible date, and then reads data into
+	 * {@link #alarmDataArrayList}.
 	 *
-	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read from/write to the database.
-	 * @param wait If this is {@code true}, the method will not return until the background thread has completed execution. Otherwise the background
-	 * thread will be started and not waited upon for completion.
+	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read
+	 * 	from/write to the database.
+	 * @param wait If this is {@code true}, the method will not return until the
+	 * 	background thread has completed execution. Otherwise the background thread
+	 * 	will be
+	 * 	started and not waited upon for completion.
 	 */
 	private void init(@NonNull AlarmDatabase alarmDatabase, boolean wait) {
 
@@ -149,38 +156,45 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 						// Update the date iff the alarm is OFF and the repeat is OFF.
 						if (!entity.isRepeatOn && !entity.isAlarmOn) {
 
-							alarmDateTime = LocalDateTime.of(entity.alarmYear, entity.alarmMonth, entity.alarmDay, entity.alarmHour,
-									entity.alarmMinutes);
+							alarmDateTime = LocalDateTime.of(entity.alarmYear,
+								entity.alarmMonth, entity.alarmDay, entity.alarmHour,
+								entity.alarmMinutes);
 
 							if (alarmDateTime.isBefore(LocalDateTime.now())) {
 								while (alarmDateTime.isBefore(LocalDateTime.now())) {
 									alarmDateTime = alarmDateTime.plusDays(1);
 								}
 								alarmDatabase.alarmDAO()
-								             .updateAlarmDate(entity.alarmHour, entity.alarmMinutes,
-										             alarmDateTime.getDayOfMonth(),
-										             alarmDateTime.getMonthValue(),
-										             alarmDateTime.getYear());
-								alarmDatabase.alarmDAO().toggleHasUserChosenDate(entity.alarmID, 0);
+									.updateAlarmDate(entity.alarmHour,
+										entity.alarmMinutes,
+										alarmDateTime.getDayOfMonth(),
+										alarmDateTime.getMonthValue(),
+										alarmDateTime.getYear());
+								alarmDatabase.alarmDAO()
+									.toggleHasUserChosenDate(entity.alarmID, 0);
 							}
 						}
 					}
 
-					//////////////////////////////////////////////////////////////////////////////////////
+					/////////////////////////////////////////////////////////////////////
 					// Now retrieve the alarms list again and fill up alarmDataArrayList
 					// for the RecyclerView.
-					//////////////////////////////////////////////////////////////////////////////////////
+					/////////////////////////////////////////////////////////////////////
 					alarmEntityList = alarmDatabase.alarmDAO().getAlarms();
 
 					for (AlarmEntity entity : alarmEntityList) {
 
-						LocalDateTime alarmDateTime = LocalDateTime.of(entity.alarmYear, entity.alarmMonth,
-								entity.alarmDay, entity.alarmHour, entity.alarmMinutes);
+						LocalDateTime alarmDateTime = LocalDateTime.of(entity.alarmYear,
+							entity.alarmMonth,
+							entity.alarmDay, entity.alarmHour, entity.alarmMinutes);
 
-						ArrayList<Integer> repeatDays = entity.isRepeatOn ? new ArrayList<>(alarmDatabase.alarmDAO()
-						                                                                                 .getAlarmRepeatDays(entity.alarmID)) : null;
+						ArrayList<Integer> repeatDays = entity.isRepeatOn
+							? new ArrayList<>(alarmDatabase.alarmDAO()
+							.getAlarmRepeatDays(entity.alarmID))
+							: null;
 
-						Objects.requireNonNull(alarmDataArrayList.getValue()).add(getAlarmDataObject(entity, alarmDateTime, repeatDays));
+						Objects.requireNonNull(alarmDataArrayList.getValue())
+							.add(getAlarmDataObject(entity, alarmDateTime, repeatDays));
 
 					}
 
@@ -204,12 +218,14 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 
 	}
 
-	//-------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
 
 	/**
-	 * Re-reads data from the database if and only if the data is not in the memory, and waits for the background thread to be completed.
+	 * Re-reads data from the database if and only if the data is not in the memory, and
+	 * waits for the background thread to be completed.
 	 *
-	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read the database.
+	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read the
+	 * 	database.
 	 */
 	public void initAndWait(@NonNull AlarmDatabase alarmDatabase) {
 		if (alreadyInitialized.getValue() == null || !alreadyInitialized.getValue()) {
@@ -217,12 +233,14 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		}
 	}
 
-	//-------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
 
 	/**
-	 * Reads from the database if and only if the ArrayList hasn't been initialized yet. Doesn't wait for background thread to be completed.
+	 * Reads from the database if and only if the ArrayList hasn't been initialized yet.
+	 * Doesn't wait for background thread to be completed.
 	 *
-	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read the database.
+	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read the
+	 * 	database.
 	 */
 	public void init(@NonNull AlarmDatabase alarmDatabase) {
 		if (alreadyInitialized.getValue() == null || !alreadyInitialized.getValue()) {
@@ -230,21 +248,24 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		}
 	}
 
-	//-------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
 
 	/**
-	 * Re-reads data from the database regardless of whether the data is already in the memory.
+	 * Re-reads data from the database regardless of whether the data is already in the
+	 * memory.
 	 *
-	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read the database.
+	 * @param alarmDatabase The {@link AlarmDatabase} object to be used to read the
+	 * 	database.
 	 */
 	public void forceInitAndWait(@NonNull AlarmDatabase alarmDatabase) {
 		init(alarmDatabase, true);
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
 
 	/**
-	 * Get an {@link ArrayList} of {@link AlarmData} objects that can be used to instantiate the adapter.
+	 * Get an {@link ArrayList} of {@link AlarmData} objects that can be used to
+	 * instantiate the adapter.
 	 *
 	 * @return An {@link ArrayList} of {@link AlarmData} objects
 	 */
@@ -256,20 +277,23 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
 
 	/**
 	 * Adds an alarm to the database.
 	 *
 	 * @param alarmDatabase The {@link AlarmDatabase} object.
-	 * @param alarmEntity The {@link AlarmEntity} object that contanins all the alarm details.
-	 * @param repeatDays The days in which the alarm is to be repeated, if repeat is ON. Otherwise, this value can be null.
-	 * @return An array consiting of TWO elements: the alarm ID at index 0 and the position at which the alarm was inserted at index 1. The latter
-	 * can
-	 * be used to scroll the {@link androidx.recyclerview.widget.RecyclerView} using
-	 * {@link androidx.recyclerview.widget.RecyclerView#scrollToPosition(int)}.
+	 * @param alarmEntity The {@link AlarmEntity} object that contanins all the alarm
+	 * 	details.
+	 * @param repeatDays The days in which the alarm is to be repeated, if repeat is ON.
+	 * 	Otherwise, this value can be null.
+	 * @return An array consiting of TWO elements: the alarm ID at index 0 and the
+	 * 	position at which the alarm was inserted at index 1. The latter can be used to
+	 * 	scroll the {@link androidx.recyclerview.widget.RecyclerView} using
+	 *    {@link androidx.recyclerview.widget.RecyclerView#scrollToPosition(int)}.
 	 */
-	public int[] addAlarm(@NonNull AlarmDatabase alarmDatabase, @NonNull AlarmEntity alarmEntity, @Nullable ArrayList<Integer> repeatDays) {
+	public int[] addAlarm(@NonNull AlarmDatabase alarmDatabase,
+		@NonNull AlarmEntity alarmEntity, @Nullable ArrayList<Integer> repeatDays) {
 
 		AtomicInteger alarmID = new AtomicInteger();
 
@@ -280,46 +304,60 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 			//////////////////////////////////////////////////////////////
 			alarmDatabase.alarmDAO().addAlarm(alarmEntity);
 
-			alarmID.set(alarmDatabase.alarmDAO().getAlarmId(alarmEntity.alarmHour, alarmEntity.alarmMinutes));
+			alarmID.set(alarmDatabase.alarmDAO()
+				.getAlarmId(alarmEntity.alarmHour, alarmEntity.alarmMinutes));
 
 			if (alarmEntity.isRepeatOn && repeatDays != null) {
 				Collections.sort(repeatDays);
 				for (int day : repeatDays) {
-					alarmDatabase.alarmDAO().insertRepeatData(new RepeatEntity(alarmID.get(), day));
+					alarmDatabase.alarmDAO()
+						.insertRepeatData(new RepeatEntity(alarmID.get(), day));
 				}
 			}
 
 		});
 		thread.start();
 
-		LocalDateTime alarmDateTime = LocalDateTime.of(alarmEntity.alarmYear, alarmEntity.alarmMonth,
-				alarmEntity.alarmDay, alarmEntity.alarmHour, alarmEntity.alarmMinutes);
+		LocalDateTime alarmDateTime = LocalDateTime.of(alarmEntity.alarmYear,
+			alarmEntity.alarmMonth,
+			alarmEntity.alarmDay, alarmEntity.alarmHour, alarmEntity.alarmMinutes);
 
 		int scrollToPosition = 0;
 
-		AlarmData newAlarmData = getAlarmDataObject(alarmEntity, alarmDateTime, repeatDays);
+		AlarmData newAlarmData = getAlarmDataObject(alarmEntity, alarmDateTime,
+			repeatDays);
 
-		if (alarmDataArrayList.getValue() == null || alarmDataArrayList.getValue().size() == 0) {
+		if (alarmDataArrayList.getValue() == null ||
+			alarmDataArrayList.getValue().size() == 0) {
 
 			alarmDataArrayList = new MutableLiveData<>(new ArrayList<>());
 			Objects.requireNonNull(alarmDataArrayList.getValue()).add(newAlarmData);
 
 		} else {
 
-			// Check if the array list already has an alarm with same time, and remove it:
-			int index = isAlarmInTheList(alarmEntity.alarmHour, alarmEntity.alarmMinutes);
+			// Check if the array list already has an alarm with same time, and remove
+			// it:
+			int index = isAlarmInTheList(alarmEntity.alarmHour,
+				alarmEntity.alarmMinutes);
 			if (index != -1) {
 				alarmDataArrayList.getValue().remove(index);
 			}
 
 			// Insert the new alarm at the correct position:
-			for (int i = 0; i < Objects.requireNonNull(alarmDataArrayList.getValue()).size(); i++) {
+			for (int i = 0;
+			     i < Objects.requireNonNull(alarmDataArrayList.getValue()).size(); i++) {
 
-				if (alarmDataArrayList.getValue().get(i).getAlarmTime().isBefore(alarmDateTime.toLocalTime())) {
+				if (alarmDataArrayList.getValue()
+					.get(i)
+					.getAlarmTime()
+					.isBefore(alarmDateTime.toLocalTime())) {
 
 					if ((i + 1) < alarmDataArrayList.getValue().size()) {
 
-						if (alarmDataArrayList.getValue().get(i + 1).getAlarmTime().isAfter(alarmDateTime.toLocalTime())) {
+						if (alarmDataArrayList.getValue()
+							.get(i + 1)
+							.getAlarmTime()
+							.isAfter(alarmDateTime.toLocalTime())) {
 							alarmDataArrayList.getValue().add(i + 1, newAlarmData);
 							scrollToPosition = i + 1;
 							break;
@@ -349,36 +387,42 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
 
 	/**
 	 * Get an {@link AlarmData} object that can be added to {@code alarmDataArrayList}.
 	 *
 	 * @param entity The {@link AlarmEntity} object representing the alarm.
 	 * @param alarmDateTime The alarm date and time.
-	 * @return An {@link AlarmData} object that can be added to {@code alarmDataArrayList}.
+	 * @return An {@link AlarmData} object that can be added to
+	 *    {@code alarmDataArrayList}.
 	 */
-	private AlarmData getAlarmDataObject(@NonNull AlarmEntity entity, @NonNull LocalDateTime alarmDateTime,
-	                                     @Nullable ArrayList<Integer> repeatDays) {
+	private AlarmData getAlarmDataObject(@NonNull AlarmEntity entity,
+		@NonNull LocalDateTime alarmDateTime,
+		@Nullable ArrayList<Integer> repeatDays) {
 
 		if (!entity.isRepeatOn) {
-			return new AlarmData(entity.isAlarmOn, alarmDateTime, entity.alarmType, entity.alarmMessage);
+			return new AlarmData(entity.isAlarmOn, alarmDateTime, entity.alarmType,
+				entity.alarmMessage);
 		} else {
 			assert repeatDays != null;
-			return new AlarmData(entity.isAlarmOn, alarmDateTime.toLocalTime(), entity.alarmType, entity.alarmMessage, repeatDays);
+			return new AlarmData(entity.isAlarmOn, alarmDateTime.toLocalTime(),
+				entity.alarmType, entity.alarmMessage, repeatDays);
 		}
 
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
 
 	/**
 	 * Removes an alarm from the database and {@code #alarmDataArrayList}.
 	 *
-	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
+	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the
+	 * 	database.
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minutes.
-	 * @return The position in the {@code #alarmDataArrayList} from where the alarm was removed.
+	 * @return The position in the {@code #alarmDataArrayList} from where the alarm was
+	 * 	removed.
 	 */
 	public int removeAlarm(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
 
@@ -392,7 +436,8 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		});
 		thread.start();
 
-		for (int i = 0; i < Objects.requireNonNull(alarmDataArrayList.getValue()).size(); i++) {
+		for (int i = 0;
+		     i < Objects.requireNonNull(alarmDataArrayList.getValue()).size(); i++) {
 			AlarmData alarmData = alarmDataArrayList.getValue().get(i);
 
 			if (alarmData.getAlarmTime().equals(LocalTime.of(hour, mins))) {
@@ -413,17 +458,19 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
 
 	/**
 	 * Toggles the ON/OFF state of an alarm.
 	 *
-	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
+	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the
+	 * 	database.
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minute.
 	 * @param newAlarmState The new alarm state. 0 means OFF and 1 means ON.
 	 */
-	public int toggleAlarmState(@NonNull AlarmDatabase alarmDatabase, int hour, int mins, int newAlarmState) {
+	public int toggleAlarmState(@NonNull AlarmDatabase alarmDatabase, int hour, int mins
+		, int newAlarmState) {
 
 		AtomicInteger alarmId = new AtomicInteger();
 
@@ -436,7 +483,8 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 
 		// Toggle the alarm status in the alarmDataArrayList:
 		int index = isAlarmInTheList(hour, mins);
-		AlarmData alarmData = Objects.requireNonNull(alarmDataArrayList.getValue()).get(index);
+		AlarmData alarmData = Objects.requireNonNull(alarmDataArrayList.getValue())
+			.get(index);
 		alarmData.setSwitchedOn(newAlarmState == 1);
 		alarmDataArrayList.getValue().set(index, alarmData);
 
@@ -449,15 +497,17 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Get the unique alarm ID.
 	 *
-	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
+	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the
+	 * 	database.
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minute.
-	 * @return The unique alarm ID if the alarm is present in the database, otherwise 0 (zero).
+	 * @return The unique alarm ID if the alarm is present in the database, otherwise 0
+	 * 	(zero).
 	 */
 	public int getAlarmId(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
 		AtomicInteger alarmId = new AtomicInteger(0);
@@ -479,21 +529,26 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		return alarmId.get();
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Get the repeat days corresponding to a certain alarm.
 	 *
-	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
+	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the
+	 * 	database.
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minute.
-	 * @return An {@link ArrayList} containing the days in which the alarm is set to repeat. Will return an empty {@link ArrayList} if repeat is OFF.
+	 * @return An {@link ArrayList} containing the days in which the alarm is set to
+	 * 	repeat. Will return an empty {@link ArrayList} if repeat is OFF.
 	 */
-	public ArrayList<Integer> getRepeatDays(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
-		AtomicReference<ArrayList<Integer>> repeatDays = new AtomicReference<>(new ArrayList<>());
+	public ArrayList<Integer> getRepeatDays(@NonNull AlarmDatabase alarmDatabase,
+		int hour, int mins) {
+		AtomicReference<ArrayList<Integer>> repeatDays =
+			new AtomicReference<>(new ArrayList<>());
 
-		Thread thread = new Thread(() -> repeatDays.set(new ArrayList<>(alarmDatabase.alarmDAO()
-		                                                                             .getAlarmRepeatDays(getAlarmId(alarmDatabase, hour, mins)))));
+		Thread thread =
+			new Thread(() -> repeatDays.set(new ArrayList<>(alarmDatabase.alarmDAO()
+				.getAlarmRepeatDays(getAlarmId(alarmDatabase, hour, mins)))));
 		thread.start();
 
 		try {
@@ -504,21 +559,26 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		return repeatDays.get();
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Get the {@link AlarmEntity} object for a certain alarm.
 	 *
-	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the database.
+	 * @param alarmDatabase The {@link AlarmDatabase} object used to access the
+	 * 	database.
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minute.
-	 * @return The {@link AlarmEntity} object for the alarm specified by {@code hour} and {@code mins}.
+	 * @return The {@link AlarmEntity} object for the alarm specified by {@code hour} and
+	 *    {@code mins}.
 	 */
-	public AlarmEntity getAlarmEntity(@NonNull AlarmDatabase alarmDatabase, int hour, int mins) {
+	public AlarmEntity getAlarmEntity(@NonNull AlarmDatabase alarmDatabase, int hour,
+		int mins) {
 
 		AtomicReference<AlarmEntity> alarmEntity = new AtomicReference<>();
 
-		Thread thread = new Thread(() -> alarmEntity.set(alarmDatabase.alarmDAO().getAlarmDetails(hour, mins).get(0)));
+		Thread thread =
+			new Thread(() -> alarmEntity.set(
+				alarmDatabase.alarmDAO().getAlarmDetails(hour, mins).get(0)));
 		thread.start();
 
 		try {
@@ -529,18 +589,20 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		return alarmEntity.get();
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Checks whether the alarm is already present in {@link #alarmDataArrayList}.
 	 *
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minutes.
-	 * @return {@code -1} if the alarm is not present in the list, otherwise the index where the alarm is present.
+	 * @return {@code -1} if the alarm is not present in the list, otherwise the index
+	 * 	where the alarm is present.
 	 */
 	private int isAlarmInTheList(int hour, int mins) {
 
-		if (alarmDataArrayList.getValue() != null && alarmDataArrayList.getValue().size() > 0) {
+		if (alarmDataArrayList.getValue() != null &&
+			alarmDataArrayList.getValue().size() > 0) {
 			for (AlarmData alarmData : alarmDataArrayList.getValue()) {
 				if (alarmData.getAlarmTime().equals(LocalTime.of(hour, mins))) {
 					return alarmDataArrayList.getValue().indexOf(alarmData);
@@ -551,33 +613,39 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		return -1;
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Returns whether there is a pending alarm that has to be switched on.
 	 * <p>
-	 * The alarm is pending because {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} has not been granted to the app.
+	 * The alarm is pending because
+	 * {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} has not been granted to
+	 * the app.
 	 *
-	 * @return {@code true} if an alarm is pending to be switched on, otherwise {@code false}.
+	 * @return {@code true} if an alarm is pending to be switched on, otherwise
+	 *    {@code false}.
 	 */
 	public boolean getPendingStatus() {
 		return isAlarmPending.getValue() != null && isAlarmPending.getValue();
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Set whether an alarm is pending to be switched on.
 	 * <p>
-	 * The alarm is pending because {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} has not been granted to the app.
+	 * The alarm is pending because
+	 * {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} has not been granted to
+	 * the app.
 	 *
-	 * @param status {@code true} if an alarm is pending to be switched on, otherwise {@code false}.
+	 * @param status {@code true} if an alarm is pending to be switched on, otherwise
+	 *    {@code false}.
 	 */
 	public void setPendingStatus(boolean status) {
 		isAlarmPending.setValue(status);
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Save the details of a pending alarm.
@@ -589,7 +657,7 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		pendingAlarmDetails.setValue(data);
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Get the details of a pending alarm.
@@ -601,13 +669,13 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		return pendingAlarmDetails.getValue();
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	public void setIsSettingsActOver(boolean isSettingsActOver) {
 		this.isSettingsActOver.setValue(isSettingsActOver);
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
 
 	public boolean getIsSettingsActOver() {
 		return Objects.requireNonNull(isSettingsActOver.getValue());

@@ -15,13 +15,15 @@ import java.util.ArrayList;
 
 import in.basulabs.shakealarmclock.R;
 
-public class PermissionAdapter extends RecyclerView.Adapter<PermissionAdapter.ViewHolder> {
+public class PermissionAdapter extends
+	RecyclerView.Adapter<PermissionAdapter.ViewHolder> {
 
 	private final ArrayList<Permission> permList;
 	private final PermissionAdapter.EventListener listener;
 	private final Context context;
 
-	public PermissionAdapter(@NonNull ArrayList<Permission> permList, @NonNull EventListener listener, @NonNull Context context) {
+	public PermissionAdapter(@NonNull ArrayList<Permission> permList,
+		@NonNull EventListener listener, @NonNull Context context) {
 		this.permList = permList;
 		this.listener = listener;
 		this.context = context;
@@ -39,7 +41,7 @@ public class PermissionAdapter extends RecyclerView.Adapter<PermissionAdapter.Vi
 	@Override
 	public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 		View listItem = LayoutInflater.from(parent.getContext())
-		                              .inflate(R.layout.recyclerviewrow_reqperm, parent, false);
+			.inflate(R.layout.recyclerviewrow_reqperm, parent, false);
 		return new PermissionAdapter.ViewHolder(listItem);
 	}
 
@@ -69,10 +71,12 @@ public class PermissionAdapter extends RecyclerView.Adapter<PermissionAdapter.Vi
 			}
 		}
 
-		holder.grantAccessBtn.setOnClickListener(view -> listener.onGrantBtnClick(permission));
+		holder.grantAccessBtn.setOnClickListener(
+			view -> listener.onGrantBtnClick(permission));
 
 		if (holder.denyAccessBtn.getVisibility() == View.VISIBLE) {
-			holder.denyAccessBtn.setOnClickListener(view -> listener.onDenyBtnClick(permission));
+			holder.denyAccessBtn.setOnClickListener(
+				view -> listener.onDenyBtnClick(permission));
 		}
 
 	}

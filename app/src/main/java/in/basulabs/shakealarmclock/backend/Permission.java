@@ -18,7 +18,7 @@ public record Permission(String androidString, int displayNameID, int permExplan
 	@Override
 	public String toString() {
 		return "Permission{" +
-				"androidString='" + androidString + '\'' +
-				'}';
+			"androidString='" + androidString + '\'' +
+			'}';
 	}
 }

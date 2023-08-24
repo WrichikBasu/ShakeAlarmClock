@@ -186,7 +186,8 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 	public void onGrantBtnClick(@NonNull Permission permission) {
 
 		viewModel.setCurrentPermission(permission);
-		viewModel.incrementTimesPermRequested(sharedPreferences, permission.androidString());
+		viewModel.incrementTimesPermRequested(sharedPreferences,
+			permission.androidString());
 
 		Log.println(Log.ERROR, getClass().getSimpleName(),
 			"Set current permission = " + viewModel.getCurrentPermission());

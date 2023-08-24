@@ -513,10 +513,12 @@ public final class ConstantsAndStatics {
 
 	public static void killServices(Context context, int alarmID) {
 
-		if (Service_RingAlarm.isThisServiceRunning && Service_RingAlarm.alarmID == alarmID) {
+		if (Service_RingAlarm.isThisServiceRunning &&
+			Service_RingAlarm.alarmID == alarmID) {
 			Intent intent1 = new Intent(context, Service_RingAlarm.class);
 			context.stopService(intent1);
-		} else if (Service_SnoozeAlarm.isThisServiceRunning && Service_SnoozeAlarm.alarmID == alarmID) {
+		} else if (Service_SnoozeAlarm.isThisServiceRunning &&
+			Service_SnoozeAlarm.alarmID == alarmID) {
 			Intent intent1 = new Intent(context, Service_SnoozeAlarm.class);
 			context.stopService(intent1);
 		}
@@ -632,7 +634,8 @@ public final class ConstantsAndStatics {
 	/**
 	 * A {@code Bundle} containing the level of the permissions being requested.
 	 * <p>
-	 * Key-value pairs expected in the {@code Bundle} should be of the following form:<br>
+	 * Key-value pairs expected in the {@code Bundle} should be of the following
+	 * form:<br>
 	 * <b>Key:</b> {@link Permission#androidString()}.<br>
 	 * <b>Corresponding value:</b> One of
 	 * {@link #PERMISSION_LEVEL_ESSENTIAL}, {@link #PERMISSION_LEVEL_RECOMMENDED} or
@@ -642,11 +645,12 @@ public final class ConstantsAndStatics {
 		"in.basulabs.shakealarmclock.PERMS_REQUESTED_LEVEL";
 
 	/**
-	 * {@link android.content.SharedPreferences} key for a {@code HashMap<String,
-	 * Integer>} that stores how many times a permission has been requested by this
-	 * app since installation/data clear.
+	 * {@link android.content.SharedPreferences} key for a
+	 * {@code HashMap<String, Integer>} that stores how many times a permission has been
+	 * requested by this app since installation/data clear.
 	 * <p>
-	 * Key-value pairs expected in the {@code Bundle} should be of the following form:<br>
+	 * Key-value pairs expected in the {@code Bundle} should be of the following
+	 * form:<br>
 	 * <b>Key:</b> {@link Permission#androidString()}.<br>
 	 * <b>Corresponding value:</b> Number of times this particular permission has been
 	 * requested by the app (any component) in the past.
