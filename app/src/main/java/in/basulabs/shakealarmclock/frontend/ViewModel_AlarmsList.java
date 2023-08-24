@@ -41,12 +41,13 @@ import in.basulabs.shakealarmclock.backend.RepeatEntity;
 
 public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver {
 
-
 	private MutableLiveData<ArrayList<AlarmData>> alarmDataArrayList;
 	private final MutableLiveData<Integer> alarmsCount = new MutableLiveData<>(0);
 	private final MutableLiveData<Boolean> isAlarmPending = new MutableLiveData<>(false);
 	private MutableLiveData<Bundle> pendingAlarmDetails;
 	private final MutableLiveData<Boolean> isSettingsActOver = new MutableLiveData<>(false);
+	private final MutableLiveData<Boolean> canRequestNonEssentialPerms =
+		new MutableLiveData<>(false);
 
 	/**
 	 * Denotes whether the data on alarms is already in the memory.
@@ -610,5 +611,13 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 
 	public boolean getIsSettingsActOver() {
 		return Objects.requireNonNull(isSettingsActOver.getValue());
+	}
+
+	public boolean getCanRequestNonEssentialPerms() {
+		return Boolean.TRUE.equals(canRequestNonEssentialPerms.getValue());
+	}
+
+	public void setCanRequestNonEssentialPerms(boolean canRequestNonEssentialPerms) {
+		this.canRequestNonEssentialPerms.setValue(canRequestNonEssentialPerms);
 	}
 }

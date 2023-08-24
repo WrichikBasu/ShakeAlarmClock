@@ -16,8 +16,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 package in.basulabs.shakealarmclock.frontend;
 
-import static android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM;
-
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -30,7 +28,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerManager;
 import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,10 +41,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -90,7 +85,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	private static final int MODE_DELETE_ALARM = 504;
 	private static final int MODE_DEACTIVATE_ONLY = 509;
 
-	private ActivityResultLauncher<Intent> settingsActLauncher, newAlarmActLauncher, oldAlarmActLauncher;
+	private ActivityResultLauncher<Intent> settingsActLauncher, newAlarmActLauncher,
+			oldAlarmActLauncher;
 
 	private String toastText = null;
 
@@ -140,20 +136,26 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 
 		initActLaunchers();
 
-		///////////////////////////////////////////////////////////////////////////////////////////////////
-		// This variable determines whether the update dialog will be displayed or not.
-		// Do not display the update dialog if the either of the snooze or update services is running.
-		// Also, do not display the dialog if the activity is created by an Activity_IntentManager.
-		//////////////////////////////////////////////////////////////////////////////////////////////////
-		boolean canShowDialogs = Service_RingAlarm.isThisServiceRunning || Service_SnoozeAlarm.isThisServiceRunning;
+		/*
+		 * Determines whether it is a good time to ask for non-essential perms (i.e.
+		 * those specified by {@link ConstantsAndStatics#PERMISSION_LEVEL_RECOMMENDED}
+		 * and {@link ConstantsAndStatics#PERMISSION_LEVEL_OPTIONAL}.
+		 * TODO: Ask FAR less frequently based on SharedPreferences
+		 */
+		viewModel.setCanRequestNonEssentialPerms(! Service_RingAlarm.isThisServiceRunning
+			&& ! Service_SnoozeAlarm.isThisServiceRunning
+			&& ! (getIntent().getAction() != null &&
+			getIntent().getAction().equals(ConstantsAndStatics.ACTION_NEW_ALARM_FROM_INTENT)));
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+			requestEssentialPerms();
+		}
 
 		// Check if this activity has been started by Activity_IntentManager.
 		// If yes, start Activity_AlarmDetails with necessary data.
 		if (getIntent().getAction() != null) {
 
 			if (getIntent().getAction().equals(ConstantsAndStatics.ACTION_NEW_ALARM_FROM_INTENT)) {
-
-				canShowDialogs = false;
 
 				Intent intent = new Intent(this, Activity_AlarmDetails.class);
 				intent.setAction(ConstantsAndStatics.ACTION_NEW_ALARM_FROM_INTENT);
@@ -166,11 +168,20 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 			}
 		}
 
-		if (savedInstanceState == null && canShowDialogs) {
-			showDialogs();
+		// Check whether it is a good time to ask for optional perms, and request them.
+		if (savedInstanceState == null && viewModel.getCanRequestNonEssentialPerms()) {
+			viewModel.setCanRequestNonEssentialPerms(false);
+			ArrayList<String> optionalPerms =
+				ConstantsAndStatics.checkRecommendedPerms(this);
+			if (! optionalPerms.isEmpty()) {
+				Intent intent = new Intent(this, Activity_ListReqPerm.class);
+				intent.putStringArrayListExtra(ConstantsAndStatics.EXTRA_PERMS_REQUESTED,
+					optionalPerms);
+				startActivity(intent);
+			}
 		}
 
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			deleteNotifChannels();
 		}
 
@@ -194,7 +205,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 					setAlarm(viewModel.getPendingALarmData());
 					viewModel.savePendingAlarm(null);
 				} else {
-					requestExactAlarmPerm();
+					requestEssentialPerms();
 				}
 			}
 		}
@@ -244,17 +255,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 			viewStub.setVisibility(View.GONE);
 		}
 	}
-
-	//--------------------------------------------------------------------------------------------------
-
-	/*
-	 * Kept for future reference.
-	 *
-	private void onDateChanged() {
-		viewModel.forceInitAndWait(alarmDatabase);
-		alarmAdapter = new AlarmAdapter(viewModel.getAlarmDataArrayList(), this, this);
-		alarmsRecyclerView.swapAdapter(alarmAdapter, false);
-	}*/
 
 	//--------------------------------------------------------------------------------------------------
 
@@ -323,7 +323,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 			if (!alarmManager.canScheduleExactAlarms()) {
 				viewModel.setPendingStatus(true);
 				viewModel.savePendingAlarm(data);
-				requestExactAlarmPerm();
+				requestEssentialPerms();
 				return;
 			}
 		}
@@ -558,45 +558,27 @@ public class Activity_AlarmsList extends AppCompatActivity implements AlarmAdapt
 	//-------------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Show the battery optimization dialog/update available dialog.
-	 * <p>
-	 * If the battery optimizations dialog is shown, then the update dialog is not shown.
-	 * </p>
-	 */
-	private void showDialogs() {
-
-		boolean showBatteryOptimDialog = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
-				.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_SHOW_BATTERY_OPTIM_DIALOG, true);
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && showBatteryOptimDialog) {
-			PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-			if (!powerManager.isIgnoringBatteryOptimizations("in.basulabs.shakealarmclock")) {
-				DialogFragment dialogFragment = new AlertDialog_BatteryOptimizations();
-				dialogFragment.setCancelable(false);
-				dialogFragment.show(getSupportFragmentManager(), "");
-			}
-		}
-	}
-
-	//-------------------------------------------------------------------------------------------------------------
-
-	/**
 	 * Requests the {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} permission by directing the user to go to Settings.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.S)
-	private void requestExactAlarmPerm() {
+	private void requestEssentialPerms() {
 
-		Intent intent = new Intent();
-		intent.setAction(ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+		ArrayList<String> perms = ConstantsAndStatics.checkEssentialPerms(this);
+		if (! perms.isEmpty()) {  // Essential perms have not been granted!
 
-		new AlertDialog.Builder(this)
-				.setMessage(R.string.request_exact_alarm_perm)
-				.setCancelable(false)
-				.setPositiveButton("Go to Settings", (dialog, which) -> {
-					viewModel.setIsSettingsActOver(false);
-					settingsActLauncher.launch(intent);
-				})
-				.show();
+			// Since essential perms are missing, we have to ask for them before
+			// proceeding. No harm in also adding the recommended/optional perms at the
+			// same time.
+			perms.addAll(ConstantsAndStatics.checkRecommendedPerms(this));
+
+			// Don't ask for optional perms again in this session.
+			viewModel.setCanRequestNonEssentialPerms(false);
+
+			Intent intent = new Intent(this, Activity_ListReqPerm.class);
+			intent.putStringArrayListExtra(ConstantsAndStatics.EXTRA_PERMS_REQUESTED,
+				perms);
+			startActivity(intent);
+		}
 	}
 
 	//------------------------------------------------------------------------------
