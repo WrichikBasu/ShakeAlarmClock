@@ -164,8 +164,13 @@ public class Service_SnoozeAlarm extends Service {
 
 	private void startSelfForeground() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(notifID, buildSnoozeNotification(),
-				ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+				startForeground(notifID, buildSnoozeNotification(),
+					ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+			} else {
+				startForeground(notifID, buildSnoozeNotification(),
+					ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+			}
 		} else {
 			startForeground(notifID, buildSnoozeNotification());
 		}

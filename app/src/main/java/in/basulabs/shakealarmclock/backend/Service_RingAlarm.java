@@ -161,8 +161,13 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 			.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(notifID, buildRingNotification(),
-				ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+				startForeground(notifID, buildRingNotification(),
+					ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+			} else {
+				startForeground(notifID, buildRingNotification(),
+					ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+			}
 		} else {
 			startForeground(notifID, buildRingNotification());
 		}

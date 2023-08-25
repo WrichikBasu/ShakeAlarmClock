@@ -62,8 +62,13 @@ public class Service_SetAlarmsPostBoot extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(UniqueNotifID.getID(), buildForegroundNotification(),
-				ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+				startForeground(UniqueNotifID.getID(), buildForegroundNotification(),
+					ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+			} else {
+				startForeground(UniqueNotifID.getID(), buildForegroundNotification(),
+					ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+			}
 		} else {
 			startForeground(UniqueNotifID.getID(), buildForegroundNotification());
 		}
