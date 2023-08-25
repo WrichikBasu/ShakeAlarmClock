@@ -33,6 +33,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import java.time.LocalTime;
 import java.util.Objects;
@@ -53,7 +54,7 @@ public class Activity_RingAlarm extends AppCompatActivity implements
 		}
 	};
 
-	//-----------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -121,11 +122,12 @@ public class Activity_RingAlarm extends AppCompatActivity implements
 
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ConstantsAndStatics.ACTION_DESTROY_RING_ALARM_ACTIVITY);
-		registerReceiver(broadcastReceiver, intentFilter);
+		ContextCompat.registerReceiver(this, broadcastReceiver, intentFilter,
+			ContextCompat.RECEIVER_NOT_EXPORTED);
 
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------
 
 	@Override
 	protected void onDestroy() {
@@ -133,7 +135,7 @@ public class Activity_RingAlarm extends AppCompatActivity implements
 		unregisterReceiver(broadcastReceiver);
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	@Override
 	public void onClick(View view) {

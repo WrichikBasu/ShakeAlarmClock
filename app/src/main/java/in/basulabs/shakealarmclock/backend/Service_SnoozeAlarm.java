@@ -112,7 +112,8 @@ public class Service_SnoozeAlarm extends Service {
 
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
-		registerReceiver(broadcastReceiver, intentFilter);
+		ContextCompat.registerReceiver(this, broadcastReceiver, intentFilter,
+			ContextCompat.RECEIVER_NOT_EXPORTED);
 
 		Service_SnoozeAlarm myInstance = this;
 
@@ -181,8 +182,8 @@ public class Service_SnoozeAlarm extends Service {
 	 * statement {@code Collections.sort(repeatDays)}. It seems that even if repeat is
 	 * ON,
 	 * the repeat days list is null. That is why we are re-reading the repeat days from
-	 * the database as a temporary fix. For details, see
-	 * https://github.com/WrichikBasu/ShakeAlarmClock/issues/39
+	 * the database as a temporary fix.
+	 * <a href="https://github.com/WrichikBasu/ShakeAlarmClock/issues/39">Details</a>
 	 * </p>
 	 */
 	private void loadRepeatDays() {

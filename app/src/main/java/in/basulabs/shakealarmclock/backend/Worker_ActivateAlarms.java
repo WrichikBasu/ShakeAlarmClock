@@ -89,8 +89,8 @@ public class Worker_ActivateAlarms extends Worker {
 		if (list != null && list.size() > 0) {
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-				if (!alarmManager.canScheduleExactAlarms()) {
-					displayErrorNoif();
+				if (ConstantsAndStatics.checkEssentialPerms(context).isEmpty()) {
+					postMissingPermNotif();
 					return Result.failure();
 				}
 			}
@@ -165,7 +165,7 @@ public class Worker_ActivateAlarms extends Worker {
 	 * <p>
 	 * The notification opens {@link Activity_RequestPermIntro}.
 	 */
-	private void displayErrorNoif() {
+	private void postMissingPermNotif() {
 
 		NotificationManager notificationManager
 			= (NotificationManager) context.getSystemService(

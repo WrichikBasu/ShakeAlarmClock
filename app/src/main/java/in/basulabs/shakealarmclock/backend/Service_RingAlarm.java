@@ -239,7 +239,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		intentFilter.addAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
 		intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
 		intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-		registerReceiver(broadcastReceiver, intentFilter);
+		ContextCompat.registerReceiver(this, broadcastReceiver, intentFilter,
+			ContextCompat.RECEIVER_NOT_EXPORTED);
 
 		audioFocusController.requestFocus();
 
