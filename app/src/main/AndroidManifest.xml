@@ -145,7 +145,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:parentActivityName=".frontend.Activity_AlarmsList" />
 
         <service
-            android:name=".backend.Service_UpdateAlarm"
+            android:name=".backend.Service_SetAlarmsPostBoot"
             android:enabled="true"
             android:exported="true"
             android:permission="in.basulabs.shakealarmclock.PLUGIN_PERMISSION" />

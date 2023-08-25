@@ -29,7 +29,7 @@ import java.util.Objects;
 
 import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 import in.basulabs.shakealarmclock.backend.Service_RingAlarm;
-import in.basulabs.shakealarmclock.backend.Service_UpdateAlarm;
+import in.basulabs.shakealarmclock.backend.Service_SetAlarmsPostBoot;
 
 public class AlarmBroadcastReceiver extends BroadcastReceiver {
 
@@ -61,7 +61,7 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
 				"in.basulabs.shakealarmclock::AlarmUpdateServiceWakelockTag");
 			wakeLock.acquire(60000);
 
-			Intent intent1 = new Intent(context, Service_UpdateAlarm.class);
+			Intent intent1 = new Intent(context, Service_SetAlarmsPostBoot.class);
 			ContextCompat.startForegroundService(context, intent1);
 		}
 

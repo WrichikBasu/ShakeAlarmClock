@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import in.basulabs.shakealarmclock.R;
-import in.basulabs.shakealarmclock.frontend.Activity_RequestPerm;
+import in.basulabs.shakealarmclock.frontend.Activity_RequestPermIntro;
 import in.basulabs.shakealarmclock.frontend.AlarmBroadcastReceiver;
 
 public class Worker_ActivateAlarms extends Worker {
@@ -164,7 +164,7 @@ public class Worker_ActivateAlarms extends Worker {
 	 * Displays a notification when {@link AlarmManager#canScheduleExactAlarms()} returns
 	 * {@code false}.
 	 * <p>
-	 * The notification opens {@link Activity_RequestPerm}.
+	 * The notification opens {@link Activity_RequestPermIntro}.
 	 */
 	private void displayErrorNoif() {
 
@@ -181,7 +181,7 @@ public class Worker_ActivateAlarms extends Worker {
 		}
 
 		Intent intent = new Intent(context.getApplicationContext(),
-			Activity_RequestPerm.class);
+			Activity_RequestPermIntro.class);
 
 		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
 			?

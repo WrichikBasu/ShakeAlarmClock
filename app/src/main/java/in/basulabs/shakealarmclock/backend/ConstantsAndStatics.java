@@ -606,7 +606,7 @@ public final class ConstantsAndStatics {
 	/**
 	 * Notification Channel ID for update service.
 	 */
-	public static final int NOTIF_CHANNEL_ID_UPDATE = 625;
+	public static final int NOTIF_CHANNEL_ID_BOOT = 625;
 
 	/**
 	 * {@link android.content.SharedPreferences} key to store whether existing

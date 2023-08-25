@@ -48,30 +48,25 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 import in.basulabs.shakealarmclock.R;
-import in.basulabs.shakealarmclock.frontend.Activity_RequestPerm;
+import in.basulabs.shakealarmclock.frontend.Activity_RequestPermIntro;
 import in.basulabs.shakealarmclock.frontend.AlarmBroadcastReceiver;
 
-public class Service_UpdateAlarm extends Service {
-
-	/**
-	 * The Notification ID for the foreground notification of this service,
-	 */
-	private static final int NOTIFICATION_ID = 903;
+public class Service_SetAlarmsPostBoot extends Service {
 
 	private AlarmDatabase alarmDatabase;
 
 	public static boolean isThisServiceRunning = false;
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(NOTIFICATION_ID, buildForegroundNotification(),
+			startForeground(UniqueNotifID.getID(), buildForegroundNotification(),
 				ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
 		} else {
-			startForeground(NOTIFICATION_ID, buildForegroundNotification());
+			startForeground(UniqueNotifID.getID(), buildForegroundNotification());
 		}
 		isThisServiceRunning = true;
 
@@ -83,11 +78,8 @@ public class Service_UpdateAlarm extends Service {
 
 		if (alarmEntityArrayList != null && alarmEntityArrayList.size() > 0) {
 
-			AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-				!alarmManager.canScheduleExactAlarms()) {
-				displayErrorNoif();
+			if (!ConstantsAndStatics.checkEssentialPerms(this).isEmpty()) {
+				postMissingPermsNotif();
 			} else {
 				cancelActiveAlarms(alarmEntityArrayList);
 				activateAlarms(alarmEntityArrayList);
@@ -99,7 +91,7 @@ public class Service_UpdateAlarm extends Service {
 		return START_NOT_STICKY;
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	@Override
 	public void onDestroy() {
@@ -109,7 +101,7 @@ public class Service_UpdateAlarm extends Service {
 	}
 
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Creates the notification channel for the foreground notification of this service.
@@ -118,8 +110,8 @@ public class Service_UpdateAlarm extends Service {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
 			NotificationChannel channel = new NotificationChannel(
-				Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_UPDATE),
-				getString(R.string.notif_channel_update), importance);
+				Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_BOOT),
+				getString(R.string.notif_channel_boot), importance);
 			NotificationManager notificationManager
 				= (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			assert notificationManager != null;
@@ -127,7 +119,7 @@ public class Service_UpdateAlarm extends Service {
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Creates the error notification channel.
@@ -145,7 +137,7 @@ public class Service_UpdateAlarm extends Service {
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Builds the foreground notification for this service.
@@ -154,12 +146,13 @@ public class Service_UpdateAlarm extends Service {
 	 *    {@link #startForeground(int, Notification)} or displayed with
 	 *    {@link NotificationManager#notify(int, Notification)}.
 	 */
+	@NonNull
 	private Notification buildForegroundNotification() {
 
 		createForegroundNotificationChannel();
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
-			Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_UPDATE))
+			Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_BOOT))
 			.setContentTitle(getResources().getString(R.string.app_name))
 			.setContentText(getResources().getString(R.string.updateAlarm_notifMessage))
 			.setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -169,7 +162,7 @@ public class Service_UpdateAlarm extends Service {
 		return builder.build();
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Get a list of all the active alarms.
@@ -197,7 +190,7 @@ public class Service_UpdateAlarm extends Service {
 
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Dismiss all the active alarms.
@@ -213,7 +206,7 @@ public class Service_UpdateAlarm extends Service {
 
 			ConstantsAndStatics.killServices(this, alarmEntity.alarmID);
 
-			Intent intent = new Intent(Service_UpdateAlarm.this,
+			Intent intent = new Intent(Service_SetAlarmsPostBoot.this,
 				AlarmBroadcastReceiver.class);
 			intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
 			intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -223,7 +216,7 @@ public class Service_UpdateAlarm extends Service {
 				PendingIntent.FLAG_NO_CREATE;
 
 			PendingIntent pendingIntent = PendingIntent.getBroadcast(
-				Service_UpdateAlarm.this, alarmEntity.alarmID, intent, flags);
+				Service_SetAlarmsPostBoot.this, alarmEntity.alarmID, intent, flags);
 
 			if (pendingIntent != null) {
 				alarmManager.cancel(pendingIntent);
@@ -232,7 +225,7 @@ public class Service_UpdateAlarm extends Service {
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Get the list of repeat days for a particular alarm.
@@ -258,7 +251,7 @@ public class Service_UpdateAlarm extends Service {
 
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Activates the alarms that are switched on, if possibe.
@@ -380,7 +373,7 @@ public class Service_UpdateAlarm extends Service {
 
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Posts a notification informing the user that an alarm has been missed.
@@ -419,19 +412,20 @@ public class Service_UpdateAlarm extends Service {
 	}
 
 	/**
-	 * Displays a notification when {@link AlarmManager#canScheduleExactAlarms()} returns
-	 * {@code false}.
+	 * Displays a notification when essential permissions are missing (i.e. when
+	 * {@link ConstantsAndStatics#checkEssentialPerms(Context)} is not empty.
 	 * <p>
-	 * The notification opens {@link Activity_RequestPerm}.
+	 * The notification opens {@link Activity_RequestPermIntro}.
 	 */
-	private void displayErrorNoif() {
+	private void postMissingPermsNotif() {
 
 		NotificationManager notificationManager =
 			(NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
 		createErrorNotificationChannel();
 
-		Intent intent = new Intent(getApplicationContext(), Activity_RequestPerm.class);
+		Intent intent = new Intent(getApplicationContext(),
+			Activity_RequestPermIntro.class);
 
 		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
 			?
@@ -460,7 +454,7 @@ public class Service_UpdateAlarm extends Service {
 
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	@Nullable
 	@Override
