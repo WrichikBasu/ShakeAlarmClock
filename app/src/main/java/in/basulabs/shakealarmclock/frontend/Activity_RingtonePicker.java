@@ -52,6 +52,7 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -59,10 +60,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
@@ -88,6 +91,11 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_ringtonepicker);
 
+		if (! Objects.equals(getIntent().getAction(), ACTION_RINGTONE_PICKER)) {
+			setResult(RESULT_CANCELED);
+			finish();
+		}
+
 		sharedPreferences = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
 
 		viewModel = new ViewModelProvider(this).get(ViewModel_RingtonePicker.class);
@@ -99,23 +107,13 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 
 		mediaPlayer = new MediaPlayer();
 		audioAttributes = new AudioAttributes.Builder()
-				.setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
-				.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+				.setUsage(AudioAttributes.USAGE_MEDIA)
+				.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
 				.build();
 
 		chooseToneLayout.setVisibility(View.GONE);
 
 		initActLaunchers();
-
-		if (Objects.equals(getIntent().getAction(), ACTION_RINGTONE_PICKER) && !viewModel.getPermissionRationaleBeingShown()) {
-
-			if (isPermissionAvailable()) {
-				initialise();
-			} else {
-				viewModel.setPermissionRationaleBeingShown(true);
-				checkAndRequestPermission();
-			}
-		}
 	}
 
 	//----------------------------------------------------------------------------------------------------
@@ -127,7 +125,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 		// Get the action view used in your playTone item
 		MenuItem toggleservice = menu.findItem(R.id.playTone);
 		SwitchCompat actionView = (SwitchCompat) toggleservice.getActionView();
-		actionView.setChecked(viewModel.getPlayTone());
+		Objects.requireNonNull(actionView).setChecked(viewModel.getPlayTone());
 		actionView.setOnCheckedChangeListener((buttonView, isChecked) -> {
 			viewModel.setPlayTone(isChecked);
 			if (!isChecked) {
@@ -145,12 +143,17 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (!viewModel.getPermissionRationaleBeingShown() && !viewModel.getIsInitialised()) {
-			viewModel.setPermissionRationaleBeingShown(false);
-			if (isPermissionAvailable()) {
+
+		if (isPermissionAvailable()) {
+			viewModel.setWerePermsRequested(false);
+			if (! viewModel.getIsInitialised()) {
 				initialise();
-			} else {
+			}
+		} else {
+			if (viewModel.werePermsRequested()) {
 				onPermissionDenied();
+			} else {
+				requestPermission();
 			}
 		}
 	}
@@ -367,75 +370,51 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	//--------------------------------------------------------------------------------------------------
 
 	/**
-	 * Checks whether {@link Manifest.permission#READ_EXTERNAL_STORAGE} permission is available or not.
+	 * Checks whether {@link Manifest.permission#READ_MEDIA_AUDIO} (for >= Tiramisu) or
+	 * {@link Manifest.permission#READ_EXTERNAL_STORAGE} permission is
+	 * available or not.
 	 *
 	 * @return {@code true} if the permission is available, otherwise {@code false}.
 	 */
 	private boolean isPermissionAvailable() {
-		return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-	}
-
-	//--------------------------------------------------------------------------------------------------
-
-	private void checkAndRequestPermission() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-				/////////////////////////////////////////////////////////////////
-				// User has denied the permission once or more than once, but
-				// never clicked on "Don't ask again" before denying.
-				////////////////////////////////////////////////////////////////
-				showPermissionExplanationDialog();
-			} else {
-				////////////////////////////////////////////////////////////////
-				// Two possibilities:
-				// 1. We are asking for the permission the first time.
-				// 2. User has clicked on "Don't ask again".
-				///////////////////////////////////////////////////////////////
-				if (!sharedPreferences.getBoolean(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE, false)) {
-					// Permission was never asked before.
-					sharedPreferences.edit()
-					                 .remove(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE)
-					                 .putBoolean(ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE, true)
-					                 .commit();
-
-					ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE);
-
-				} else {
-					////////////////////////////////////////////
-					// User had chosen "Don't ask again".
-					////////////////////////////////////////////
-					showPermissionExplanationDialog();
-				}
-			}
-			viewModel.setPermissionRationaleBeingShown(true);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			return ContextCompat.checkSelfPermission(this,
+				Manifest.permission.READ_MEDIA_AUDIO) ==
+				PackageManager.PERMISSION_GRANTED;
+		} else {
+			return ContextCompat.checkSelfPermission(this,
+				Manifest.permission.READ_EXTERNAL_STORAGE) ==
+				PackageManager.PERMISSION_GRANTED;
 		}
 	}
 
 	//--------------------------------------------------------------------------------------------------
 
-	/**
-	 * Shows an {@code AlertDialog} explaining why the permission is necessary.
-	 */
-	private void showPermissionExplanationDialog() {
-		DialogFragment dialogPermissionReason =
-				AlertDialog_PermissionReason.getInstance(getResources().getString(R.string.permissionReasonExp_ringtonePicker));
-		dialogPermissionReason.setCancelable(false);
-		dialogPermissionReason.show(getSupportFragmentManager(), "");
-	}
+	private void requestPermission() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-	//--------------------------------------------------------------------------------------------------
+			String permAndroidString;
 
-	@Override
-	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-		if (requestCode == PERMISSIONS_REQUEST_CODE) {
-			viewModel.setPermissionRationaleBeingShown(false);
-			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-				Toast.makeText(this, "Permission granted.", Toast.LENGTH_SHORT).show();
-				initialise();
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+				permAndroidString = Manifest.permission.READ_MEDIA_AUDIO;
 			} else {
-				onPermissionDenied();
+				permAndroidString  = Manifest.permission.READ_EXTERNAL_STORAGE;
 			}
+
+			ArrayList<String> perm = new ArrayList<>();
+			perm.add(permAndroidString);
+
+			Bundle permsLevelBundle = new Bundle();
+			permsLevelBundle.putInt(permAndroidString, ConstantsAndStatics.PERMISSION_LEVEL_ESSENTIAL);
+
+			Intent intent = new Intent(this, Activity_ListReqPerm.class);
+			intent.putStringArrayListExtra(ConstantsAndStatics.EXTRA_PERMS_REQUESTED,
+				perm);
+			intent.putExtra(ConstantsAndStatics.EXTRA_PERMS_REQUESTED_LEVEL,
+				permsLevelBundle);
+
+			viewModel.setWerePermsRequested(true);
+			startActivity(intent);
 		}
 	}
 
@@ -512,7 +491,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 				Uri uri = Uri.fromParts("package", getPackageName(), null);
 				intent.setData(uri);
 				startActivity(intent);
-				viewModel.setPermissionRationaleBeingShown(false);
+				viewModel.setWerePermsRequested(false);
 
 			} else {
 
@@ -533,7 +512,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements View.O
 	//----------------------------------------------------------------------------------------------------
 
 	private void onPermissionDenied() {
-		viewModel.setPermissionRationaleBeingShown(false);
+		viewModel.setWerePermsRequested(false);
 		Toast.makeText(this, "Operation not possible without the permission.", Toast.LENGTH_LONG).show();
 		setResult(RESULT_CANCELED);
 		finish();
