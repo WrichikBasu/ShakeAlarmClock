@@ -35,7 +35,8 @@ import androidx.lifecycle.ViewModelProvider;
 import in.basulabs.shakealarmclock.R;
 
 public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
-		implements RadioGroup.OnCheckedChangeListener, CompoundButton.OnCheckedChangeListener {
+	implements RadioGroup.OnCheckedChangeListener,
+	CompoundButton.OnCheckedChangeListener {
 
 	private View view;
 	private RadioGroup freqRadioGroup, intervalRadioGroup;
@@ -48,12 +49,14 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 
 	@Nullable
 	@Override
-	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-	                         @Nullable Bundle savedInstanceState) {
+	public View onCreateView(@NonNull LayoutInflater inflater,
+		@Nullable ViewGroup container,
+		@Nullable Bundle savedInstanceState) {
 
 		view = inflater.inflate(R.layout.frag_alarmdetails_snooze, container, false);
 
-		viewModel = new ViewModelProvider(requireActivity()).get(ViewModel_AlarmDetails.class);
+		viewModel = new ViewModelProvider(requireActivity()).get(
+			ViewModel_AlarmDetails.class);
 
 		onOffSwitch = view.findViewById(R.id.snoozeOnOffSwitch);
 		freqRadioGroup = view.findViewById(R.id.snoozeFreqRadioGroup);
@@ -101,7 +104,8 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 			default -> {
 				intervalRadioGroup.check(R.id.intervalRadioButton_custom);
 				snoozeIntervalEditText.setEnabled(true);
-				snoozeIntervalEditText.setText(String.valueOf(viewModel.getSnoozeIntervalInMins()));
+				snoozeIntervalEditText.setText(
+					String.valueOf(viewModel.getSnoozeIntervalInMins()));
 			}
 		}
 
@@ -109,11 +113,14 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 
 		snoozeFreqEditText.addTextChangedListener(new TextWatcher() {
 			@Override
-			public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+			public void beforeTextChanged(CharSequence charSequence, int start,
+				int count,
+				int after) {
 			}
 
 			@Override
-			public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+			public void onTextChanged(CharSequence charSequence, int start, int before,
+				int count) {
 				if (charSequence.length() != 0) {
 					viewModel.setSnoozeFreq(Integer.parseInt("" + charSequence));
 				}
@@ -126,13 +133,17 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 
 		snoozeIntervalEditText.addTextChangedListener(new TextWatcher() {
 			@Override
-			public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+			public void beforeTextChanged(CharSequence charSequence, int start,
+				int count,
+				int after) {
 			}
 
 			@Override
-			public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+			public void onTextChanged(CharSequence charSequence, int start, int before,
+				int count) {
 				if (charSequence.length() != 0) {
-					viewModel.setSnoozeIntervalInMins(Integer.parseInt("" + charSequence));
+					viewModel.setSnoozeIntervalInMins(
+						Integer.parseInt("" + charSequence));
 				}
 			}
 
@@ -165,7 +176,8 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 	private void onSwitchCheckedChanged() {
 		if (viewModel.getIsSnoozeOn()) {
 
-			onOffSwitch.setText(requireContext().getResources().getString(R.string.switchOn));
+			onOffSwitch.setText(
+				requireContext().getResources().getString(R.string.switchOn));
 
 			view.findViewById(R.id.freqRadioButton_three).setEnabled(true);
 			view.findViewById(R.id.freqRadioButton_five).setEnabled(true);
@@ -178,12 +190,13 @@ public class Fragment_AlarmDetails_SnoozeOptions extends Fragment
 			view.findViewById(R.id.intervalRadioButton_custom).setEnabled(true);
 
 			snoozeFreqEditText.setEnabled(freqRadioGroup.getCheckedRadioButtonId()
-					== R.id.freqRadioButton_custom);
+				== R.id.freqRadioButton_custom);
 			snoozeIntervalEditText.setEnabled(intervalRadioGroup.getCheckedRadioButtonId()
-					== R.id.intervalRadioButton_custom);
+				== R.id.intervalRadioButton_custom);
 		} else {
 
-			onOffSwitch.setText(requireContext().getResources().getString(R.string.switchOff));
+			onOffSwitch.setText(
+				requireContext().getResources().getString(R.string.switchOff));
 
 			view.findViewById(R.id.freqRadioButton_three).setEnabled(false);
 			view.findViewById(R.id.freqRadioButton_five).setEnabled(false);

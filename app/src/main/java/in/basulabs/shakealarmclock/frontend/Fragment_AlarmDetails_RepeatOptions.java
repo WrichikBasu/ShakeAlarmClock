@@ -35,7 +35,8 @@ import java.util.Objects;
 
 import in.basulabs.shakealarmclock.R;
 
-public class Fragment_AlarmDetails_RepeatOptions extends Fragment implements CompoundButton.OnCheckedChangeListener {
+public class Fragment_AlarmDetails_RepeatOptions extends Fragment implements
+	CompoundButton.OnCheckedChangeListener {
 
 	private List<CheckBox> checkBoxArrayList;
 
@@ -45,11 +46,14 @@ public class Fragment_AlarmDetails_RepeatOptions extends Fragment implements Com
 
 	@Nullable
 	@Override
-	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+	public View onCreateView(@NonNull LayoutInflater inflater,
+		@Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-		View view = inflater.inflate(R.layout.frag_alarmdetails_repeatoptions, container, false);
+		View view = inflater.inflate(R.layout.frag_alarmdetails_repeatoptions, container,
+			false);
 
-		viewModel = new ViewModelProvider(requireActivity()).get(ViewModel_AlarmDetails.class);
+		viewModel = new ViewModelProvider(requireActivity()).get(
+			ViewModel_AlarmDetails.class);
 
 		checkBoxArrayList = new ArrayList<>();
 		checkBoxArrayList.add(view.findViewById(R.id.checkBox_mon));
@@ -66,7 +70,8 @@ public class Fragment_AlarmDetails_RepeatOptions extends Fragment implements Com
 
 		if (viewModel.getRepeatDays() != null && viewModel.getRepeatDays().size() > 0) {
 			for (int i : viewModel.getRepeatDays()) {
-				// The checkBoxArrayList starts from index 0 (for monday), while the DayOfWeek enum assigns monday to 1.
+				// The checkBoxArrayList starts from index 0 (for monday), while the
+				// DayOfWeek enum assigns monday to 1.
 				checkBoxArrayList.get(i - 1).setChecked(true);
 			}
 		}
@@ -98,12 +103,14 @@ public class Fragment_AlarmDetails_RepeatOptions extends Fragment implements Com
 		} else {
 
 			// Remove the dpecific day from the View Model:
-			int index = Objects.requireNonNull(viewModel.getRepeatDays(), "Repeat days array list was null!")
-					.indexOf(checkBoxArrayList.indexOf(checkBox) + 1);
+			int index = Objects.requireNonNull(viewModel.getRepeatDays(),
+					"Repeat days array list was null!")
+				.indexOf(checkBoxArrayList.indexOf(checkBox) + 1);
 			viewModel.getRepeatDays().remove(index);
 
 			// Make the ArrayList of repeatDays null if it is empty.
-			if (viewModel.getRepeatDays() != null && viewModel.getRepeatDays().size() == 0) {
+			if (viewModel.getRepeatDays() != null &&
+				viewModel.getRepeatDays().size() == 0) {
 				viewModel.setRepeatDays(null);
 				viewModel.setIsRepeatOn(false);
 			}

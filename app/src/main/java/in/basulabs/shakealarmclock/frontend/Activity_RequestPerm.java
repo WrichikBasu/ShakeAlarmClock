@@ -39,7 +39,8 @@ public class Activity_RequestPerm extends AppCompatActivity {
 
 	private TextView permGiven;
 	private boolean startedService;
-	private static final String KEY_SERVICE_STARTED = "in.basulabs.shakealarmclock.Act_ReqPerm.ServiceStarted";
+	private static final String KEY_SERVICE_STARTED
+		= "in.basulabs.shakealarmclock.Act_ReqPerm.ServiceStarted";
 
 	@RequiresApi(api = Build.VERSION_CODES.S)
 	@Override
@@ -50,7 +51,7 @@ public class Activity_RequestPerm extends AppCompatActivity {
 		setSupportActionBar(findViewById(R.id.toolbar3));
 		setTitle(R.string.grant_permission);
 
-		if (savedInstanceState == null){
+		if (savedInstanceState == null) {
 			startedService = false;
 		} else {
 			startedService = savedInstanceState.getBoolean(KEY_SERVICE_STARTED);
@@ -82,7 +83,7 @@ public class Activity_RequestPerm extends AppCompatActivity {
 	protected void onResume() {
 		super.onResume();
 		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-		if (alarmManager.canScheduleExactAlarms() && ! startedService) {
+		if (alarmManager.canScheduleExactAlarms() && !startedService) {
 			permGiven.setVisibility(View.VISIBLE);
 
 			Intent intent = new Intent(this, Service_UpdateAlarm.class);

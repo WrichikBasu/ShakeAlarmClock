@@ -30,7 +30,8 @@ import java.util.List;
 public interface AlarmDAO {
 
 	/**
-	 * Inserts an alarm into the database. On conflict, the old alarm is replaced by the new alarm.
+	 * Inserts an alarm into the database. On conflict, the old alarm is replaced by the
+	 * new alarm.
 	 *
 	 * @param alarmEntity The {@link AlarmEntity} object that is to be inserted.
 	 */
@@ -38,7 +39,8 @@ public interface AlarmDAO {
 	void addAlarm(AlarmEntity alarmEntity);
 
 	/**
-	 * Executes a query to delete an alarm. The specific alarm is determined by the supplied arguments.
+	 * Executes a query to delete an alarm. The specific alarm is determined by the
+	 * supplied arguments.
 	 *
 	 * @param hour The hour of the alarm.
 	 * @param mins The minute of the alarm.
@@ -49,8 +51,8 @@ public interface AlarmDAO {
 	/**
 	 * Retrieves the alarm list from the database, ordered by the alarm hour and minutes.
 	 *
-	 * @return A list of {@link AlarmEntity} type containing objects of the aforesaid class representing
-	 * 		alarms.
+	 * @return A list of {@link AlarmEntity} type containing objects of the aforesaid
+	 * 	class representing alarms.
 	 */
 	@Query("SELECT * FROM alarm_entity ORDER BY alarmHour, alarmMinutes")
 	List<AlarmEntity> getAlarms();
@@ -60,9 +62,11 @@ public interface AlarmDAO {
 	 *
 	 * @param hour The alarm hour.
 	 * @param mins The alarm minutes.
-	 * @param newAlarmState The new alarm state. {@code 0} means OFF and {code 1} means ON.
+	 * @param newAlarmState The new alarm state. {@code 0} means OFF and {code 1} means
+	 * 	ON.
 	 */
-	@Query("UPDATE alarm_entity SET isAlarmOn = :newAlarmState WHERE alarmHour = :hour AND alarmMinutes = :mins")
+	@Query("UPDATE alarm_entity SET isAlarmOn = :newAlarmState WHERE alarmHour = :hour " +
+		"AND alarmMinutes = :mins")
 	void toggleAlarm(int hour, int mins, int newAlarmState);
 
 	/**
@@ -70,7 +74,6 @@ public interface AlarmDAO {
 	 *
 	 * @param hour The hour of the alarm.
 	 * @param mins The minute of the alarm.
-	 *
 	 * @return An {@link AlarmEntity} object containing the details of the alarm.
 	 */
 	@Query("SELECT * FROM alarm_entity WHERE alarmHour = :hour AND alarmMinutes = :mins")
@@ -85,15 +88,19 @@ public interface AlarmDAO {
 	 * @param newMonth The NEW Month.
 	 * @param newYear The NEW Year.
 	 */
-	@Query("UPDATE alarm_entity SET alarmDay = :newDayOfMonth, alarmMonth = :newMonth, alarmYear = :newYear WHERE " +
-			"alarmHour = :hour AND alarmMinutes = :mins")
-	void updateAlarmDate(int hour, int mins, int newDayOfMonth, int newMonth, int newYear);
+	@Query("UPDATE alarm_entity SET alarmDay = :newDayOfMonth, alarmMonth = :newMonth," +
+		" " +
+		"alarmYear = :newYear WHERE " +
+		"alarmHour = :hour AND alarmMinutes = :mins")
+	void updateAlarmDate(int hour, int mins, int newDayOfMonth, int newMonth,
+		int newYear);
 
 	/**
 	 * Toggles the alarm state in the database.
 	 *
 	 * @param alarmId The unique id of the alarm.
-	 * @param newAlarmState The new alarm state. {@code 0} means OFF and {code 1} means ON.
+	 * @param newAlarmState The new alarm state. {@code 0} means OFF and {code 1} means
+	 * 	ON.
 	 */
 	@Query("UPDATE alarm_entity SET isAlarmOn = :newAlarmState WHERE alarmID = :alarmId")
 	void toggleAlarm(int alarmId, int newAlarmState);
@@ -102,8 +109,8 @@ public interface AlarmDAO {
 	 * Get the days in which the alarm is to be repeated.
 	 *
 	 * @param alarmId The unique ID of the alarm.
-	 *
-	 * @return The days in which the alarm is to be repeated. If repeat is off, this may return null.
+	 * @return The days in which the alarm is to be repeated. If repeat is off, this may
+	 * 	return null.
 	 */
 	@Query("SELECT repeatDay from alarm_repeat_entity WHERE alarmID = :alarmId")
 	List<Integer> getAlarmRepeatDays(int alarmId);
@@ -121,7 +128,8 @@ public interface AlarmDAO {
 	 *
 	 * @return The alarms that are currently active, i.e., in ON state.
 	 */
-	@Query("SELECT * FROM alarm_entity WHERE isAlarmOn = 1 ORDER BY alarmHour, alarmMinutes")
+	@Query("SELECT * FROM alarm_entity WHERE isAlarmOn = 1 ORDER BY alarmHour, " +
+		"alarmMinutes")
 	List<AlarmEntity> getActiveAlarms();
 
 	/**
@@ -129,10 +137,11 @@ public interface AlarmDAO {
 	 *
 	 * @param hour The alarm hour.
 	 * @param mins The alarm mins.
-	 *
 	 * @return The unique alarm ID.
 	 */
-	@Query("SELECT alarmID FROM alarm_entity WHERE alarmHour = :hour AND alarmMinutes = :mins")
+	@Query(
+		"SELECT alarmID FROM alarm_entity WHERE alarmHour = :hour AND alarmMinutes = " +
+			":mins")
 	int getAlarmId(int hour, int mins);
 
 	/**
@@ -149,7 +158,8 @@ public interface AlarmDAO {
 	 * @param alarmId The alarm ID.
 	 * @param newState The new state. Pass 0 if {@code false} and 1 if {@code true}.
 	 */
-	@Query("UPDATE alarm_entity SET hasUserChosenDate = :newState WHERE alarmID = :alarmId")
+	@Query("UPDATE alarm_entity SET hasUserChosenDate = :newState WHERE alarmID = " +
+		":alarmId")
 	void toggleHasUserChosenDate(int alarmId, int newState);
 
 	/**

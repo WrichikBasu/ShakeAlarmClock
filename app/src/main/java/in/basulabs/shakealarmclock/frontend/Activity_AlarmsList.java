@@ -178,30 +178,31 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	protected void onResume() {
 		super.onResume();
 
-			if (viewModel.getPendingStatus() && viewModel.getPendingALarmData() != null) {
-				// An alarm is pending to be saved.
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-					if (ConstantsAndStatics.checkEssentialPerms(this).isEmpty()) {
-						// All essential permissions are available.
-						setAlarm(viewModel.getPendingALarmData());
-					} else { // Essential permissions are not available.
-						requestEssentialPerms();
-					}
-				} else {
-					// No need to check for essential permissions. Just save the alarm.
+		if (viewModel.getPendingStatus() && viewModel.getPendingALarmData() != null) {
+			// An alarm is pending to be saved.
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+				if (ConstantsAndStatics.checkEssentialPerms(this).isEmpty()) {
+					// All essential permissions are available.
 					setAlarm(viewModel.getPendingALarmData());
-				}
-			} else { // No pending alarm.
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+				} else { // Essential permissions are not available.
 					requestEssentialPerms();
 				}
-				// Check whether it is a good time to ask for optional perms, and request them.
-				// Note that if essential perms have been requested in the current
-				// session, non-essential perms will not be asked in this session.
-				if (viewModel.getCanRequestNonEssentialPerms()) {
-					requestNonEssentialPermsOnly();
-				}
+			} else {
+				// No need to check for essential permissions. Just save the alarm.
+				setAlarm(viewModel.getPendingALarmData());
 			}
+		} else { // No pending alarm.
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+				requestEssentialPerms();
+			}
+			// Check whether it is a good time to ask for optional perms, and request
+			// them.
+			// Note that if essential perms have been requested in the current
+			// session, non-essential perms will not be asked in this session.
+			if (viewModel.getCanRequestNonEssentialPerms()) {
+				requestNonEssentialPermsOnly();
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -357,8 +358,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 		int flags =
 			android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ?
-			PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE :
-			PendingIntent.FLAG_NO_CREATE;
+				PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE :
+				PendingIntent.FLAG_NO_CREATE;
 
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
 			alarmID, intent, flags);
@@ -544,8 +545,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	/**
 	 * Sets the alarm in the Android system.
 	 * <p>
-	 * Assumes that the permission to set alarms has been granted (for Android version
-	 * >= S). Check for alarm permission before invoking.
+	 * Assumes that the permission to set alarms has been granted (for Android version >=
+	 * S). Check for alarm permission before invoking.
 	 *
 	 * @param data The details of the alarm to be set.
 	 */

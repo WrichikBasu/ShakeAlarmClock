@@ -59,7 +59,9 @@ public class ViewModel_RingtonePicker extends ViewModel {
 		this.requestedPermissions.setValue(value);
 	}
 
-	/** @noinspection BooleanMethodIsAlwaysInverted*/
+	/**
+	 * @noinspection BooleanMethodIsAlwaysInverted
+	 */
 	public boolean getIsInitialised() {
 		return Boolean.TRUE.equals(isInitialised.getValue());
 	}

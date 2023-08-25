@@ -47,7 +47,8 @@ public class AlertDialog_TestShakeSensitivity extends DialogFragment {
 		if (context instanceof AlertDialog_TestShakeSensitivity.DialogListener) {
 			listener = (AlertDialog_TestShakeSensitivity.DialogListener) context;
 		} else {
-			throw new ClassCastException(context.getClass().getSimpleName() + " must implement AlertDialog_TestShakeSensitivity.DialogListener");
+			throw new ClassCastException(context.getClass().getSimpleName() +
+				" must implement AlertDialog_TestShakeSensitivity.DialogListener");
 		}
 	}
 
@@ -59,12 +60,14 @@ public class AlertDialog_TestShakeSensitivity extends DialogFragment {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
 		builder.setTitle(R.string.title_shakeDetectionTest)
-				.setMessage(getResources().getString(R.string.message_shakeDetectionTest))
-				.setNegativeButton(getResources().getString(R.string.negative_shakeDetectionTest), (dialogInterface, i) -> {
+			.setMessage(getResources().getString(R.string.message_shakeDetectionTest))
+			.setNegativeButton(
+				getResources().getString(R.string.negative_shakeDetectionTest),
+				(dialogInterface, i) -> {
 					listener.onDialogNegativeClick(AlertDialog_TestShakeSensitivity.this);
 					dismiss();
 				})
-				.setCancelable(false);
+			.setCancelable(false);
 
 		return builder.create();
 	}

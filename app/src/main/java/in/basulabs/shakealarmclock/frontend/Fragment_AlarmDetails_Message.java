@@ -37,11 +37,14 @@ public class Fragment_AlarmDetails_Message extends Fragment {
 
 	@Nullable
 	@Override
-	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+	public View onCreateView(@NonNull LayoutInflater inflater,
+		@Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-		View view = inflater.inflate(R.layout.frag_alarmdetails_message, container, false);
+		View view = inflater.inflate(R.layout.frag_alarmdetails_message, container,
+			false);
 
-		viewModel = new ViewModelProvider(requireActivity()).get(ViewModel_AlarmDetails.class);
+		viewModel = new ViewModelProvider(requireActivity()).get(
+			ViewModel_AlarmDetails.class);
 
 		EditText messageEditText = view.findViewById(R.id.alarmMessageEditText);
 
@@ -54,7 +57,8 @@ public class Fragment_AlarmDetails_Message extends Fragment {
 		messageEditText.addTextChangedListener(new TextWatcher() {
 
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
 			}
 
 			@Override

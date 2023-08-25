@@ -36,11 +36,14 @@ public class Fragment_AlarmDetails_DatePicker extends Fragment {
 
 	@Nullable
 	@Override
-	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+	public View onCreateView(@NonNull LayoutInflater inflater,
+		@Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-		View view = inflater.inflate(R.layout.frag_alarmdetails_datepicker, container, false);
+		View view = inflater.inflate(R.layout.frag_alarmdetails_datepicker, container,
+			false);
 
-		ViewModel_AlarmDetails viewModel = new ViewModelProvider(requireActivity()).get(ViewModel_AlarmDetails.class);
+		ViewModel_AlarmDetails viewModel = new ViewModelProvider(requireActivity()).get(
+			ViewModel_AlarmDetails.class);
 
 		Calendar minCalendar = Calendar.getInstance();
 		minCalendar.set(Calendar.DAY_OF_MONTH, viewModel.getMinDate().getDayOfMonth());
@@ -53,16 +56,22 @@ public class Fragment_AlarmDetails_DatePicker extends Fragment {
 		DatePicker datePicker = view.findViewById(R.id.datePicker);
 		datePicker.setMinDate(minCalendar.getTimeInMillis());
 
-		datePicker.init(viewModel.getAlarmDateTime().getYear(), viewModel.getAlarmDateTime().getMonthValue() - 1,
-				viewModel.getAlarmDateTime().getDayOfMonth(), (datePicker1, newYear, newMonthOfYear, newDayOfMonth) -> {
+		datePicker.init(viewModel.getAlarmDateTime().getYear(),
+			viewModel.getAlarmDateTime().getMonthValue() - 1,
+			viewModel.getAlarmDateTime().getDayOfMonth(),
+			(datePicker1, newYear, newMonthOfYear, newDayOfMonth) -> {
 
-					viewModel.setAlarmDateTime(viewModel.getAlarmDateTime().withDayOfMonth(newDayOfMonth));
-					viewModel.setAlarmDateTime(viewModel.getAlarmDateTime().withMonth(newMonthOfYear + 1));
-					viewModel.setAlarmDateTime(viewModel.getAlarmDateTime().withYear(newYear));
+				viewModel.setAlarmDateTime(
+					viewModel.getAlarmDateTime().withDayOfMonth(newDayOfMonth));
+				viewModel.setAlarmDateTime(
+					viewModel.getAlarmDateTime().withMonth(newMonthOfYear + 1));
+				viewModel.setAlarmDateTime(
+					viewModel.getAlarmDateTime().withYear(newYear));
 
-					viewModel.setIsChosenDateToday(viewModel.getAlarmDateTime().toLocalDate().equals(LocalDate.now()));
-					viewModel.setHasUserChosenDate(true);
-				});
+				viewModel.setIsChosenDateToday(
+					viewModel.getAlarmDateTime().toLocalDate().equals(LocalDate.now()));
+				viewModel.setHasUserChosenDate(true);
+			});
 
 		return view;
 	}

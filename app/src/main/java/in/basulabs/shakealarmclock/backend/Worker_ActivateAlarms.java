@@ -51,7 +51,8 @@ public class Worker_ActivateAlarms extends Worker {
 
 	//----------------------------------------------------------------------------------------------------------
 
-	public Worker_ActivateAlarms(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+	public Worker_ActivateAlarms(@NonNull Context context,
+		@NonNull WorkerParameters workerParams) {
 		super(context, workerParams);
 		this.context = context;
 	}
@@ -64,7 +65,8 @@ public class Worker_ActivateAlarms extends Worker {
 
 		stopExecuting = false;
 
-		if (Service_RingAlarm.isThisServiceRunning || Service_SnoozeAlarm.isThisServiceRunning) {
+		if (Service_RingAlarm.isThisServiceRunning ||
+			Service_SnoozeAlarm.isThisServiceRunning) {
 			return Result.failure();
 		} else {
 			return activateAlarmsIfInactive();
@@ -74,11 +76,13 @@ public class Worker_ActivateAlarms extends Worker {
 	//----------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Activates the alarms that are ON, but inactive because {@link AlarmManager} has cancelled them for no reason.
+	 * Activates the alarms that are ON, but inactive because {@link AlarmManager} has
+	 * cancelled them for no reason.
 	 */
 	private Result activateAlarmsIfInactive() {
 
-		final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		final AlarmManager alarmManager = (AlarmManager) context.getSystemService(
+			Context.ALARM_SERVICE);
 		final AlarmDatabase alarmDatabase = AlarmDatabase.getInstance(context);
 
 		List<AlarmEntity> list = alarmDatabase.alarmDAO().getActiveAlarms();
@@ -94,43 +98,59 @@ public class Worker_ActivateAlarms extends Worker {
 
 			for (AlarmEntity alarmEntity : list) {
 
-				AtomicReference<ArrayList<Integer>> repeatDaysAtomic = new AtomicReference<>();
+				AtomicReference<ArrayList<Integer>> repeatDaysAtomic
+					= new AtomicReference<>();
 
 				alarmDatabase.alarmDAO().getAlarmRepeatDays(alarmEntity.alarmID);
 
 				ArrayList<Integer> repeatDays = repeatDaysAtomic.get();
 
-				Intent intent = new Intent(context.getApplicationContext(), AlarmBroadcastReceiver.class);
+				Intent intent = new Intent(context.getApplicationContext(),
+					AlarmBroadcastReceiver.class);
 				intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
 				intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
 				Bundle data = alarmEntity.getAlarmDetailsInABundle();
-				data.putIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS, repeatDays);
+				data.putIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS,
+					repeatDays);
 				intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, data);
 
-				int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE
-						: PendingIntent.FLAG_NO_CREATE;
+				int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
+					PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE
+					: PendingIntent.FLAG_NO_CREATE;
 
-				PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), alarmEntity.alarmID, intent, flags);
+				PendingIntent pendingIntent = PendingIntent.getBroadcast(
+					context.getApplicationContext(), alarmEntity.alarmID, intent, flags);
 
 				if (pendingIntent == null) {
 
-					LocalDateTime alarmDateTime = ConstantsAndStatics.getAlarmDateTime(LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth,
-							alarmEntity.alarmDay), LocalTime.of(alarmEntity.alarmHour, alarmEntity.alarmMinutes), alarmEntity.isRepeatOn,
-							repeatDays);
+					LocalDateTime alarmDateTime = ConstantsAndStatics.getAlarmDateTime(
+						LocalDate.of(alarmEntity.alarmYear, alarmEntity.alarmMonth,
+							alarmEntity.alarmDay),
+						LocalTime.of(alarmEntity.alarmHour, alarmEntity.alarmMinutes),
+						alarmEntity.isRepeatOn,
+						repeatDays);
 
-					ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime, ZoneId.systemDefault());
+					ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime,
+						ZoneId.systemDefault());
 
-					int flags2 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
+					int flags2 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+						? PendingIntent.FLAG_IMMUTABLE
+						: 0;
 
-					PendingIntent pendingIntent1 = PendingIntent.getBroadcast(context.getApplicationContext(), alarmEntity.alarmID, intent, flags2);
+					PendingIntent pendingIntent1 = PendingIntent.getBroadcast(
+						context.getApplicationContext(), alarmEntity.alarmID, intent,
+						flags2);
 
-					alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000, pendingIntent1),
-							pendingIntent1);
+					alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(
+							zonedDateTime.toEpochSecond() * 1000, pendingIntent1),
+						pendingIntent1);
 
 				}
 
-				if ((stopExecuting && !isStopped()) || Service_RingAlarm.isThisServiceRunning || Service_SnoozeAlarm.isThisServiceRunning) {
+				if ((stopExecuting && !isStopped()) ||
+					Service_RingAlarm.isThisServiceRunning ||
+					Service_SnoozeAlarm.isThisServiceRunning) {
 					return Result.failure();
 				}
 			}
@@ -141,41 +161,51 @@ public class Worker_ActivateAlarms extends Worker {
 	//----------------------------------------------------------------------------------------------------
 
 	/**
-	 * Displays a notification when {@link AlarmManager#canScheduleExactAlarms()} returns {@code false}.
+	 * Displays a notification when {@link AlarmManager#canScheduleExactAlarms()} returns
+	 * {@code false}.
 	 * <p>
 	 * The notification opens {@link Activity_RequestPerm}.
 	 */
 	private void displayErrorNoif() {
 
-		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		NotificationManager notificationManager
+			= (NotificationManager) context.getSystemService(
+			Context.NOTIFICATION_SERVICE);
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
-			NotificationChannel channel = new NotificationChannel(Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ERROR),
-					context.getString(R.string.notif_channel_error), importance);
+			NotificationChannel channel = new NotificationChannel(
+				Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ERROR),
+				context.getString(R.string.notif_channel_error), importance);
 			notificationManager.createNotificationChannel(channel);
 		}
 
-		Intent intent = new Intent(context.getApplicationContext(), Activity_RequestPerm.class);
+		Intent intent = new Intent(context.getApplicationContext(),
+			Activity_RequestPerm.class);
 
-		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ?
-				PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT : PendingIntent.FLAG_UPDATE_CURRENT;
+		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
+			?
+			PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+			: PendingIntent.FLAG_UPDATE_CURRENT;
 
-		PendingIntent pendingIntent = PendingIntent.getActivity(context.getApplicationContext(), 255, intent, flags);
+		PendingIntent pendingIntent = PendingIntent.getActivity(
+			context.getApplicationContext(), 255, intent, flags);
 
-		NotificationCompat.Action notifAction = new NotificationCompat.Action.Builder(R.drawable.ic_notif,
-				context.getString(R.string.error_notif_body), pendingIntent).build();
+		NotificationCompat.Action notifAction = new NotificationCompat.Action.Builder(
+			R.drawable.ic_notif,
+			context.getString(R.string.error_notif_body), pendingIntent).build();
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ERROR))
-				.setContentTitle(context.getString(R.string.error_notif_title))
-				.setContentText(context.getString(R.string.error_notif_body))
-				.setPriority(NotificationCompat.PRIORITY_HIGH)
-				.setCategory(NotificationCompat.CATEGORY_ERROR)
-				.setSmallIcon(R.drawable.ic_notif)
-				.setOngoing(true)
-				.setAutoCancel(true)
-				.setOnlyAlertOnce(true)
-				.addAction(notifAction);
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(context,
+			Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ERROR))
+			.setContentTitle(context.getString(R.string.error_notif_title))
+			.setContentText(context.getString(R.string.error_notif_body))
+			.setPriority(NotificationCompat.PRIORITY_HIGH)
+			.setCategory(NotificationCompat.CATEGORY_ERROR)
+			.setSmallIcon(R.drawable.ic_notif)
+			.setOngoing(true)
+			.setAutoCancel(true)
+			.setOnlyAlertOnce(true)
+			.addAction(notifAction);
 
 		notificationManager.notify(UniqueNotifID.getID(), builder.build());
 

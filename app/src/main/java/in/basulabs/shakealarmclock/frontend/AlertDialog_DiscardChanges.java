@@ -41,7 +41,8 @@ public class AlertDialog_DiscardChanges extends DialogFragment {
 		if (context instanceof DialogListener) {
 			listener = (DialogListener) context;
 		} else {
-			throw new ClassCastException(context.getClass() + " must implement AlertDialog_DiscardChanges.DialogListener");
+			throw new ClassCastException(context.getClass() +
+				" must implement AlertDialog_DiscardChanges.DialogListener");
 		}
 	}
 
@@ -51,11 +52,12 @@ public class AlertDialog_DiscardChanges extends DialogFragment {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
 		builder.setMessage(getResources().getString(R.string.cancelDialogMessage))
-				.setPositiveButton(getResources().getString(R.string.cancelDialog_positive),
-						(dialogInterface, i) -> listener.onDialogPositiveClick(AlertDialog_DiscardChanges.this))
-				.setNegativeButton(getResources().getString(R.string.cancelDialog_negative),
-						(dialogInterface, i) -> dismiss())
-				.setCancelable(false);
+			.setPositiveButton(getResources().getString(R.string.cancelDialog_positive),
+				(dialogInterface, i) -> listener.onDialogPositiveClick(
+					AlertDialog_DiscardChanges.this))
+			.setNegativeButton(getResources().getString(R.string.cancelDialog_negative),
+				(dialogInterface, i) -> dismiss())
+			.setCancelable(false);
 
 		return builder.create();
 	}

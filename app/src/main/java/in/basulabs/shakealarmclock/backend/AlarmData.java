@@ -39,12 +39,15 @@ public class AlarmData {
 	 * Use this constructor if repeat is OFF for the alarm.
 	 *
 	 * @param isSwitchedOn Whether alarm is switched on.
-	 * @param alarmDateTime A {@link LocalDateTime} object representing the date and time of the alarm. Cannot be null.
-	 * @param alarmType One of {@link ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY}, {@link ConstantsAndStatics#ALARM_TYPE_VIBRATE_ONLY} or {@link
-	 * ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}.
+	 * @param alarmDateTime A {@link LocalDateTime} object representing the date and time
+	 * 	of the alarm. Cannot be null.
+	 * @param alarmType One of {@link ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY},
+	 *    {@link ConstantsAndStatics#ALARM_TYPE_VIBRATE_ONLY} or
+	 *    {@link ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}.
 	 * @param alarmMessage The alarm message. May be {@code null}.
 	 */
-	public AlarmData(boolean isSwitchedOn, @NonNull LocalDateTime alarmDateTime, int alarmType, @Nullable String alarmMessage) {
+	public AlarmData(boolean isSwitchedOn, @NonNull LocalDateTime alarmDateTime,
+		int alarmType, @Nullable String alarmMessage) {
 		this.isSwitchedOn = isSwitchedOn;
 		this.alarmDateTime = alarmDateTime;
 		this.alarmType = alarmType;
@@ -60,16 +63,18 @@ public class AlarmData {
 	 * Use this constructor if repeat is ON.
 	 *
 	 * @param isSwitchedOn Whether alarm is switched on.
-	 * @param alarmTime A {@link LocalTime} object representing the time of the alarm. Must not be null.
-	 * @param alarmType One of {@link ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY}, {@link ConstantsAndStatics#ALARM_TYPE_VIBRATE_ONLY} or {@link
-	 * ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}.
-	 * @param repeatDays An <code>ArrayList</code> containing the days in which the alarm is to be repeated. Follows {@link java.time.DayOfWeek}
-	 * enum. Cannot
-	 * be null.
+	 * @param alarmTime A {@link LocalTime} object representing the time of the alarm.
+	 * 	Must not be null.
+	 * @param alarmType One of {@link ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY},
+	 *    {@link ConstantsAndStatics#ALARM_TYPE_VIBRATE_ONLY} or
+	 *    {@link ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}.
+	 * @param repeatDays An <code>ArrayList</code> containing the days in which the alarm
+	 * 	is to be repeated. Follows {@link java.time.DayOfWeek} enum. Cannot be null.
 	 * @param alarmMessage The alarm message. May be {@code null}.
 	 */
-	public AlarmData(boolean isSwitchedOn, @NonNull LocalTime alarmTime, int alarmType, @Nullable String alarmMessage,
-	                 @NonNull ArrayList<Integer> repeatDays) {
+	public AlarmData(boolean isSwitchedOn, @NonNull LocalTime alarmTime, int alarmType,
+		@Nullable String alarmMessage,
+		@NonNull ArrayList<Integer> repeatDays) {
 		this.isSwitchedOn = isSwitchedOn;
 		this.alarmTime = alarmTime;
 		this.alarmType = alarmType;
@@ -106,9 +111,8 @@ public class AlarmData {
 	/**
 	 * Get the days on which the alarm will repeat.
 	 *
-	 * @return An {@code ArrayList} containing the days on which the alarm will repeat. Must follow {@link java.time.DayOfWeek} enum. May be null in
-	 * case repeat
-	 * is off.
+	 * @return An {@code ArrayList} containing the days on which the alarm will repeat.
+	 * 	Must follow {@link java.time.DayOfWeek} enum. May be null in case repeat is off.
 	 */
 	@Nullable
 	public ArrayList<Integer> getRepeatDays() {
@@ -120,8 +124,9 @@ public class AlarmData {
 	/**
 	 * Set the days on which the alarm is to be repeated.
 	 *
-	 * @param repeatDays An {@code ArrayList} containing the days on which the alarm will repeat. Must follow {@link java.time.DayOfWeek} enum. May
-	 * be null in case repeat is off.
+	 * @param repeatDays An {@code ArrayList} containing the days on which the alarm will
+	 * 	repeat. Must follow {@link java.time.DayOfWeek} enum. May be null in case repeat
+	 * 	is off.
 	 */
 	public void setRepeatDays(@Nullable ArrayList<Integer> repeatDays) {
 		this.repeatDays = repeatDays;
@@ -166,7 +171,8 @@ public class AlarmData {
 	/**
 	 * Set the alarm date and time.
 	 *
-	 * @param alarmDateTime A {@link LocalDateTime} object representing the alarm date and time. May be null if repeat is on.
+	 * @param alarmDateTime A {@link LocalDateTime} object representing the alarm date
+	 * 	and time. May be null if repeat is on.
 	 */
 	public void setAlarmDateTime(@Nullable LocalDateTime alarmDateTime) {
 		this.alarmDateTime = alarmDateTime;
@@ -177,7 +183,8 @@ public class AlarmData {
 	/**
 	 * Get the alarm time.
 	 *
-	 * @return A {@link LocalTime} object representing the alarm time. Will never be null.
+	 * @return A {@link LocalTime} object representing the alarm time. Will never be
+	 * null.
 	 */
 	@NonNull
 	public LocalTime getAlarmTime() {
@@ -189,7 +196,8 @@ public class AlarmData {
 	/**
 	 * Set the alarm time.
 	 *
-	 * @param alarmTime A {@link LocalTime} object representing the alarm time. Cannot be null.
+	 * @param alarmTime A {@link LocalTime} object representing the alarm time. Cannot be
+	 * 	null.
 	 */
 	public void setAlarmTime(@NonNull LocalTime alarmTime) {
 		this.alarmTime = alarmTime;
@@ -200,8 +208,9 @@ public class AlarmData {
 	/**
 	 * Get the alarm type.
 	 *
-	 * @return One of {@link ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY}, {@link ConstantsAndStatics#ALARM_TYPE_VIBRATE_ONLY} or {@link
-	 * ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}.
+	 * @return One of {@link ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY},
+	 *    {@link ConstantsAndStatics#ALARM_TYPE_VIBRATE_ONLY} or
+	 *    {@link ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}.
 	 */
 	public int getAlarmType() {
 		return alarmType;
@@ -212,8 +221,9 @@ public class AlarmData {
 	/**
 	 * Set the alarm type.
 	 *
-	 * @param alarmType One of {@link ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY}, {@link ConstantsAndStatics#ALARM_TYPE_VIBRATE_ONLY} or {@link
-	 * ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}.
+	 * @param alarmType One of {@link ConstantsAndStatics#ALARM_TYPE_SOUND_ONLY},
+	 *    {@link ConstantsAndStatics#ALARM_TYPE_VIBRATE_ONLY} or
+	 *    {@link ConstantsAndStatics#ALARM_TYPE_SOUND_AND_VIBRATE}.
 	 */
 	public void setAlarmType(int alarmType) {
 		this.alarmType = alarmType;

@@ -20,11 +20,11 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 
 @Entity(tableName = "alarm_repeat_entity", primaryKeys = {"alarmID", "repeatDay"},
-		foreignKeys = @ForeignKey(entity = AlarmEntity.class,
-				parentColumns = "alarmID",
-				childColumns = "alarmID",
-				onDelete = ForeignKey.CASCADE,
-				onUpdate = ForeignKey.CASCADE))
+	foreignKeys = @ForeignKey(entity = AlarmEntity.class,
+		parentColumns = "alarmID",
+		childColumns = "alarmID",
+		onDelete = ForeignKey.CASCADE,
+		onUpdate = ForeignKey.CASCADE))
 public class RepeatEntity {
 
 	/**
@@ -33,7 +33,8 @@ public class RepeatEntity {
 	public int alarmID;
 
 	/**
-	 * The day on which the alarm is to be repeated. Follows {@link java.time.DayOfWeek} enum.
+	 * The day on which the alarm is to be repeated. Follows {@link java.time.DayOfWeek}
+	 * enum.
 	 */
 	public int repeatDay;
 

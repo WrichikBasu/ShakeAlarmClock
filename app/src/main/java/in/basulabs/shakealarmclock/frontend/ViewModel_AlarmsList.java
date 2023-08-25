@@ -94,6 +94,7 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 	}
 
 	//----------------------------------------------------------------------------------
+
 	/**
 	 * Get the total number of alarms in the database.
 	 *

@@ -28,9 +28,9 @@ public class MyWorkManagerInitializer extends MyContentProvider {
 	@Override
 	public boolean onCreate() {
 		WorkManager.initialize(Objects.requireNonNull(getContext()),
-				new Configuration.Builder()
-						.setMinimumLoggingLevel(Log.DEBUG)
-						.build());
+			new Configuration.Builder()
+				.setMinimumLoggingLevel(Log.DEBUG)
+				.build());
 		return true;
 	}
 }

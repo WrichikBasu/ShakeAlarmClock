@@ -16,7 +16,33 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 package in.basulabs.shakealarmclock.frontend;
 
-import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.*;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.ACTION_EXISTING_ALARM;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.ACTION_NEW_ALARM;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.ACTION_NEW_ALARM_FROM_INTENT;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.ALARM_TYPE_SOUND_ONLY;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_ALARM_DAY;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_ALARM_MONTH;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_ALARM_YEAR;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_HAS_USER_CHOSEN_DATE;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_OLD_ALARM_HOUR;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_OLD_ALARM_MINUTE;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_FILE_NAME;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_IS_ON;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -41,12 +67,12 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import in.basulabs.shakealarmclock.R;
 import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 
-import in.basulabs.shakealarmclock.R;
-
-public class Activity_AlarmDetails extends AppCompatActivity implements Fragment_AlarmDetails_Main.FragmentGUIListener,
-		AlertDialog_DiscardChanges.DialogListener {
+public class Activity_AlarmDetails extends AppCompatActivity implements
+	Fragment_AlarmDetails_Main.FragmentGUIListener,
+	AlertDialog_DiscardChanges.DialogListener {
 
 	private FragmentManager fragmentManager;
 	private ActionBar actionBar;
@@ -89,37 +115,41 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 				setVariablesInViewModel();
 
 				fragmentManager.beginTransaction()
-				               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Main())
-				               .addToBackStack(BACK_STACK_TAG)
-				               .commit();
+					.replace(R.id.addAlarmActFragHolder,
+						new Fragment_AlarmDetails_Main())
+					.addToBackStack(BACK_STACK_TAG)
+					.commit();
 
-			} else if (Objects.requireNonNull(getIntent().getAction()).equals(ACTION_EXISTING_ALARM)) {
+			} else if (Objects.requireNonNull(getIntent().getAction())
+				.equals(ACTION_EXISTING_ALARM)) {
 
-				Bundle data = Objects.requireNonNull(getIntent().getExtras()).getBundle(BUNDLE_KEY_ALARM_DETAILS);
+				Bundle data = Objects.requireNonNull(getIntent().getExtras())
+					.getBundle(BUNDLE_KEY_ALARM_DETAILS);
 
 				assert data != null;
 
 				setVariablesInViewModel(MODE_EXISTING_ALARM,
-						data.getInt(BUNDLE_KEY_ALARM_HOUR),
-						data.getInt(BUNDLE_KEY_ALARM_MINUTE),
-						data.getInt(BUNDLE_KEY_ALARM_DAY),
-						data.getInt(BUNDLE_KEY_ALARM_MONTH),
-						data.getInt(BUNDLE_KEY_ALARM_YEAR),
-						data.getBoolean(BUNDLE_KEY_IS_SNOOZE_ON),
-						data.getBoolean(BUNDLE_KEY_IS_REPEAT_ON),
-						data.getInt(BUNDLE_KEY_SNOOZE_FREQUENCY),
-						data.getInt(BUNDLE_KEY_SNOOZE_TIME_IN_MINS),
-						data.getInt(BUNDLE_KEY_ALARM_TYPE),
-						data.getInt(BUNDLE_KEY_ALARM_VOLUME),
-						data.getIntegerArrayList(BUNDLE_KEY_REPEAT_DAYS),
-						data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE),
-						Objects.requireNonNull(data.getParcelable(BUNDLE_KEY_ALARM_TONE_URI)),
-						data.getBoolean(BUNDLE_KEY_HAS_USER_CHOSEN_DATE));
+					data.getInt(BUNDLE_KEY_ALARM_HOUR),
+					data.getInt(BUNDLE_KEY_ALARM_MINUTE),
+					data.getInt(BUNDLE_KEY_ALARM_DAY),
+					data.getInt(BUNDLE_KEY_ALARM_MONTH),
+					data.getInt(BUNDLE_KEY_ALARM_YEAR),
+					data.getBoolean(BUNDLE_KEY_IS_SNOOZE_ON),
+					data.getBoolean(BUNDLE_KEY_IS_REPEAT_ON),
+					data.getInt(BUNDLE_KEY_SNOOZE_FREQUENCY),
+					data.getInt(BUNDLE_KEY_SNOOZE_TIME_IN_MINS),
+					data.getInt(BUNDLE_KEY_ALARM_TYPE),
+					data.getInt(BUNDLE_KEY_ALARM_VOLUME),
+					data.getIntegerArrayList(BUNDLE_KEY_REPEAT_DAYS),
+					data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE),
+					Objects.requireNonNull(data.getParcelable(BUNDLE_KEY_ALARM_TONE_URI)),
+					data.getBoolean(BUNDLE_KEY_HAS_USER_CHOSEN_DATE));
 
 				fragmentManager.beginTransaction()
-				               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Main())
-				               .addToBackStack(BACK_STACK_TAG)
-				               .commit();
+					.replace(R.id.addAlarmActFragHolder,
+						new Fragment_AlarmDetails_Main())
+					.addToBackStack(BACK_STACK_TAG)
+					.commit();
 
 			} else if (getIntent().getAction().equals(ACTION_NEW_ALARM_FROM_INTENT)) {
 
@@ -132,27 +162,32 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 				} else {
 
 					setVariablesInViewModel(MODE_NEW_ALARM,
-							data.getInt(BUNDLE_KEY_ALARM_HOUR),
-							data.getInt(BUNDLE_KEY_ALARM_MINUTE),
-							data.getInt(BUNDLE_KEY_ALARM_DAY),
-							data.getInt(BUNDLE_KEY_ALARM_MONTH),
-							data.getInt(BUNDLE_KEY_ALARM_YEAR),
-							sharedPreferences.getBoolean(SHARED_PREF_KEY_DEFAULT_SNOOZE_IS_ON, true),
-							data.getBoolean(BUNDLE_KEY_IS_REPEAT_ON),
-							sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ, 3),
-							sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL, 5),
-							data.getInt(BUNDLE_KEY_ALARM_TYPE),
-							data.getInt(BUNDLE_KEY_ALARM_VOLUME),
-							data.getIntegerArrayList(BUNDLE_KEY_REPEAT_DAYS),
-							data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null),
-							Objects.requireNonNull(data.getParcelable(BUNDLE_KEY_ALARM_TONE_URI)), false);
+						data.getInt(BUNDLE_KEY_ALARM_HOUR),
+						data.getInt(BUNDLE_KEY_ALARM_MINUTE),
+						data.getInt(BUNDLE_KEY_ALARM_DAY),
+						data.getInt(BUNDLE_KEY_ALARM_MONTH),
+						data.getInt(BUNDLE_KEY_ALARM_YEAR),
+						sharedPreferences.getBoolean(SHARED_PREF_KEY_DEFAULT_SNOOZE_IS_ON,
+							true),
+						data.getBoolean(BUNDLE_KEY_IS_REPEAT_ON),
+						sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ, 3),
+						sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL,
+							5),
+						data.getInt(BUNDLE_KEY_ALARM_TYPE),
+						data.getInt(BUNDLE_KEY_ALARM_VOLUME),
+						data.getIntegerArrayList(BUNDLE_KEY_REPEAT_DAYS),
+						data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE,
+							null),
+						Objects.requireNonNull(
+							data.getParcelable(BUNDLE_KEY_ALARM_TONE_URI)), false);
 
 				}
 
 				fragmentManager.beginTransaction()
-				               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Main())
-				               .addToBackStack(BACK_STACK_TAG)
-				               .commit();
+					.replace(R.id.addAlarmActFragHolder,
+						new Fragment_AlarmDetails_Main())
+					.addToBackStack(BACK_STACK_TAG)
+					.commit();
 			}
 
 			fragmentManager.executePendingTransactions();
@@ -173,25 +208,33 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 
 		viewModel.setAlarmDateTime(LocalDateTime.now().plusHours(1));
 
-		viewModel.setIsSnoozeOn(sharedPreferences.getBoolean(SHARED_PREF_KEY_DEFAULT_SNOOZE_IS_ON, true));
+		viewModel.setIsSnoozeOn(
+			sharedPreferences.getBoolean(SHARED_PREF_KEY_DEFAULT_SNOOZE_IS_ON, true));
 		viewModel.setIsRepeatOn(false);
 
-		String alarmTone = sharedPreferences.getString(SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, null);
+		String alarmTone = sharedPreferences.getString(
+			SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI, null);
 
-		viewModel.setAlarmToneUri(alarmTone != null ? Uri.parse(alarmTone) : Settings.System.DEFAULT_ALARM_ALERT_URI);
+		viewModel.setAlarmToneUri(alarmTone != null
+			? Uri.parse(alarmTone)
+			: Settings.System.DEFAULT_ALARM_ALERT_URI);
 
 		viewModel.setAlarmType(ALARM_TYPE_SOUND_ONLY);
 
 		AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-		viewModel.setAlarmVolume(sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME,
+		viewModel.setAlarmVolume(
+			sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME,
 				audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) - 2));
 
-		viewModel.setSnoozeFreq(sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ, 3));
-		viewModel.setSnoozeIntervalInMins(sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL, 5));
+		viewModel.setSnoozeFreq(
+			sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ, 3));
+		viewModel.setSnoozeIntervalInMins(
+			sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL, 5));
 
 		viewModel.setRepeatDays(null);
 
-		viewModel.setIsChosenDateToday(viewModel.getAlarmDateTime().toLocalDate().equals(LocalDate.now()));
+		viewModel.setIsChosenDateToday(
+			viewModel.getAlarmDateTime().toLocalDate().equals(LocalDate.now()));
 
 		if (viewModel.getIsChosenDateToday()) {
 			viewModel.setMinDate(viewModel.getAlarmDateTime().toLocalDate());
@@ -210,14 +253,17 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 
 	//----------------------------------------------------------------------------------------------------
 
-	private void setVariablesInViewModel(int mode, int alarmHour, int alarmMinute, int dayOfMonth, int month, int year, boolean isSnoozeOn,
-	                                     boolean isRepeatOn, int snoozeFreq, int snoozeIntervalInMins, int alarmType, int alarmVolume,
-	                                     @Nullable ArrayList<Integer> repeatDays, @Nullable String alarmMessage,
-	                                     @NonNull Uri alarmToneUri, boolean hasUserChosenDate) {
+	private void setVariablesInViewModel(int mode, int alarmHour, int alarmMinute,
+		int dayOfMonth, int month, int year, boolean isSnoozeOn,
+		boolean isRepeatOn, int snoozeFreq, int snoozeIntervalInMins, int alarmType,
+		int alarmVolume,
+		@Nullable ArrayList<Integer> repeatDays, @Nullable String alarmMessage,
+		@NonNull Uri alarmToneUri, boolean hasUserChosenDate) {
 
 		viewModel.setMode(mode);
 
-		viewModel.setAlarmDateTime(LocalDateTime.of(year, month, dayOfMonth, alarmHour, alarmMinute));
+		viewModel.setAlarmDateTime(
+			LocalDateTime.of(year, month, dayOfMonth, alarmHour, alarmMinute));
 
 		viewModel.setIsSnoozeOn(isSnoozeOn);
 		viewModel.setIsRepeatOn(isRepeatOn);
@@ -232,8 +278,10 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 			viewModel.setSnoozeFreq(snoozeFreq);
 			viewModel.setSnoozeIntervalInMins(snoozeIntervalInMins);
 		} else {
-			viewModel.setSnoozeFreq(sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ, 3));
-			viewModel.setSnoozeIntervalInMins(sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL, 5));
+			viewModel.setSnoozeFreq(
+				sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ, 3));
+			viewModel.setSnoozeIntervalInMins(
+				sharedPreferences.getInt(SHARED_PREF_KEY_DEFAULT_SNOOZE_INTERVAL, 5));
 		}
 
 		if (isRepeatOn && repeatDays != null) {
@@ -242,7 +290,8 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 			viewModel.setRepeatDays(null);
 		}
 
-		viewModel.setIsChosenDateToday(viewModel.getAlarmDateTime().toLocalDate().equals(LocalDate.now()));
+		viewModel.setIsChosenDateToday(
+			viewModel.getAlarmDateTime().toLocalDate().equals(LocalDate.now()));
 
 		if (viewModel.getIsChosenDateToday()) {
 			viewModel.setMinDate(viewModel.getAlarmDateTime().toLocalDate());
@@ -268,7 +317,8 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 	//----------------------------------------------------------------------------------------------------
 
 	/**
-	 * Sets the ActionBar title as per the created fragment. Uses {@link #whichFragment} to determine the current fragment.
+	 * Sets the ActionBar title as per the created fragment. Uses {@link #whichFragment}
+	 * to determine the current fragment.
 	 */
 	private void setActionBarTitle() {
 		switch (whichFragment) {
@@ -328,7 +378,8 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 		data.putInt(BUNDLE_KEY_ALARM_HOUR, viewModel.getAlarmDateTime().getHour());
 		data.putInt(BUNDLE_KEY_ALARM_MINUTE, viewModel.getAlarmDateTime().getMinute());
 		data.putInt(BUNDLE_KEY_ALARM_DAY, viewModel.getAlarmDateTime().getDayOfMonth());
-		data.putInt(BUNDLE_KEY_ALARM_MONTH, viewModel.getAlarmDateTime().getMonthValue());
+		data.putInt(BUNDLE_KEY_ALARM_MONTH,
+			viewModel.getAlarmDateTime().getMonthValue());
 		data.putInt(BUNDLE_KEY_ALARM_YEAR, viewModel.getAlarmDateTime().getYear());
 		data.putInt(BUNDLE_KEY_ALARM_TYPE, viewModel.getAlarmType());
 		data.putBoolean(BUNDLE_KEY_IS_SNOOZE_ON, viewModel.getIsSnoozeOn());
@@ -338,12 +389,14 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 		data.putInt(BUNDLE_KEY_SNOOZE_FREQUENCY, viewModel.getSnoozeFreq());
 		data.putIntegerArrayList(BUNDLE_KEY_REPEAT_DAYS, viewModel.getRepeatDays());
 		data.putParcelable(BUNDLE_KEY_ALARM_TONE_URI, viewModel.getAlarmToneUri());
-		data.putString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, viewModel.getAlarmMessage());
+		data.putString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE,
+			viewModel.getAlarmMessage());
 
 		if (viewModel.getIsRepeatOn()) {
 			data.putBoolean(BUNDLE_KEY_HAS_USER_CHOSEN_DATE, false);
 		} else {
-			data.putBoolean(BUNDLE_KEY_HAS_USER_CHOSEN_DATE, viewModel.getHasUserChosenDate());
+			data.putBoolean(BUNDLE_KEY_HAS_USER_CHOSEN_DATE,
+				viewModel.getHasUserChosenDate());
 		}
 
 		if (viewModel.getMode() == MODE_EXISTING_ALARM) {
@@ -362,9 +415,10 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 	public void onRequestSnoozeFragCreation() {
 		whichFragment = FRAGMENT_SNOOZE;
 		FragmentTransaction fragmentTransaction =
-				fragmentManager.beginTransaction()
-				               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_SnoozeOptions())
-				               .addToBackStack(BACK_STACK_TAG);
+			fragmentManager.beginTransaction()
+				.replace(R.id.addAlarmActFragHolder,
+					new Fragment_AlarmDetails_SnoozeOptions())
+				.addToBackStack(BACK_STACK_TAG);
 		fragmentTransaction.commit();
 		fragmentManager.executePendingTransactions();
 		setActionBarTitle();
@@ -375,9 +429,9 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 	@Override
 	public void onRequestDatePickerFragCreation() {
 		fragmentManager.beginTransaction()
-		               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_DatePicker())
-		               .addToBackStack(BACK_STACK_TAG)
-		               .commit();
+			.replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_DatePicker())
+			.addToBackStack(BACK_STACK_TAG)
+			.commit();
 		fragmentManager.executePendingTransactions();
 		whichFragment = FRAGMENT_PICK_DATE;
 		setActionBarTitle();
@@ -388,9 +442,10 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 	@Override
 	public void onRequestRepeatFragCreation() {
 		fragmentManager.beginTransaction()
-		               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_RepeatOptions())
-		               .addToBackStack(BACK_STACK_TAG)
-		               .commit();
+			.replace(R.id.addAlarmActFragHolder,
+				new Fragment_AlarmDetails_RepeatOptions())
+			.addToBackStack(BACK_STACK_TAG)
+			.commit();
 		fragmentManager.executePendingTransactions();
 		whichFragment = FRAGMENT_REPEAT;
 		setActionBarTitle();
@@ -401,9 +456,9 @@ public class Activity_AlarmDetails extends AppCompatActivity implements Fragment
 	@Override
 	public void onRequestMessageFragCreation() {
 		fragmentManager.beginTransaction()
-		               .replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Message())
-		               .addToBackStack(BACK_STACK_TAG)
-		               .commit();
+			.replace(R.id.addAlarmActFragHolder, new Fragment_AlarmDetails_Message())
+			.addToBackStack(BACK_STACK_TAG)
+			.commit();
 		fragmentManager.executePendingTransactions();
 		whichFragment = FRAGMENT_ALARM_MESSAGE;
 		setActionBarTitle();
