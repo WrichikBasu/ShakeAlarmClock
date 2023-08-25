@@ -20,9 +20,7 @@ apply plugin: 'com.android.application'
 android {
 	namespace 'in.basulabs.shakealarmclock'
 
-    compileSdkPreview "UpsideDownCake"
     compileSdk 34
-    //buildTools "31.0.0"
 
     defaultConfig {
         applicationId "in.basulabs.shakealarmclock"
@@ -55,6 +53,7 @@ android {
 }
 
 dependencies {
+
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.3'
     implementation fileTree(dir: "libs", include: ["*.jar"])
