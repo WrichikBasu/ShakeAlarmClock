@@ -322,25 +322,21 @@ public class Activity_AlarmDetails extends AppCompatActivity implements
 	 */
 	private void setActionBarTitle() {
 		switch (whichFragment) {
-			case FRAGMENT_MAIN:
+			case FRAGMENT_MAIN -> {
 				if (viewModel.getMode() == MODE_NEW_ALARM) {
 					actionBar.setTitle(R.string.actionBarTitle_newAlarm);
 				} else if (viewModel.getMode() == MODE_EXISTING_ALARM) {
 					actionBar.setTitle(R.string.actionBarTitle_editAlarm);
 				}
-				break;
-			case FRAGMENT_SNOOZE:
+			}
+			case FRAGMENT_SNOOZE ->
 				actionBar.setTitle(R.string.actionBarTitle_snoozeOptions);
-				break;
-			case FRAGMENT_REPEAT:
+			case FRAGMENT_REPEAT ->
 				actionBar.setTitle(R.string.actionBarTitle_repeatOptions);
-				break;
-			case FRAGMENT_PICK_DATE:
+			case FRAGMENT_PICK_DATE ->
 				actionBar.setTitle(R.string.actionBarTitle_dateOptions);
-				break;
-			case FRAGMENT_ALARM_MESSAGE:
+			case FRAGMENT_ALARM_MESSAGE ->
 				actionBar.setTitle(R.string.actionBarTitle_alarmMessage);
-				break;
 		}
 	}
 

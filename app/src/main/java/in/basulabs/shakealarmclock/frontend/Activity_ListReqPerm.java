@@ -42,7 +42,6 @@ import in.basulabs.shakealarmclock.backend.PermissionAdapter;
 public class Activity_ListReqPerm extends AppCompatActivity implements
 	PermissionAdapter.EventListener {
 
-	private RecyclerView permRecyclerView;
 	private PermissionAdapter permAdapter;
 	private ViewModel_ListReqPerm viewModel;
 	private ActivityResultLauncher<String> reqPermsLauncher;
@@ -86,7 +85,7 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 
 		viewModel.init(sharedPreferences);
 
-		permRecyclerView = findViewById(R.id.permsRecyclerView);
+		RecyclerView permRecyclerView = findViewById(R.id.permsRecyclerView);
 		permRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 		permAdapter = new PermissionAdapter(viewModel.getPermsQueue(), this, this);
@@ -117,60 +116,60 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 
 		if (viewModel.getCurrentPermission() != null) {
 
-			if (viewModel.getCurrentPermission()
-				.androidString()
-				.equals(Manifest.permission.SCHEDULE_EXACT_ALARM)) {
+			switch (viewModel.getCurrentPermission().androidString()) {
 
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+				case Manifest.permission.SCHEDULE_EXACT_ALARM -> {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 
-					AlarmManager alarmManager =
-						(AlarmManager) getSystemService(Context.ALARM_SERVICE);
+						AlarmManager alarmManager =
+							(AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-					if (alarmManager.canScheduleExactAlarms()) {
+						if (alarmManager.canScheduleExactAlarms()) {
+							onPermissionGranted();
+						} else {
+							onPermissionDenied();
+						}
+					}
+				}
+
+				case Manifest.permission.ACCESS_NOTIFICATION_POLICY -> {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+						NotificationManager notifManager =
+							(NotificationManager) getSystemService(
+								Context.NOTIFICATION_SERVICE);
+
+						if (notifManager.isNotificationPolicyAccessGranted()) {
+							onPermissionGranted();
+						} else {
+							onPermissionDenied();
+						}
+					}
+				}
+
+				case Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS -> {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+						PowerManager powerManager =
+							(PowerManager) getSystemService(POWER_SERVICE);
+
+						if (powerManager.isIgnoringBatteryOptimizations(
+							getPackageName())) {
+							onPermissionGranted();
+						} else {
+							onPermissionDenied();
+						}
+					}
+				}
+
+				default -> {
+					if (ContextCompat.checkSelfPermission(this,
+						viewModel.getCurrentPermission()
+							.androidString()) == PackageManager.PERMISSION_GRANTED) {
 						onPermissionGranted();
 					} else {
 						onPermissionDenied();
 					}
-				}
-			} else if (viewModel.getCurrentPermission()
-				.androidString()
-				.equals(Manifest.permission.ACCESS_NOTIFICATION_POLICY)) {
-
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-					NotificationManager notifManager =
-						(NotificationManager) getSystemService(
-							Context.NOTIFICATION_SERVICE);
-
-					if (notifManager.isNotificationPolicyAccessGranted()) {
-						onPermissionGranted();
-					} else {
-						onPermissionDenied();
-					}
-				}
-
-			} else if (viewModel.getCurrentPermission()
-				.androidString()
-				.equals(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)) {
-
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-					PowerManager powerManager =
-						(PowerManager) getSystemService(POWER_SERVICE);
-
-					if (powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
-						onPermissionGranted();
-					} else {
-						onPermissionDenied();
-					}
-				}
-			} else {
-				if (ContextCompat.checkSelfPermission(this,
-					viewModel.getCurrentPermission()
-						.androidString()) == PackageManager.PERMISSION_GRANTED) {
-					onPermissionGranted();
-				} else {
-					onPermissionDenied();
 				}
 			}
 		}
