@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -69,6 +70,8 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_req_perm_list);
 		setSupportActionBar(findViewById(R.id.toolbar6));
+
+		Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
 		sharedPreferences = getSharedPreferences(
 			ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
@@ -174,6 +177,15 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 	}
 
 	@Override
+	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+		if (item.getItemId() == android.R.id.home) {
+			this.onBackPressed();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		try {
@@ -228,9 +240,10 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 	@Override
 	public void onBackPressed() {
 		if (viewModel.areEssentialPermsPresent()) {
-			Toast.makeText(this, "App won't work without the Essential permissions!",
-				Toast.LENGTH_LONG).show();
+			setResult(RESULT_CANCELED);
+			finish();
 		} else {
+			setResult(RESULT_OK);
 			finish();
 		}
 	}
