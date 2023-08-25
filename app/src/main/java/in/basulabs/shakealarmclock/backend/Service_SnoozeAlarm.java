@@ -49,7 +49,6 @@ import java.util.Collections;
 import java.util.Objects;
 
 import in.basulabs.shakealarmclock.R;
-import in.basulabs.shakealarmclock.frontend.AlarmBroadcastReceiver;
 
 public class Service_SnoozeAlarm extends Service {
 

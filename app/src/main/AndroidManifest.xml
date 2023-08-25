@@ -84,7 +84,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:exported="false"/>
 
         <receiver
-            android:name=".frontend.AlarmBroadcastReceiver"
+            android:name=".backend.AlarmBroadcastReceiver"
             android:enabled="true"
             android:exported="true"
             tools:ignore="ExportedReceiver">
