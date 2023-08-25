@@ -45,8 +45,6 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 	private final MutableLiveData<Integer> alarmsCount = new MutableLiveData<>(0);
 	private final MutableLiveData<Boolean> isAlarmPending = new MutableLiveData<>(false);
 	private MutableLiveData<Bundle> pendingAlarmDetails;
-	private final MutableLiveData<Boolean> isSettingsActOver = new MutableLiveData<>(
-		false);
 	private final MutableLiveData<Boolean> canRequestNonEssentialPerms =
 		new MutableLiveData<>(false);
 
@@ -670,16 +668,6 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 	}
 
 	//----------------------------------------------------------------------------------
-
-	public void setIsSettingsActOver(boolean isSettingsActOver) {
-		this.isSettingsActOver.setValue(isSettingsActOver);
-	}
-
-	//-----------------------------------------------------------------------------------
-
-	public boolean getIsSettingsActOver() {
-		return Objects.requireNonNull(isSettingsActOver.getValue());
-	}
 
 	public boolean getCanRequestNonEssentialPerms() {
 		return Boolean.TRUE.equals(canRequestNonEssentialPerms.getValue());

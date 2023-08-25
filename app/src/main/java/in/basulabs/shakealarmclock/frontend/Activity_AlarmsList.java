@@ -87,8 +87,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	private static final int MODE_DELETE_ALARM = 504;
 	private static final int MODE_DEACTIVATE_ONLY = 509;
 
-	private ActivityResultLauncher<Intent> settingsActLauncher, newAlarmActLauncher,
-		oldAlarmActLauncher;
+	private ActivityResultLauncher<Intent> newAlarmActLauncher,
+		oldAlarmActLauncher, permsActLauncher;
 
 	private String toastText = null;
 
@@ -149,10 +149,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 		setCanAskForNonEssentialPerms();
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-			requestEssentialPerms();
-		}
-
 		// Check if this activity has been started by Activity_IntentManager.
 		// If yes, start Activity_AlarmDetails with necessary data.
 		if (getIntent().getAction() != null) {
@@ -171,15 +167,9 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 			}
 		}
 
-		// Check whether it is a good time to ask for optional perms, and request them.
-		if (savedInstanceState == null && viewModel.getCanRequestNonEssentialPerms()) {
-			requestNonEssentialPermsOnly();
-		}
-
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			deleteNotifChannels();
 		}
-
 	}
 
 	//----------------------------------------------------------------------------------
@@ -188,23 +178,30 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	protected void onResume() {
 		super.onResume();
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-
-			if (viewModel.getPendingStatus() && viewModel.getPendingALarmData() != null
-				&& viewModel.getIsSettingsActOver()) {
-
-				AlarmManager alarmManager = (AlarmManager) getSystemService(
-					ALARM_SERVICE);
-				if (alarmManager.canScheduleExactAlarms()) {
-					viewModel.setPendingStatus(false);
-					viewModel.setIsSettingsActOver(false);
-					setAlarm(viewModel.getPendingALarmData());
-					viewModel.savePendingAlarm(null);
+			if (viewModel.getPendingStatus() && viewModel.getPendingALarmData() != null) {
+				// An alarm is pending to be saved.
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+					if (ConstantsAndStatics.checkEssentialPerms(this).isEmpty()) {
+						// All essential permissions are available.
+						setAlarm(viewModel.getPendingALarmData());
+					} else { // Essential permissions are not available.
+						requestEssentialPerms();
+					}
 				} else {
+					// No need to check for essential permissions. Just save the alarm.
+					setAlarm(viewModel.getPendingALarmData());
+				}
+			} else { // No pending alarm.
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 					requestEssentialPerms();
 				}
+				// Check whether it is a good time to ask for optional perms, and request them.
+				// Note that if essential perms have been requested in the current
+				// session, non-essential perms will not be asked in this session.
+				if (viewModel.getCanRequestNonEssentialPerms()) {
+					requestNonEssentialPermsOnly();
+				}
 			}
-		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -546,6 +543,9 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 	/**
 	 * Sets the alarm in the Android system.
+	 * <p>
+	 * Assumes that the permission to set alarms has been granted (for Android version
+	 * >= S). Check for alarm permission before invoking.
 	 *
 	 * @param data The details of the alarm to be set.
 	 */
@@ -588,6 +588,10 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 				Duration.between(ZonedDateTime.now(ZoneId.systemDefault()).withSecond(0),
 					zonedDateTime)));
 		showToast();
+
+		// No alarms are pending now.
+		viewModel.setPendingStatus(false);
+		viewModel.savePendingAlarm(null);
 	}
 
 	//------------------------------------------------------------------------------
@@ -618,7 +622,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 			Intent intent = new Intent(this, Activity_ListReqPerm.class);
 			intent.putStringArrayListExtra(ConstantsAndStatics.EXTRA_PERMS_REQUESTED,
 				perms);
-			startActivity(intent);
+			permsActLauncher.launch(intent);
 		}
 	}
 
@@ -670,10 +674,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	 * Initializes all activity launchers.
 	 */
 	private void initActLaunchers() {
-
-		settingsActLauncher = registerForActivityResult(
-			new ActivityResultContracts.StartActivityForResult(),
-			result -> viewModel.setIsSettingsActOver(true));
 
 		newAlarmActLauncher = registerForActivityResult(
 			new ActivityResultContracts.StartActivityForResult(), (result) -> {
@@ -770,6 +770,20 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 			});
 
+
+		permsActLauncher = registerForActivityResult(
+			new ActivityResultContracts.StartActivityForResult(), (result) -> {
+
+				if (result.getResultCode() == RESULT_CANCELED) {
+
+					Toast.makeText(this, "App won't be able to work without those " +
+						"permissions. Exiting...", Toast.LENGTH_LONG).show();
+
+					finish();
+
+				}
+
+			});
 	}
 
 	/**
