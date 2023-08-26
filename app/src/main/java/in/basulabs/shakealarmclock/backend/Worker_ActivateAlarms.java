@@ -48,7 +48,7 @@ public class Worker_ActivateAlarms extends Worker {
 
 	private boolean stopExecuting;
 
-	//----------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------
 
 	public Worker_ActivateAlarms(@NonNull Context context,
 		@NonNull WorkerParameters workerParams) {
@@ -56,7 +56,7 @@ public class Worker_ActivateAlarms extends Worker {
 		this.context = context;
 	}
 
-	//----------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------
 
 	@NonNull
 	@Override
@@ -72,7 +72,7 @@ public class Worker_ActivateAlarms extends Worker {
 		}
 	}
 
-	//----------------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------
 
 	/**
 	 * Activates the alarms that are ON, but inactive because {@link AlarmManager} has
@@ -157,7 +157,7 @@ public class Worker_ActivateAlarms extends Worker {
 		return Result.success();
 	}
 
-	//----------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------
 
 	/**
 	 * Displays a notification when {@link AlarmManager#canScheduleExactAlarms()} returns
@@ -192,7 +192,7 @@ public class Worker_ActivateAlarms extends Worker {
 
 		NotificationCompat.Action notifAction = new NotificationCompat.Action.Builder(
 			R.drawable.ic_notif,
-			context.getString(R.string.error_notif_body), pendingIntent).build();
+			context.getString(R.string.grant_permission), pendingIntent).build();
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context,
 			Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ERROR))

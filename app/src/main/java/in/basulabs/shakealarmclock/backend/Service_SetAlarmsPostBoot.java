@@ -441,7 +441,7 @@ public class Service_SetAlarmsPostBoot extends Service {
 
 		NotificationCompat.Action notifAction = new NotificationCompat.Action.Builder(
 			R.drawable.ic_notif,
-			getString(R.string.error_notif_body), pendingIntent).build();
+			getString(R.string.grant_permission), pendingIntent).build();
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
 			Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ERROR))
