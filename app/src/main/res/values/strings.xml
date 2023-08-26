@@ -221,9 +221,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     <string name="grant_access">Grant access</string>
     <string name="requirement_type">Requirement type:</string>
-    <string name="perm_type_critical">Essential; app won\'t work without it.</string>
-    <string name="perm_type_optional">Optional; dependent app functionalities will not work.</string>
-    <string name="perm_type_recom">Highly recommended; app may not work properly without it</string>
+    <string name="perm_type_essential">Essential</string>
+    <string name="perm_type_optional">Optional</string>
+    <string name="perm_type_recom">Highly recommended</string>
     <string name="app_req_perm">The app requests the following permissions:</string>
 
     <string-array name="perm_title">
@@ -242,18 +242,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     <string name="perm_title_post_notif">Post notifications</string>
     <string name="perm_exp_post_notif">This permission allows the app to post notifications. Without this, you will
-    not see the alarm screen when an alarm rings, or dismiss it later from the notification.</string>
+    not see the alarm screen when an alarm rings, nor be able to dismiss it later from the notification.</string>
 
     <string name="perm_title_read_media_audio">Read audio files</string>
-    <string name="perm_exp_media_audio">This permission is optional, and will be required if you
-    choose an alarm tone different from the default alarm tone of your device. You may ignore it now if you wish, but the app will
-    ask for it when required.</string>
+    <string name="perm_exp_media_audio">This permission is required if you want to
+    choose an alarm tone different from the default alarm tone of your device. Allows the app to read audio and music files
+    on your device.</string>
 
     <string name="perm_title_notif_policy">Change Do Not Disturb settings</string>
-    <string name="perm_exp_notif_policy">The app has an option to set specific volumes for each alarm.
-    If you activate this feature, the app will change the volume of the system alarm stream when the
-    alarm rings (and restore it to what it was after the alarm stops ringing). To change the volume, the permission
-    to change Do Not Disturb settings is needed.</string>
+    <string name="perm_exp_notif_policy">The app allows you to set different ring volumes for each alarm.
+    Before ringing the alarm, the app tries to change the volume of the system alarm stream to the volume you
+    have set (and restores it to what it was initially). To change the volume, the permission
+    to change Do Not Disturb settings is needed in Android Nougat and above. If not granted, the app will
+    simply not set the volume before ringing the alarm.</string>
 
     <string name="perm_title_ign_bat_optim">Ignore Battery Optimizations</string>
     <string name="perm_exp_ign_bat_optim">The Android system, by default, sets all user installed apps

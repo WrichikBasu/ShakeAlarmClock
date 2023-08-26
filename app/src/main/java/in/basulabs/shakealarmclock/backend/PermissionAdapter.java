@@ -55,18 +55,23 @@ public class PermissionAdapter extends
 
 		switch (permission.permType()) {
 			case ConstantsAndStatics.PERMISSION_LEVEL_ESSENTIAL -> {
-				holder.permTypeTV.setText(context.getString(R.string.perm_type_critical));
+				holder.permTypeTV.setText(
+					context.getString(R.string.perm_type_essential));
 				holder.permTypeTV.setTextColor(Color.RED);
 				holder.denyAccessBtn.setVisibility(View.GONE);
 			}
 			case ConstantsAndStatics.PERMISSION_LEVEL_RECOMMENDED -> {
 				holder.permTypeTV.setText(context.getString(R.string.perm_type_recom));
-				holder.permTypeTV.setTextColor(Color.CYAN);
+				holder.permTypeTV.setTextColor(
+					ConstantsAndStatics.isNightModeActive(context) ?
+						Color.parseColor("#FFFF00FF") : Color.parseColor("#FFC869FF"));
 				holder.denyAccessBtn.setVisibility(View.VISIBLE);
 			}
 			case ConstantsAndStatics.PERMISSION_LEVEL_OPTIONAL -> {
 				holder.permTypeTV.setText(context.getString(R.string.perm_type_optional));
-				holder.permTypeTV.setTextColor(Color.GREEN);
+				holder.permTypeTV.setTextColor(
+					ConstantsAndStatics.isNightModeActive(context) ?
+						Color.parseColor("#FF00FF90") : Color.parseColor("#FFB4FF90"));
 				holder.denyAccessBtn.setVisibility(View.VISIBLE);
 			}
 		}

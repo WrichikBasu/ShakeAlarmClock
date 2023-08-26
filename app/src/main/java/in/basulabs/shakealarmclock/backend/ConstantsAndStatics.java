@@ -17,6 +17,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package in.basulabs.shakealarmclock.backend;
 
 import static android.content.Context.POWER_SERVICE;
+import static android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+import static android.content.res.Configuration.UI_MODE_NIGHT_YES;
 
 import android.Manifest;
 import android.app.AlarmManager;
@@ -724,6 +726,33 @@ public final class ConstantsAndStatics {
 	}
 
 	public static final String DEBUG_TAG = "basulabsDebug";
+
+	/**
+	 * Determines whether the app theme is dark or light.
+	 * <p>
+	 * <a href="https://stackoverflow.com/a/58525184/8387076">Courtesy</a>
+	 *
+	 * @param context The {@link Context} of the caller.
+	 * @return {@code true} if the theme is dark, {@code false} otherwise (including if
+	 * 	the theme is undefined).
+	 */
+	public static boolean isNightModeActive(@NonNull Context context) {
+		int defaultNightMode = AppCompatDelegate.getDefaultNightMode();
+		if (defaultNightMode == AppCompatDelegate.MODE_NIGHT_YES) {
+			return true;
+		}
+		if (defaultNightMode == AppCompatDelegate.MODE_NIGHT_NO) {
+			return false;
+		}
+
+		int currentNightMode = context.getResources().getConfiguration().uiMode
+			& UI_MODE_NIGHT_MASK;
+
+		return switch (currentNightMode) {
+			case UI_MODE_NIGHT_YES -> true;
+			default -> false;
+		};
+	}
 
 
 }

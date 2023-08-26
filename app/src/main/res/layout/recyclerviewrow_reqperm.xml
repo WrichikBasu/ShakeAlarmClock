@@ -2,7 +2,6 @@
 
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/alarmCardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -54,7 +53,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:text="TextView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -93,23 +92,24 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 style="@style/labelStyle"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:text="@string/requirement_type"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/perm_exp_textview" />
 
             <TextView
                 android:id="@+id/perm_type_textview"
+                style="@style/normalTextViewStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
-                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                style="@style/normalTextViewStyle"
+                android:textSize="16sp"
                 android:text="TextView"
+                app:layout_constraintBottom_toBottomOf="@+id/textView24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/textView24"
-                app:layout_constraintTop_toBottomOf="@+id/perm_exp_textview" />
+                app:layout_constraintTop_toTopOf="@+id/textView24" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
