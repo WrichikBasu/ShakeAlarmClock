@@ -138,13 +138,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <string name="cancelDialog_positive">Yes</string>
     <string name="cancelDialog_negative">No</string>
 
-    <!-- AlertDialog_PermissionReason -->
-    <string name="permissionReasonExp_normal">This app needs permission to read your device storage so that
-    it can read and play the alarm sound. Without this permission, the app may fail to ring the alarm. Give the permission?</string>
-
-    <string name="permissionReasonExp_ringtonePicker">This app needs permission to read your device storage
-        so that it can read the tones. Without this permission, the app will not work. Give the permission?</string>
-
     <!-- Activity_Settings -->
     <string name="settings_title">Settings</string>
     <string name="shakeOp">If I <b>shake</b> the phone when an alarm rings,</string>
@@ -193,14 +186,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <string name="message_shakeDetectionTest">Shake your phone. A vibration will tell you that a shake event has
     been detected. Change the sensitivity as per your choice.</string>
     <string name="negative_shakeDetectionTest">Stop</string>
-
-    <!-- AlertDialog_BatteryOptimizations -->
-    <string name="batteryOptim_message">Please disable battery optimizations for this app. If this app is 
-        optimized, it might not be able to ring the alarm.</string>
-    <string name="batteryOptim_title">Disable battery optimizations</string>
-    <string name="batteryOptim_positive">Proceed</string>
-    <string name="batteryOptim_negative">Maybe later</string>
-    <string name="batteryOptim_neutral">Never show again</string>
 
     <string name="defaultAlarmToneText">Default alarm tone</string>
 
@@ -265,6 +250,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <string name="perm_title_exact_alarms">Schedule Alarms</string>
     <string name="perm_expln_exact_alarms">Android versions S and above need a permission to
     schedule exact alarms. Without this, the app will not be able to schedule any alarms. </string>
+
+    <string name="perm_title_ext_storage">Read external storage</string>
+    <string name="perm_exp_ext_storage">This permission is required if you want to
+    choose an alarm tone different from the default alarm tone of your device. Allows the app to read audio and music files
+    on your device. On higher Android versions, we request a granular permission that allow us to read only the
+    music and audio files and nothing else, thus ensuring you, the user, more privacy. However, in the Android version
+    running on your device, this is not supported, so we have to ask for permission to read external storage.</string>
 
     <string name="perm_requested_twice">Seems you have already denied this permission twice.
     Android will not allow this app to create the permission request dialog again. Would you

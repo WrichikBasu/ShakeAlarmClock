@@ -113,8 +113,8 @@ public class ViewModel_ListReqPerm extends ViewModel {
 						Objects.requireNonNull(permsQueue.getValue())
 							.add(new Permission(
 								Manifest.permission.READ_EXTERNAL_STORAGE,
-								R.string.perm_title_read_media_audio,
-								R.string.perm_exp_media_audio,
+								R.string.perm_title_ext_storage,
+								R.string.perm_exp_ext_storage,
 								Objects.requireNonNull(permsLevelMap.getValue())
 									.containsKey(perm) ?
 									permsLevelMap.getValue().get(perm) :
