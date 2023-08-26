@@ -131,7 +131,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 
 	private int powerBtnAction;
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
@@ -152,12 +152,16 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		}
 	};
 
-	//--------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
 		notifID = UniqueNotifID.getID();
+
+		// Do NOT move this!!!!
+		alarmDetails = Objects.requireNonNull(Objects.requireNonNull(intent.getExtras())
+			.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -173,9 +177,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		isThisServiceRunning = true;
 		preMatureDeath = true;
 		alarmRingingStarted = false;
-
-		alarmDetails = Objects.requireNonNull(Objects.requireNonNull(intent.getExtras())
-			.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
@@ -266,7 +267,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		return START_NOT_STICKY;
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	@Override
 	public void onDestroy() {
@@ -299,7 +300,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		alarmID = -1;
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Reads the repeat days from alarm database.
@@ -325,7 +326,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Initialises the shake sensor.
@@ -339,7 +340,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Creates the notification channel.
@@ -357,7 +358,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Creates a notification that can be shown when the alarm is ringing.
@@ -411,7 +412,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		return builder.build();
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Initialises the {@link MediaPlayer}, and starts ringing the alarm.
@@ -463,7 +464,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		ringTimer.start();
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Vibrate the phone for the alarm.
@@ -485,7 +486,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Snoozes the alarm. If snooze is off, or the snooze frequency has been reached, the
@@ -519,7 +520,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Dismisses the current alarm, and sets the next alarm if repeat is enabled.
@@ -591,7 +592,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Stops the ringing alarm. Also sends a broadcast to {@link Activity_RingAlarm} to
@@ -623,7 +624,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		audioFocusController.abandonFocus();
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Sets the next alarn in case of a repeat alarm.
@@ -655,8 +656,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 				pendingIntent), pendingIntent);
 	}
 
-	//---------------------------------------------------------------------------------------------------
-
+	//----------------------------------------------------------------------------------
 	/**
 	 * While testing, we found that sometimes, the alarm was being reset at a later date
 	 * unintentionally. This function cancels such an unintentional alarm.
@@ -684,14 +684,14 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
@@ -729,7 +729,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	/**
 	 * Creates a vibration for a small period of time, indicating that the app has
@@ -755,28 +755,28 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 	public void onAccuracyChanged(Sensor sensor, int i) {
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	@Override
 	public void decreaseVolume() {
 		// No ducking.
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	@Override
 	public void increaseVolume() {
 		// No ducking.
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	@Override
 	public void pause() {
 		// No pause.
 	}
 
-	//--------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------
 
 	@Override
 	public void resume() {
