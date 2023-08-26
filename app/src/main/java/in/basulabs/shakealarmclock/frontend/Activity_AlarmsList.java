@@ -185,7 +185,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 		if (viewModel.getPendingStatus() && viewModel.getPendingALarmData() != null) {
 			// An alarm is pending to be saved.
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-				if (ConstantsAndStatics.checkEssentialPerms(this).isEmpty()) {
+				if (ConstantsAndStatics.getEssentialPerms(this).isEmpty()) {
 					// All essential permissions are available.
 					setAlarm(viewModel.getPendingALarmData());
 				} else { // Essential permissions are not available.
@@ -613,13 +613,13 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	@RequiresApi(api = Build.VERSION_CODES.S)
 	private void requestEssentialPerms() {
 
-		ArrayList<String> perms = ConstantsAndStatics.checkEssentialPerms(this);
+		ArrayList<String> perms = ConstantsAndStatics.getEssentialPerms(this);
 		if (!perms.isEmpty()) {  // Essential perms have not been granted!
 
 			// Since essential perms are missing, we have to ask for them before
 			// proceeding. No harm in also adding the recommended/optional perms at the
 			// same time.
-			perms.addAll(ConstantsAndStatics.checkRecommendedPerms(this));
+			perms.addAll(ConstantsAndStatics.getNonEssentialPerms(this));
 
 			// Don't ask for optional perms again in this session.
 			viewModel.setCanRequestNonEssentialPerms(false);
@@ -655,7 +655,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 			true).apply();
 
 		ArrayList<String> optionalPerms =
-			ConstantsAndStatics.checkRecommendedPerms(this);
+			ConstantsAndStatics.getNonEssentialPerms(this);
 
 		if (!optionalPerms.isEmpty()) {
 			Intent intent = new Intent(this, Activity_ListReqPerm.class);

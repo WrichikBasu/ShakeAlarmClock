@@ -74,7 +74,7 @@ public class Activity_RequestPermIntro extends AppCompatActivity {
 		grantPerm.setOnClickListener(view -> {
 			Intent intent = new Intent(this, Activity_ListReqPerm.class);
 			intent.putStringArrayListExtra(ConstantsAndStatics.EXTRA_PERMS_REQUESTED,
-				ConstantsAndStatics.checkEssentialPerms(this));
+				ConstantsAndStatics.getEssentialPerms(this));
 			permsActLauncher.launch(intent);
 		});
 	}

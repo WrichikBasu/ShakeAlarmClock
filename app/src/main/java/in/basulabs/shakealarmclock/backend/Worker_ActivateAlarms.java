@@ -89,7 +89,7 @@ public class Worker_ActivateAlarms extends Worker {
 		if (list != null && list.size() > 0) {
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-				if (!ConstantsAndStatics.checkEssentialPerms(context).isEmpty()) {
+				if (!ConstantsAndStatics.getEssentialPerms(context).isEmpty()) {
 					postMissingPermNotif();
 					return Result.failure();
 				}

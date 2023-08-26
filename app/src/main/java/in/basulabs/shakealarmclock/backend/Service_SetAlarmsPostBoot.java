@@ -82,7 +82,7 @@ public class Service_SetAlarmsPostBoot extends Service {
 
 		if (alarmEntityArrayList != null && alarmEntityArrayList.size() > 0) {
 
-			if (!ConstantsAndStatics.checkEssentialPerms(this).isEmpty()) {
+			if (!ConstantsAndStatics.getEssentialPerms(this).isEmpty()) {
 				postMissingPermsNotif();
 			} else {
 				cancelActiveAlarms(alarmEntityArrayList);
@@ -417,7 +417,7 @@ public class Service_SetAlarmsPostBoot extends Service {
 
 	/**
 	 * Displays a notification when essential permissions are missing (i.e. when
-	 * {@link ConstantsAndStatics#checkEssentialPerms(Context)} is not empty.
+	 * {@link ConstantsAndStatics#getEssentialPerms(Context)} is not empty.
 	 * <p>
 	 * The notification opens {@link Activity_RequestPermIntro}.
 	 */

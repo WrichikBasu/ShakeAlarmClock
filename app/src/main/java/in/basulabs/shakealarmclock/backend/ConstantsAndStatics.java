@@ -281,14 +281,6 @@ public final class ConstantsAndStatics {
 		"in.basulabs.shakealarmclock.DESTROY_RING_ALARM_ACTIVITY";
 
 	/**
-	 * {@link android.content.SharedPreferences} key indicating whether the read storage
-	 * permission was asked before. This is used to determine if the user had chosen
-	 * "Don't ask again" before denying the permission. The value is {@code boolean}.
-	 */
-	public static final String SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE =
-		"in.basulabs.shakealarmclock.PERMISSION_WAS_ASKED_BEFORE";
-
-	/**
 	 * {@link android.content.SharedPreferences} key to store the default shake
 	 * operation.
 	 * Can be either {@link #DISMISS} or {@link #SNOOZE}.
@@ -670,7 +662,7 @@ public final class ConstantsAndStatics {
 			".SHARED_PREF_KEY_REQUESTED_NON_ESSENTIAL_PERMS_RECENTLY";
 
 	@NonNull
-	public static ArrayList<String> checkEssentialPerms(@NonNull Context context) {
+	public static ArrayList<String> getEssentialPerms(@NonNull Context context) {
 
 		ArrayList<String> reqdPermsList = new ArrayList<>();
 
@@ -693,7 +685,7 @@ public final class ConstantsAndStatics {
 	}
 
 	@NonNull
-	public static ArrayList<String> checkRecommendedPerms(@NonNull Context context) {
+	public static ArrayList<String> getNonEssentialPerms(@NonNull Context context) {
 
 		ArrayList<String> permsList = new ArrayList<>();
 
@@ -719,6 +711,13 @@ public final class ConstantsAndStatics {
 				!= PackageManager.PERMISSION_GRANTED) {
 
 				permsList.add(Manifest.permission.READ_MEDIA_AUDIO);
+			}
+		} else {
+			if (ContextCompat.checkSelfPermission(context,
+				Manifest.permission.READ_EXTERNAL_STORAGE) !=
+				PackageManager.PERMISSION_GRANTED) {
+
+				permsList.add(Manifest.permission.READ_EXTERNAL_STORAGE);
 			}
 		}
 
