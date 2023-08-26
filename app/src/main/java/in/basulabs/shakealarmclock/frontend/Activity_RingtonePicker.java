@@ -31,7 +31,6 @@ import static android.media.RingtoneManager.URI_COLUMN_INDEX;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.AudioAttributes;
@@ -59,9 +58,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
@@ -72,7 +69,7 @@ import in.basulabs.shakealarmclock.R;
 import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 
 public class Activity_RingtonePicker extends AppCompatActivity implements
-	View.OnClickListener, AlertDialog_PermissionReason.DialogListener {
+	View.OnClickListener {
 
 	private AudioAttributes audioAttributes;
 	private Bundle savedInstanceState;
@@ -80,8 +77,6 @@ public class Activity_RingtonePicker extends AppCompatActivity implements
 	private RadioGroup radioGroup;
 	private static final int DEFAULT_RADIO_BTN_ID = View.generateViewId(),
 		SILENT_RADIO_BTN_ID = View.generateViewId();
-	private static final int PERMISSIONS_REQUEST_CODE = 3720;
-	private SharedPreferences sharedPreferences;
 	private ViewModel_RingtonePicker viewModel;
 	private ConstraintLayout chooseToneLayout;
 	private ActivityResultLauncher<Intent> fileActLauncher;
@@ -99,9 +94,6 @@ public class Activity_RingtonePicker extends AppCompatActivity implements
 			setResult(RESULT_CANCELED);
 			finish();
 		}
-
-		sharedPreferences = getSharedPreferences(
-			ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
 
 		viewModel = new ViewModelProvider(this).get(ViewModel_RingtonePicker.class);
 
@@ -534,47 +526,6 @@ public class Activity_RingtonePicker extends AppCompatActivity implements
 
 			});
 
-	}
-
-	//----------------------------------------------------------------------------------------------------
-
-	@Override
-	public void onDialogPositiveClick(DialogFragment dialogFragment) {
-
-		if (dialogFragment.getClass().equals(AlertDialog_PermissionReason.class)) {
-
-			if ((!ActivityCompat.shouldShowRequestPermissionRationale(this,
-				Manifest.permission.READ_EXTERNAL_STORAGE)) &&
-				(sharedPreferences.getBoolean(
-					ConstantsAndStatics.SHARED_PREF_KEY_PERMISSION_WAS_ASKED_BEFORE,
-					false))) {
-
-				////////////////////////////////////////////////////////////////////////////////
-				// User had chosen "Don't ask again". We need to redirect the user to the
-				// Settings app to obtain the permission.
-				////////////////////////////////////////////////////////////////////////////////
-				Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-				Uri uri = Uri.fromParts("package", getPackageName(), null);
-				intent.setData(uri);
-				startActivity(intent);
-				viewModel.setWerePermsRequested(false);
-
-			} else {
-
-				ActivityCompat.requestPermissions(this,
-					new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-					PERMISSIONS_REQUEST_CODE);
-			}
-		}
-	}
-
-	//----------------------------------------------------------------------------------------------------
-
-	@Override
-	public void onDialogNegativeClick(DialogFragment dialogFragment) {
-		if (dialogFragment.getClass().equals(AlertDialog_PermissionReason.class)) {
-			onPermissionDenied();
-		}
 	}
 
 	//----------------------------------------------------------------------------------------------------
