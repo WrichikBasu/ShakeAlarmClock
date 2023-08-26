@@ -675,6 +675,6 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 	}
 
 	public void setCanRequestNonEssentialPerms(boolean canRequestNonEssentialPerms) {
-		this.canRequestNonEssentialPerms.postValue(canRequestNonEssentialPerms);
+		this.canRequestNonEssentialPerms.setValue(canRequestNonEssentialPerms);
 	}
 }

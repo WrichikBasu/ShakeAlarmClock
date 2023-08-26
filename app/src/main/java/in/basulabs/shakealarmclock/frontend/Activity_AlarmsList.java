@@ -16,6 +16,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 package in.basulabs.shakealarmclock.frontend;
 
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.DEBUG_TAG;
+
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -29,6 +31,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -201,7 +204,12 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 			// Note that if essential perms have been requested in the current
 			// session, non-essential perms will not be asked in this session.
 			if (viewModel.getCanRequestNonEssentialPerms()) {
+				Log.d(DEBUG_TAG, "Can request non-essential " +
+					"perms now.");
 				requestNonEssentialPermsOnly();
+			} else {
+				Log.d(DEBUG_TAG, "Cannot request non-essential " +
+					"perms now.");
 			}
 		}
 	}
@@ -843,7 +851,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	 */
 	private void setCanAskForNonEssentialPerms() {
 
-		new Thread(() -> {
+			Log.d(DEBUG_TAG, "Started.");
 
 			long numberOfTimesAppOpened =
 				sharedPref.getLong(
@@ -882,7 +890,9 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 				ConstantsAndStatics.SHARED_PREF_KEY_NO_OF_TIMES_APP_OPENED,
 				numberOfTimesAppOpened).commit();
 
-		}).start();
+			Log.d(DEBUG_TAG, "Ended.");
+
+			Log.d(DEBUG_TAG, ""+ viewModel.getCanRequestNonEssentialPerms());
 
 	}
 

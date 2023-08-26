@@ -723,5 +723,7 @@ public final class ConstantsAndStatics {
 		return permsList;
 	}
 
+	public static final String DEBUG_TAG = "basulabsDebug";
+
 
 }
