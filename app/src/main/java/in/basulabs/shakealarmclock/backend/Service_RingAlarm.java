@@ -288,8 +288,12 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		if (isShakeActive) {
 			snsMgr.unregisterListener(this);
 		}
-		audioManager.setStreamVolume(AudioManager.STREAM_ALARM, initialAlarmStreamVolume,
-			0);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			if (notificationManager.isNotificationPolicyAccessGranted()) {
+				audioManager.setStreamVolume(AudioManager.STREAM_ALARM,
+					initialAlarmStreamVolume, 0);
+			}
+		}
 		unregisterReceiver(broadcastReceiver);
 		isThisServiceRunning = false;
 		alarmID = -1;
@@ -364,6 +368,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 	 *
 	 * @return A {@link Notification} instance that can be displayed to the user.
 	 */
+	@NonNull
 	private Notification buildRingNotification() {
 
 		createNotificationChannel();
@@ -371,7 +376,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		Intent fullScreenIntent = new Intent(this, Activity_RingAlarm.class)
 			.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 			.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-			.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY).putExtras(alarmDetails);
+			.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+			.putExtras(alarmDetails);
 
 		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
 			?
@@ -424,8 +430,17 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 				.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
 				.build();
 
-			audioManager.setStreamVolume(AudioManager.STREAM_ALARM,
-				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME), 0);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+				if (notificationManager.isNotificationPolicyAccessGranted()) {
+
+					audioManager.setStreamVolume(AudioManager.STREAM_ALARM,
+						alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME),
+						0);
+				}
+			} else {
+				audioManager.setStreamVolume(AudioManager.STREAM_ALARM,
+					alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME), 0);
+			}
 
 			try {
 				mediaPlayer.setDataSource(this, alarmToneUri);
