@@ -64,14 +64,14 @@ public class PermissionAdapter extends
 				holder.permTypeTV.setText(context.getString(R.string.perm_type_recom));
 				holder.permTypeTV.setTextColor(
 					ConstantsAndStatics.isNightModeActive(context) ?
-						Color.parseColor("#FFFF00FF") : Color.parseColor("#FFC869FF"));
+						Color.parseColor("#c32b7a73") : Color.parseColor("#FFC869FF"));
 				holder.denyAccessBtn.setVisibility(View.VISIBLE);
 			}
 			case ConstantsAndStatics.PERMISSION_LEVEL_OPTIONAL -> {
 				holder.permTypeTV.setText(context.getString(R.string.perm_type_optional));
 				holder.permTypeTV.setTextColor(
 					ConstantsAndStatics.isNightModeActive(context) ?
-						Color.parseColor("#FF00FF90") : Color.parseColor("#FFB4FF90"));
+						Color.parseColor("#FFB4FF90") : Color.parseColor("#FF282099"));
 				holder.denyAccessBtn.setVisibility(View.VISIBLE);
 			}
 		}
