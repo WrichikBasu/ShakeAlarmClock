@@ -44,12 +44,14 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -157,9 +159,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 
 		notifID = UniqueNotifID.getID();
 
-		alarmDetails = Objects.requireNonNull(Objects.requireNonNull(intent.getExtras())
-			.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
-
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
 				startForeground(notifID, buildRingNotification(),
@@ -174,6 +173,9 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		isThisServiceRunning = true;
 		preMatureDeath = true;
 		alarmRingingStarted = false;
+
+		alarmDetails = Objects.requireNonNull(Objects.requireNonNull(intent.getExtras())
+			.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
@@ -202,8 +204,18 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 			stopService(new Intent(this, Service_SnoozeAlarm.class));
 		}
 
-		alarmToneUri = alarmDetails.getParcelable(
+		Uri chosenToneUri = alarmDetails.getParcelable(
 			ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI);
+		try (InputStream ignored = getContentResolver().openInputStream(
+			Objects.requireNonNull(chosenToneUri))) {
+			// Alarm tone file exists.
+			alarmToneUri = chosenToneUri;
+		} catch (Exception ex) {
+			// Tone file can either not be accessed, or not available in the file system.
+			// Fall back to default tone.
+			alarmToneUri = Settings.System.DEFAULT_ALARM_ALERT_URI;
+		}
+
 		numberOfTimesTheAlarmHasBeenSnoozed = intent.getExtras()
 			.getInt(EXTRA_NO_OF_TIMES_SNOOZED, 0);
 
