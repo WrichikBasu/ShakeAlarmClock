@@ -201,7 +201,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 					? 1
 					: (alarmData.getRepeatDays().get(i) + 1);
 				str.append(
-					new DateFormatSymbols().getShortWeekdays()[day].substring(0, 3));
+					new DateFormatSymbols().getShortWeekdays()[day]);
 				if (i < alarmData.getRepeatDays().size() - 1) {
 					str.append(" ");
 				}
