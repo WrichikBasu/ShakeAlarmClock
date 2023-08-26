@@ -35,6 +35,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -66,6 +67,7 @@ import androidx.lifecycle.ViewModelProvider;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import in.basulabs.audiofocuscontroller.AudioFocusController;
 import in.basulabs.shakealarmclock.R;
 import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 
@@ -83,6 +85,8 @@ public class Activity_RingtonePicker extends AppCompatActivity implements
 	private ViewModel_RingtonePicker viewModel;
 	private ConstraintLayout chooseToneLayout;
 	private ActivityResultLauncher<Intent> fileActLauncher;
+
+	private AudioFocusController audioFocusController;
 
 	//----------------------------------------------------------------------------------------------------
 
@@ -115,6 +119,41 @@ public class Activity_RingtonePicker extends AppCompatActivity implements
 		chooseToneLayout.setVisibility(View.GONE);
 
 		initActLaunchers();
+
+		audioFocusController = new AudioFocusController.Builder(this)
+			.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+			.setStream(AudioManager.STREAM_MUSIC)
+			.setUsage(AudioAttributes.USAGE_MEDIA)
+			.setAcceptsDelayedFocus(true)
+			.setPauseWhenAudioIsNoisy(true)
+			.setPauseWhenDucked(true)
+			.setDurationHint(AudioManager.AUDIOFOCUS_GAIN)
+			.setAudioFocusChangeListener(
+				new AudioFocusController.OnAudioFocusChangeListener() {
+					@Override
+					public void decreaseVolume() {}
+
+					@Override
+					public void increaseVolume() {}
+
+					@Override
+					public void pause() {
+						try {
+							if (mediaPlayer.isPlaying()) {
+								mediaPlayer.pause();
+							}
+						} catch (Exception ignored) {
+						}
+					}
+
+					@Override
+					public void resume() {
+						try {
+							mediaPlayer.start();
+						} catch (Exception ignored) {
+						}
+					}
+				}).build();
 	}
 
 	//----------------------------------------------------------------------------------------------------
@@ -168,6 +207,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements
 		try {
 			if (mediaPlayer.isPlaying()) {
 				mediaPlayer.stop();
+				audioFocusController.abandonFocus();
 			}
 		} catch (Exception ignored) {
 		}
@@ -677,7 +717,8 @@ public class Activity_RingtonePicker extends AppCompatActivity implements
 				mediaPlayer.setLooping(false);
 				mediaPlayer.setAudioAttributes(audioAttributes);
 				mediaPlayer.prepareAsync();
-				mediaPlayer.setOnPreparedListener(MediaPlayer::start);
+				mediaPlayer.setOnPreparedListener(
+					mp -> audioFocusController.requestFocus());
 			} catch (Exception ignored) {
 			}
 		}
