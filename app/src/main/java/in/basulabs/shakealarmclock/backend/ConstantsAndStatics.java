@@ -53,7 +53,6 @@ import in.basulabs.shakealarmclock.frontend.Activity_AlarmDetails;
 import in.basulabs.shakealarmclock.frontend.Activity_AlarmsList;
 import in.basulabs.shakealarmclock.frontend.Activity_RingAlarm;
 import in.basulabs.shakealarmclock.frontend.Activity_RingtonePicker;
-import in.basulabs.shakealarmclock.frontend.AlertDialog_BatteryOptimizations;
 
 /**
  * A class containing all the constants required by this app.
@@ -302,14 +301,6 @@ public final class ConstantsAndStatics {
 	 */
 	public static final String SHARED_PREF_KEY_SHAKE_SENSITIVITY =
 		"in.basulabs.shakealarmclock.SHAKE_SENSITIVITY";
-
-	/**
-	 * {@link android.content.SharedPreferences} key indicating whether
-	 * {@link AlertDialog_BatteryOptimizations} should be shown in
-	 * {@link Activity_AlarmsList}. Data type is {@code boolean}.
-	 */
-	public static final String SHARED_PREF_KEY_SHOW_BATTERY_OPTIM_DIALOG =
-		"in.basulabs.shakealarmclock.SHOW_BATTERY_OPTIM_DIALOG";
 
 	/**
 	 * The default sensitivity of the shake detector.
