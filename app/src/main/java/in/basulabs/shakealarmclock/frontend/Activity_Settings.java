@@ -18,6 +18,7 @@ package in.basulabs.shakealarmclock.frontend;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -335,14 +336,14 @@ public class Activity_Settings extends AppCompatActivity implements
 			(expansionFraction, state) -> setShakeImageView(state));
 
 		////////////////////////////////////////////////////////
-		// Initialise shakeSensitivityConstarintLayout:
+		// Initialise shakeSensitivityConstraintLayout:
 		///////////////////////////////////////////////////////
 		ConstraintLayout shakeOptionsConstraintLayout = findViewById(
 			R.id.shakeSensitivityConstarintLayout);
 		shakeOptionsConstraintLayout.setOnClickListener(this);
 
 		////////////////////////////////////////////////////////////
-		// Intitialize ActivityResultLauncher for RingtonePicker:
+		// Initialize ActivityResultLauncher for RingtonePicker:
 		///////////////////////////////////////////////////////////
 		initializeActLauncher();
 
@@ -379,6 +380,18 @@ public class Activity_Settings extends AppCompatActivity implements
 				SAVE_INSTANCE_IS_SHAKE_ONGOING);
 			lastShakeTime = System.currentTimeMillis();
 		}
+
+		// Set app version
+		TextView appVersionTextView = findViewById(R.id.appVersionTextView);
+		try {
+			String versionName =
+				getPackageManager().getPackageInfo(getPackageName(),0).versionName;
+			appVersionTextView.setText(versionName);
+			appVersionTextView.setVisibility(View.VISIBLE);
+		} catch (PackageManager.NameNotFoundException e) {
+			appVersionTextView.setVisibility(View.GONE);
+		}
+
 
 	}
 
