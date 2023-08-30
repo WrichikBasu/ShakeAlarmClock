@@ -2,15 +2,14 @@
 <i>An alarm clock app for Android which allows you to dismiss the ringing alarm by shaking the phone.</i>
 
 ![GitHub All Releases](https://img.shields.io/github/downloads/WrichikBasu/ShakeAlarmClock/total?style=for-the-badge) &nbsp;
-![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/WrichikBasu/ShakeAlarmClock?style=for-the-badge) &nbsp;
 ![GitHub license](https://img.shields.io/github/license/WrichikBasu/ShakeAlarmClock?style=for-the-badge)
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/WrichikBasu/ShakeAlarmClock?style=for-the-badge) &nbsp; 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/WrichikBasu/ShakeAlarmClock?style=for-the-badge)](https://github.com/WrichikBasu/ShakeAlarmClock/releases/latest?style=for-the-badge) &nbsp;
 ![GitHub Release Date](https://img.shields.io/github/release-date/WrichikBasu/ShakeAlarmClock?style=for-the-badge)
 
-![](https://img.shields.io/badge/Minimum%20SDK%20version-Lollipop%20(API%2021)-%2306486b?style=for-the-badge) &nbsp; 
-![Target SDK version](https://img.shields.io/badge/target%20SDK%20version-Android%2012%20(API%2031)-9cf?style=for-the-badge)
+![](https://img.shields.io/badge/Min_SDK-Lollipop_(SDK_21)-%2306486b?style=for-the-badge) &nbsp; 
+![Target SDK version](https://img.shields.io/badge/target_SDK-Android%2014%20(API%2034)-9cf?style=for-the-badge)
 
 Tired of pressing the power button/swiping the screen every time an alarm rings? Does your phone's UI have a tendency to freeze, thereby making it impossible to dismiss an alarm? No worries! You have come to the right place. With this app, you can simply shake your phone and dismiss the alarm.
 
