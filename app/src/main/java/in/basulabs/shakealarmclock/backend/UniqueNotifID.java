@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+/*
 Copyright (C) 2022  Wrichik Basu (basulabs.developer@gmail.com)
 
 This program is free software: you can redistribute it and/or modify
@@ -14,11 +13,25 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
--->
-<resources>
-    <color name="colorBackgroundFragment">@android:color/transparent</color>
-    <color name="colorBackgroundButton">@android:color/transparent</color>
-    <color name="defaultLabelColor">#FFFFFF</color>
+*/
+package in.basulabs.shakealarmclock.backend;
 
-    <color name="surface">#000000</color>
-</resources>
+import java.util.Date;
+
+/**
+ * A class to generate unique Notification IDs.
+ */
+public class UniqueNotifID {
+
+	/**
+	 * Get a unique notification ID.
+	 * <p>
+	 * <a href="https://stackoverflow.com/questions/12978184/android-get-unique-id-of-notification#comment51322954_28251192">Courtesy</a>
+	 *
+	 * @return A unique notification ID.
+	 */
+	public static int getID(){
+		return (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+	}
+
+}

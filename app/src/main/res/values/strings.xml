@@ -138,13 +138,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <string name="cancelDialog_positive">Yes</string>
     <string name="cancelDialog_negative">No</string>
 
-    <!-- AlertDialog_PermissionReason -->
-    <string name="permissionReasonExp_normal">This app needs permission to read your device storage so that
-    it can read and play the alarm sound. Without this permission, the app may fail to ring the alarm. Give the permission?</string>
-
-    <string name="permissionReasonExp_ringtonePicker">This app needs permission to read your device storage
-        so that it can read the tones. Without this permission, the app will not work. Give the permission?</string>
-
     <!-- Activity_Settings -->
     <string name="settings_title">Settings</string>
     <string name="shakeOp">If I <b>shake</b> the phone when an alarm rings,</string>
@@ -183,7 +176,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <string name="testShake"><small><b>Test shake sensitivity</b>\nTap to enable the shake detector so that you can
         choose the sensitivity that correctly suits you.</small></string>
 
-    <!-- Service_UpdateAlarm -->
+    <!-- Service_SetAlarmsPostBoot -->
     <string name="updateAlarm_notifMessage">Activating alarms. This may take a while…</string>
     <string name="updateAlarm_alarmMissedTitle">Alarm missed!</string>
     <string name="updateAlarm_alarmMissedText">The alarm at %s did not ring.</string>
@@ -194,20 +187,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     been detected. Change the sensitivity as per your choice.</string>
     <string name="negative_shakeDetectionTest">Stop</string>
 
-    <!-- AlertDialog_BatteryOptimizations -->
-    <string name="batteryOptim_message">Please disable battery optimizations for this app. If this app is 
-        optimized, it might not be able to ring the alarm.</string>
-    <string name="batteryOptim_title">Disable battery optimizations</string>
-    <string name="batteryOptim_positive">Proceed</string>
-    <string name="batteryOptim_negative">Maybe later</string>
-    <string name="batteryOptim_neutral">Never show again</string>
-
     <string name="defaultAlarmToneText">Default alarm tone</string>
 
-    <string name="require_permission_exact_alarms">Require permission to set exact alarms</string>
-    <string name="request_exact_alarm_perm">On Android S and higher, the app needs permission to schedule exact alarms. Without this, no alarm can
-        be set. Please go to Settings and enable this permission to continue setting an alarm.</string>
-    <string name="grant_permission">Missing permission</string>
+    <string name="essential_perms_missing">Essential permissions missing!</string>
+    <string name="missing_perms_exp">Certain essential permissions are missing, due to which this app can\'t set
+    alarms. Please grant them below:</string>
+    <string name="grant_permission">Grant permissions</string>
 
     <string name="error_notif_title">Error in setting alarms!</string>
     <string name="error_notif_body">Alarms could not be set due to missing permission. Tap to see details.</string>
@@ -217,6 +202,67 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <string name="notif_channel_name_ring_alarms">Ringing alarms</string>
     <string name="notif_channel_name_snoozed_alarms">Snoozed alarms</string>
     <string name="notif_channel_error">Errors</string>
-    <string name="notif_channel_update">Updating alarms</string>
+    <string name="notif_channel_boot">Post boot notifications</string>
+
+    <string name="grant_access">Grant access</string>
+    <string name="requirement_type">Requirement type:</string>
+    <string name="perm_type_essential">Essential</string>
+    <string name="perm_type_optional">Optional</string>
+    <string name="perm_type_recom">Highly recommended</string>
+    <string name="app_req_perm">The app requests the following permissions:</string>
+
+    <string-array name="perm_title">
+        <item>@string/perm_title_post_notif</item>
+        <item>@string/perm_title_ign_bat_optim</item>
+        <item>@string/perm_title_notif_policy</item>
+        <item>@string/perm_title_read_media_audio</item>
+    </string-array>
+
+    <string-array name="perm_exp">
+        <item>@string/perm_exp_post_notif</item>
+        <item>@string/perm_exp_ign_bat_optim</item>
+        <item>@string/perm_exp_notif_policy</item>
+        <item>@string/perm_exp_media_audio</item>
+    </string-array>
+
+    <string name="perm_title_post_notif">Post notifications</string>
+    <string name="perm_exp_post_notif">This permission allows the app to post notifications. Without this, you will
+    not see the alarm screen when an alarm rings, nor be able to dismiss it later from the notification.</string>
+
+    <string name="perm_title_read_media_audio">Read audio files</string>
+    <string name="perm_exp_media_audio">This permission is required if you want to
+    choose an alarm tone different from the default alarm tone of your device. Allows the app to read audio and music files
+    on your device.</string>
+
+    <string name="perm_title_notif_policy">Change Do Not Disturb settings</string>
+    <string name="perm_exp_notif_policy">The app allows you to set different ring volumes for each alarm.
+    Before ringing the alarm, the app tries to change the volume of the system alarm stream to the volume you
+    have set (and restores it to what it was initially). To change the volume, the permission
+    to change Do Not Disturb settings is needed in Android Nougat and above. If not granted, the app will
+    simply not set the volume before ringing the alarm.</string>
+
+    <string name="perm_title_ign_bat_optim">Ignore Battery Optimizations</string>
+    <string name="perm_exp_ign_bat_optim">The Android system, by default, sets all user installed apps
+    to be optimized to save battery. While this is OK for many apps, this app is an alarm clock app, and often faces trouble
+    if set to optimize battery. With this enabled, the Android system can kill the app at any time and/or cancel the alarms it has set, which
+    will be detrimental to the working of the app. We recommend you to whitelist this app from battery optimizations.</string>
+
+    <string name="perm_title_exact_alarms">Schedule Alarms</string>
+    <string name="perm_expln_exact_alarms">Android versions S and above need a permission to
+    schedule exact alarms. Without this, the app will not be able to schedule any alarms. </string>
+
+    <string name="perm_title_ext_storage">Read external storage</string>
+    <string name="perm_exp_ext_storage">This permission is required if you want to
+    choose an alarm tone different from the default alarm tone of your device. Allows the app to read audio and music files
+    on your device. On higher Android versions, we request a granular permission that allow us to read only the
+    music and audio files and nothing else, thus ensuring you, the user, more privacy. However, in the Android version
+    running on your device, this is not supported, so we have to ask for permission to read external storage.</string>
+
+    <string name="perm_requested_twice">Seems you have already denied this permission twice.
+    Android will not allow this app to create the permission request dialog again. Would you
+    like to head to Settings and allow this permission?</string>
+
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
 </resources>

@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activity_AlarmsList"
+    tools:context=".frontend.Activity_AlarmsList"
     android:background="@color/colorBackgroundFragment">
 
     <androidx.appcompat.widget.Toolbar

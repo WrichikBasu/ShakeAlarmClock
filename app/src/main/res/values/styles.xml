@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSurface">@color/surface</item>
     </style>
 
     <style name="transparentButtonStyle">
@@ -55,6 +56,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <item name="android:gravity">center</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@color/defaultLabelColor</item>
+    </style>
+
+    <style name="normalTextViewStyle">
+        <item name="android:fontFamily">arial</item>
+        <item name="android:gravity">start</item>
+        <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/defaultLabelColor</item>
     </style>
 

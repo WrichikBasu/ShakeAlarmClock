@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+/*
 Copyright (C) 2022  Wrichik Basu (basulabs.developer@gmail.com)
 
 This program is free software: you can redistribute it and/or modify
@@ -14,11 +13,24 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
--->
-<resources>
-    <color name="colorBackgroundFragment">@android:color/transparent</color>
-    <color name="colorBackgroundButton">@android:color/transparent</color>
-    <color name="defaultLabelColor">#FFFFFF</color>
+*/
+package in.basulabs.shakealarmclock.backend;
 
-    <color name="surface">#000000</color>
-</resources>
+import android.util.Log;
+
+import androidx.work.Configuration;
+import androidx.work.WorkManager;
+
+import java.util.Objects;
+
+public class MyWorkManagerInitializer extends MyContentProvider {
+
+	@Override
+	public boolean onCreate() {
+		WorkManager.initialize(Objects.requireNonNull(getContext()),
+			new Configuration.Builder()
+				.setMinimumLoggingLevel(Log.DEBUG)
+				.build());
+		return true;
+	}
+}

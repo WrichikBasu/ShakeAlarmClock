@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 Copyright (C) 2022  Wrichik Basu (basulabs.developer@gmail.com)
 
 This program is free software: you can redistribute it and/or modify
@@ -17,21 +16,33 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="in.basulabs.shakealarmclock"
     android:installLocation="internalOnly">
 
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.SET_ALARM" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <uses-feature android:name="android.hardware.audio.output" android:required="true"/>
-    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true"/>
+    <uses-feature
+        android:name="android.hardware.audio.output"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.sensor.accelerometer"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -63,25 +74,37 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             tools:node="remove"/>-->
 
         <provider
-            android:name=".MyWorkManagerInitializer"
-            android:authorities="in.basulabs.shakealarmclock.MyWorkManagerInitializer"
+            android:name=".backend.MyWorkManagerInitializer"
+            android:authorities="in.basulabs.shakealarmclock.backend.MyWorkManagerInitializer"
             android:exported="false" />
 
         <service
-            android:name=".Service_SnoozeAlarm"
+            android:name=".backend.Service_SnoozeAlarm"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Invoked when a ringing alarm is snoozed; stays foreground during the snooze duration,
+                starts Service_RingAlarm at the end of the snooze duration, and sets a repeat alarm if the alarm is
+                dismissed while being snoozed." />
+        </service>
 
         <service
-            android:name=".Service_RingAlarm"
+            android:name=".backend.Service_RingAlarm"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Invoked when an alarm rings; controls the ringing alarm sound, and the ability to
+                dismiss the alarm by shaking (which is the main feature of the app)." />
+        </service>
 
         <receiver
-            android:name=".AlarmBroadcastReceiver"
+            android:name=".backend.AlarmBroadcastReceiver"
             android:enabled="true"
-            android:exported="true"
-            tools:ignore="ExportedReceiver">
+            android:exported="true">
             <intent-filter>
                 <action android:name="in.basulabs.shakealarmclock.DELIVER_ALARM" />
             </intent-filter>
@@ -90,7 +113,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             </intent-filter>
         </receiver>
 
-        <activity android:name=".Activity_AlarmsList"
+        <activity
+            android:name=".frontend.Activity_AlarmsList"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -98,23 +122,23 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SHOW_ALARMS"/>
-                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.SHOW_ALARMS" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
         <activity
-            android:name=".Activity_AlarmDetails"
+            android:name=".frontend.Activity_AlarmDetails"
             android:enabled="true"
             android:exported="false"
-            android:parentActivityName=".Activity_AlarmsList" />
+            android:parentActivityName=".frontend.Activity_AlarmsList" />
 
         <activity
-            android:name=".Activity_RingAlarm"
-            android:enabled="true"
-            android:exported="false"
+            android:name=".frontend.Activity_RingAlarm"
             android:configChanges="orientation|keyboard"
+            android:enabled="true"
             android:excludeFromRecents="true"
+            android:exported="false"
             android:noHistory="true"
             android:screenOrientation="sensorPortrait"
             android:showOnLockScreen="true"
@@ -122,7 +146,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <activity
-            android:name=".Activity_RingtonePicker"
+            android:name=".frontend.Activity_RingtonePicker"
             android:enabled="true"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
@@ -133,37 +157,47 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         </activity>
 
         <activity
-            android:name=".Activity_Settings"
+            android:name=".frontend.Activity_Settings"
             android:enabled="true"
             android:exported="false"
-            android:parentActivityName=".Activity_AlarmsList" />
+            android:parentActivityName=".frontend.Activity_AlarmsList" />
 
         <service
-            android:name=".Service_UpdateAlarm"
+            android:name=".backend.Service_SetAlarmsPostBoot"
             android:enabled="true"
             android:exported="true"
-            android:permission="in.basulabs.shakealarmclock.PLUGIN_PERMISSION" />
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Sets the alarms after a device reboot, and posts an alarm missed notification." />
+        </service>
 
-        <activity android:name=".Activity_IntentManager"
+        <activity
+            android:name=".frontend.Activity_IntentManager"
+            android:configChanges="uiMode|orientation|keyboard|colorMode"
             android:enabled="true"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat.Translucent"
-            android:configChanges="uiMode|orientation|keyboard|colorMode">
+            android:theme="@style/Theme.AppCompat.Translucent">
 
             <intent-filter>
-                <action android:name="android.intent.action.DISMISS_ALARM"/>
-                <action android:name="android.intent.action.SET_ALARM"/>
-                <action android:name="android.intent.action.SNOOZE_ALARM"/>
+                <action android:name="android.intent.action.DISMISS_ALARM" />
+                <action android:name="android.intent.action.SET_ALARM" />
+                <action android:name="android.intent.action.SNOOZE_ALARM" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
         </activity>
 
         <activity
-            android:name=".Activity_RequestPerm"
-            android:exported="false"
-            android:enabled="false"/>
+            android:name=".frontend.Activity_ListReqPerm"
+            android:enabled="true"
+            android:exported="false" />
+
+        <activity
+            android:name=".frontend.Activity_RequestPermIntro"
+            android:enabled="true"
+            android:exported="false" />
 
     </application>
 
