@@ -404,6 +404,12 @@ public final class ConstantsAndStatics {
 	public static final String WORK_TAG_ACTIVATE_ALARMS =
 		"in.basulabs.WORK_ACTIVATE_ALARMS";
 
+	public static final String DATABASE_NAME =
+		"in_basulabs_shakeAlarmClock_AlarmDatabase";
+
+	public static final String SHARED_PREF_KEY_DATABASE_MOVED =
+		"in.basulabs.shakealarmclock.DATABASE_MOVED";
+
 	//-----------------------------------------------------------------------------------
 
 	/**

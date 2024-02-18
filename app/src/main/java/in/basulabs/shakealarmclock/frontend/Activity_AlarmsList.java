@@ -16,7 +16,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 package in.basulabs.shakealarmclock.frontend;
 
-import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.DEBUG_TAG;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.DATABASE_NAME;
 
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
@@ -31,7 +31,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -107,15 +106,17 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 		setContentView(R.layout.activity_alarmslist);
 		setSupportActionBar(findViewById(R.id.toolbar));
 
+		sharedPref = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
+			MODE_PRIVATE);
+		sharedPrefEditor = sharedPref.edit();
+
+		moveDatabase();
+
 		alarmDatabase = AlarmDatabase.getInstance(this);
 		viewModel = new ViewModelProvider(this).get(ViewModel_AlarmsList.class);
 
 		// Initialise the view model:
 		viewModel.init(alarmDatabase);
-
-		sharedPref = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
-			MODE_PRIVATE);
-		sharedPrefEditor = sharedPref.edit();
 
 		// Find and set the app theme:
 		int defaultTheme = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
@@ -204,12 +205,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 			// Note that if essential perms have been requested in the current
 			// session, non-essential perms will not be asked in this session.
 			if (viewModel.getCanRequestNonEssentialPerms()) {
-				Log.d(DEBUG_TAG, "Can request non-essential " +
-					"perms now.");
 				requestNonEssentialPermsOnly();
-			} else {
-				Log.d(DEBUG_TAG, "Cannot request non-essential " +
-					"perms now.");
 			}
 		}
 	}
@@ -851,8 +847,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	 */
 	private void setCanAskForNonEssentialPerms() {
 
-			Log.d(DEBUG_TAG, "Started.");
-
 			long numberOfTimesAppOpened =
 				sharedPref.getLong(
 					ConstantsAndStatics.SHARED_PREF_KEY_NO_OF_TIMES_APP_OPENED,
@@ -890,9 +884,31 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 				ConstantsAndStatics.SHARED_PREF_KEY_NO_OF_TIMES_APP_OPENED,
 				numberOfTimesAppOpened).commit();
 
-			Log.d(DEBUG_TAG, "Ended.");
+	}
 
-			Log.d(DEBUG_TAG, ""+ viewModel.getCanRequestNonEssentialPerms());
+	private void moveDatabase(){
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+			if (getDatabasePath(DATABASE_NAME).exists()) {
+
+				if (!sharedPref.getBoolean(
+					ConstantsAndStatics.SHARED_PREF_KEY_DATABASE_MOVED,
+					false)) {
+
+					createDeviceProtectedStorageContext().moveDatabaseFrom(
+						getApplicationContext(), DATABASE_NAME);
+
+					sharedPrefEditor.putBoolean(
+							ConstantsAndStatics.SHARED_PREF_KEY_DATABASE_MOVED,	true)
+						.commit();
+
+					//todo remove:
+					Toast.makeText(this, "Moved database.", Toast.LENGTH_LONG).show();
+				}
+
+			}
+		}
 
 	}
 
