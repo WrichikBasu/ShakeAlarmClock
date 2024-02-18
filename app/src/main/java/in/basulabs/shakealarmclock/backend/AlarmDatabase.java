@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package in.basulabs.shakealarmclock.backend;
 
 import android.content.Context;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.room.Database;
@@ -31,9 +32,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 @TypeConverters({Convertors.class})
 public abstract class AlarmDatabase extends RoomDatabase {
 
-	private static final String DATABASE_NAME
-		= "in_basulabs_shakeAlarmClock_AlarmDatabase";
-
 	private static AlarmDatabase instance;
 
 	static final Migration MIGRATION_1_2 = new Migration(1, 2) {
@@ -44,10 +42,15 @@ public abstract class AlarmDatabase extends RoomDatabase {
 		}
 	};
 
-	public static synchronized AlarmDatabase getInstance(Context context) {
+	public static synchronized AlarmDatabase getInstance(@NonNull Context context) {
+
 		if (instance == null) {
-			instance = Room.databaseBuilder(context.getApplicationContext(),
-					AlarmDatabase.class, DATABASE_NAME)
+
+			instance = Room.databaseBuilder(
+					Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+						? context.createDeviceProtectedStorageContext()
+						: context.getApplicationContext(),
+					AlarmDatabase.class, ConstantsAndStatics.DATABASE_NAME)
 				.addMigrations(MIGRATION_1_2)
 				.fallbackToDestructiveMigrationOnDowngrade()
 				.build();

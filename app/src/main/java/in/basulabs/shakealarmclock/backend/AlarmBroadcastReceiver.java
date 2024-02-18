@@ -52,7 +52,8 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
 						.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
 			ContextCompat.startForegroundService(context, intent1);
 
-		} else if (Objects.equals(intent.getAction(), Intent.ACTION_BOOT_COMPLETED)) {
+		} else if (Objects.equals(intent.getAction(), Intent.ACTION_BOOT_COMPLETED) ||
+			Objects.equals(intent.getAction(), Intent.ACTION_LOCKED_BOOT_COMPLETED)) {
 
 			PowerManager powerManager = (PowerManager) context.getSystemService(
 				POWER_SERVICE);

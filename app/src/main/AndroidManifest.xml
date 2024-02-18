@@ -82,6 +82,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:name=".backend.Service_SnoozeAlarm"
             android:enabled="true"
             android:exported="false"
+            android:directBootAware="true"
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
@@ -94,6 +95,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:name=".backend.Service_RingAlarm"
             android:enabled="true"
             android:exported="false"
+            android:directBootAware="true"
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
@@ -104,12 +106,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <receiver
             android:name=".backend.AlarmBroadcastReceiver"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:directBootAware="true">
             <intent-filter>
                 <action android:name="in.basulabs.shakealarmclock.DELIVER_ALARM" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
@@ -166,6 +172,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:name=".backend.Service_SetAlarmsPostBoot"
             android:enabled="true"
             android:exported="true"
+            android:directBootAware="true"
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
