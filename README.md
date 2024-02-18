@@ -1,15 +1,19 @@
 # Shake Alarm Clock
 <i>An alarm clock app for Android which allows you to dismiss the ringing alarm by shaking the phone.</i>
 
-![GitHub All Releases](https://img.shields.io/github/downloads/WrichikBasu/ShakeAlarmClock/total?style=for-the-badge) &nbsp;
-![GitHub license](https://img.shields.io/github/license/WrichikBasu/ShakeAlarmClock?style=for-the-badge)
 
-![GitHub last commit](https://img.shields.io/github/last-commit/WrichikBasu/ShakeAlarmClock?style=for-the-badge) &nbsp; 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/WrichikBasu/ShakeAlarmClock?style=for-the-badge)](https://github.com/WrichikBasu/ShakeAlarmClock/releases/latest?style=for-the-badge) &nbsp;
-![GitHub Release Date](https://img.shields.io/github/release-date/WrichikBasu/ShakeAlarmClock?style=for-the-badge)
+![GitHub license](https://img.shields.io/github/license/WrichikBasu/ShakeAlarmClock?style=for-the-badge)   &nbsp; 
+![GitHub All Releases](https://img.shields.io/github/downloads/WrichikBasu/ShakeAlarmClock/total?style=for-the-badge)
 
 ![](https://img.shields.io/badge/Min_SDK-Lollipop_(SDK_21)-%2306486b?style=for-the-badge) &nbsp; 
-![Target SDK version](https://img.shields.io/badge/target_SDK-Android%2014%20(API%2034)-9cf?style=for-the-badge)
+![Target SDK version](https://img.shields.io/badge/target_SDK-Android%2014%20(API%2034)-9cf?style=for-the-badge)  
+
+![GitHub Release](https://img.shields.io/github/v/release/WrichikBasu/ShakeAlarmClock?sort=date&display_name=tag&style=for-the-badge)
+ &nbsp;
+![GitHub Release Date](https://img.shields.io/github/release-date/WrichikBasu/ShakeAlarmClock?display_date=published_at&style=for-the-badge)
+
+![GitHub last commit](https://img.shields.io/github/last-commit/WrichikBasu/ShakeAlarmClock?display_timestamp=committer&style=for-the-badge&label=Last%20commit)
+
 
 Tired of pressing the power button/swiping the screen every time an alarm rings? Does your phone's UI have a tendency to freeze, thereby making it impossible to dismiss an alarm? No worries! You have come to the right place. With this app, you can simply shake your phone and dismiss the alarm.
 
