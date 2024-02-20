@@ -109,8 +109,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 		moveToDeviceProtectedStorage();
 
-		sharedPref = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
-			MODE_PRIVATE);
+		sharedPref = ConstantsAndStatics.getSharedPref(this);
 		sharedPrefEditor = sharedPref.edit();
 
 		alarmDatabase = AlarmDatabase.getInstance(this);
@@ -806,11 +805,12 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	@RequiresApi(api = Build.VERSION_CODES.O)
 	private void deleteNotifChannels() {
 
+		final Context context = this;
+
 		new Thread(() -> {
 
 			SharedPreferences sharedPref =
-				getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
-					MODE_PRIVATE);
+				ConstantsAndStatics.getSharedPref(context);
 
 			if (!sharedPref.getBoolean(
 				ConstantsAndStatics.SHARED_PREF_KEY_NOTIF_CHANNELS_DELETED, false)) {

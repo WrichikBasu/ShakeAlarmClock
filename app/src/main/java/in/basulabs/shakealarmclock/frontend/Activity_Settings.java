@@ -125,8 +125,7 @@ public class Activity_Settings extends AppCompatActivity implements
 		//////////////////////////////////////////////////
 		// Get SharedPreferences and its editor:
 		/////////////////////////////////////////////////
-		sharedPreferences = getSharedPreferences(
-			ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
+		sharedPreferences = ConstantsAndStatics.getSharedPref(this);
 		prefEditor = sharedPreferences.edit();
 
 		/////////////////////////////////////////////////

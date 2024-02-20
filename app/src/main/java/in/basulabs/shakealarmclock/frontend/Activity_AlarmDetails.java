@@ -105,7 +105,7 @@ public class Activity_AlarmDetails extends AppCompatActivity implements
 		actionBar.setDisplayHomeAsUpEnabled(true);
 
 		fragmentManager = getSupportFragmentManager();
-		sharedPreferences = getSharedPreferences(SHARED_PREF_FILE_NAME, MODE_PRIVATE);
+		sharedPreferences = ConstantsAndStatics.getSharedPref(this);
 		viewModel = new ViewModelProvider(this).get(ViewModel_AlarmDetails.class);
 
 		if (savedInstanceState == null) {

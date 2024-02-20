@@ -180,8 +180,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
-		sharedPreferences = getSharedPreferences(
-			ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
+		sharedPreferences = ConstantsAndStatics.getSharedPref(this);
 
 		audioFocusController = new AudioFocusController.Builder(this)
 			.setAcceptsDelayedFocus(true)

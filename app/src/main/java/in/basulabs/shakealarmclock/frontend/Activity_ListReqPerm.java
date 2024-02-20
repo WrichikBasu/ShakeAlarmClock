@@ -72,8 +72,7 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 
 		Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-		sharedPreferences = getSharedPreferences(
-			ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
+		sharedPreferences = ConstantsAndStatics.getSharedPref(this);
 
 		viewModel = new ViewModelProvider(this).get(ViewModel_ListReqPerm.class);
 

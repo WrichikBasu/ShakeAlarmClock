@@ -16,6 +16,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 package in.basulabs.shakealarmclock.backend;
 
+import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.POWER_SERVICE;
 import static android.content.Context.USER_SERVICE;
 import static android.content.res.Configuration.UI_MODE_NIGHT_MASK;
@@ -26,6 +27,7 @@ import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.PowerManager;
@@ -764,6 +766,18 @@ public final class ConstantsAndStatics {
 			case UI_MODE_NIGHT_YES -> true;
 			default -> false;
 		};
+	}
+
+	@NonNull
+	public static SharedPreferences getSharedPref(@NonNull Context context) {
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			return context.createDeviceProtectedStorageContext()
+				.getSharedPreferences(SHARED_PREF_FILE_NAME, MODE_PRIVATE);
+		} else {
+			return context.getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
+				MODE_PRIVATE);
+		}
 	}
 
 

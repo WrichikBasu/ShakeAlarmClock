@@ -617,9 +617,7 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 	 * Handles {@code saveButton} clicks.
 	 */
 	private void saveButtonClicked() {
-		SharedPreferences sharedPreferences = requireContext()
-			.getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
-				Context.MODE_PRIVATE);
+		SharedPreferences sharedPreferences = ConstantsAndStatics.getSharedPref(requireContext());
 
 		if (sharedPreferences.getBoolean(
 			ConstantsAndStatics.SHARED_PREF_KEY_AUTO_SET_TONE, true)) {
