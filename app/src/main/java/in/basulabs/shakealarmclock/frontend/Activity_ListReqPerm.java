@@ -15,7 +15,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -72,8 +71,7 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 
 		Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-		sharedPreferences = getSharedPreferences(
-			ConstantsAndStatics.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
+		sharedPreferences = ConstantsAndStatics.getSharedPref(this);
 
 		viewModel = new ViewModelProvider(this).get(ViewModel_ListReqPerm.class);
 
@@ -93,9 +91,6 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 
 		reqPermsLauncher = registerForActivityResult(
 			new ActivityResultContracts.RequestPermission(), isGranted -> {
-
-				Log.println(Log.ERROR, getClass().getSimpleName(),
-					"Current permission = " + viewModel.getCurrentPermission());
 
 				if (viewModel.getCurrentPermission() != null) {
 					if (isGranted) {
@@ -200,9 +195,6 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 		viewModel.incrementTimesPermRequested(sharedPreferences,
 			permission.androidString());
 
-		Log.println(Log.ERROR, getClass().getSimpleName(),
-			"Set current permission = " + viewModel.getCurrentPermission());
-
 		int numberOfTimesRequested = viewModel.getTimesPermRequested(sharedPreferences,
 			permission.androidString());
 
@@ -248,7 +240,6 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 	}
 
 	private void observePermsQueue(ArrayList<Permission> permsQueue) {
-		Log.e(getClass().getSimpleName(), "Queue: " + permsQueue.toString());
 		if (permsQueue.isEmpty()) {
 			this.onBackPressed();
 		}

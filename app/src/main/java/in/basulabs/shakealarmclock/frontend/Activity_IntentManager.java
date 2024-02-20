@@ -168,8 +168,7 @@ public class Activity_IntentManager extends AppCompatActivity {
 
 	private void setAlarm() {
 
-		SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREF_FILE_NAME,
-			MODE_PRIVATE);
+		SharedPreferences sharedPreferences = ConstantsAndStatics.getSharedPref(this);
 
 		///////////////////////////////////////////////
 		// Retrieve all data passed with intent:

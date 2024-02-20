@@ -16,7 +16,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 package in.basulabs.shakealarmclock.frontend;
 
-import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.DEBUG_TAG;
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.DATABASE_NAME;
 
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
@@ -107,15 +107,16 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 		setContentView(R.layout.activity_alarmslist);
 		setSupportActionBar(findViewById(R.id.toolbar));
 
+		moveToDeviceProtectedStorage();
+
+		sharedPref = ConstantsAndStatics.getSharedPref(this);
+		sharedPrefEditor = sharedPref.edit();
+
 		alarmDatabase = AlarmDatabase.getInstance(this);
 		viewModel = new ViewModelProvider(this).get(ViewModel_AlarmsList.class);
 
 		// Initialise the view model:
 		viewModel.init(alarmDatabase);
-
-		sharedPref = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
-			MODE_PRIVATE);
-		sharedPrefEditor = sharedPref.edit();
 
 		// Find and set the app theme:
 		int defaultTheme = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
@@ -204,12 +205,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 			// Note that if essential perms have been requested in the current
 			// session, non-essential perms will not be asked in this session.
 			if (viewModel.getCanRequestNonEssentialPerms()) {
-				Log.d(DEBUG_TAG, "Can request non-essential " +
-					"perms now.");
 				requestNonEssentialPermsOnly();
-			} else {
-				Log.d(DEBUG_TAG, "Cannot request non-essential " +
-					"perms now.");
 			}
 		}
 	}
@@ -809,11 +805,12 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	@RequiresApi(api = Build.VERSION_CODES.O)
 	private void deleteNotifChannels() {
 
+		final Context context = this;
+
 		new Thread(() -> {
 
 			SharedPreferences sharedPref =
-				getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
-					MODE_PRIVATE);
+				ConstantsAndStatics.getSharedPref(context);
 
 			if (!sharedPref.getBoolean(
 				ConstantsAndStatics.SHARED_PREF_KEY_NOTIF_CHANNELS_DELETED, false)) {
@@ -850,8 +847,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	 * been asked in the last 100 app sessions.
 	 */
 	private void setCanAskForNonEssentialPerms() {
-
-			Log.d(DEBUG_TAG, "Started.");
 
 			long numberOfTimesAppOpened =
 				sharedPref.getLong(
@@ -890,9 +885,22 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 				ConstantsAndStatics.SHARED_PREF_KEY_NO_OF_TIMES_APP_OPENED,
 				numberOfTimesAppOpened).commit();
 
-			Log.d(DEBUG_TAG, "Ended.");
+	}
 
-			Log.d(DEBUG_TAG, ""+ viewModel.getCanRequestNonEssentialPerms());
+	/**
+	 * Moves the database and the shared preferences file to device protected storage
+	 * in Android N and above to make the app Direct Boot compatible.
+	 */
+	private void moveToDeviceProtectedStorage(){
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+			createDeviceProtectedStorageContext().moveDatabaseFrom(
+				getApplicationContext(), DATABASE_NAME);
+
+			createDeviceProtectedStorageContext().moveSharedPreferencesFrom(this,
+					ConstantsAndStatics.SHARED_PREF_FILE_NAME);
+		}
 
 	}
 
