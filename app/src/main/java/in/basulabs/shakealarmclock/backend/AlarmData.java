@@ -252,4 +252,9 @@ public class AlarmData {
 		return alarmMessage;
 	}
 
+	@NonNull
+	@Override
+	public String toString() {
+		return "Alarm date time = " + alarmDateTime.toString();
+	}
 }

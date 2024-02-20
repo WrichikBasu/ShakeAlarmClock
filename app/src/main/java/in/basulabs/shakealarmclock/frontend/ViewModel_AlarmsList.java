@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package in.basulabs.shakealarmclock.frontend;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,6 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import in.basulabs.shakealarmclock.backend.AlarmData;
 import in.basulabs.shakealarmclock.backend.AlarmDatabase;
 import in.basulabs.shakealarmclock.backend.AlarmEntity;
+import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 import in.basulabs.shakealarmclock.backend.RepeatEntity;
 
 public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver {
@@ -437,11 +439,21 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 
 		for (int i = 0;
 		     i < Objects.requireNonNull(alarmDataArrayList.getValue()).size(); i++) {
+
 			AlarmData alarmData = alarmDataArrayList.getValue().get(i);
 
 			if (alarmData.getAlarmTime().equals(LocalTime.of(hour, mins))) {
+
+				Log.e(ConstantsAndStatics.DEBUG_TAG,
+					"len before = " + alarmDataArrayList.getValue().size());
+
 				alarmDataArrayList.getValue().remove(i);
 				position = i;
+
+				Log.e(ConstantsAndStatics.DEBUG_TAG, "Deleted alarm from " +
+					"alarmDataArrayList at pos = " + position);
+				Log.e(ConstantsAndStatics.DEBUG_TAG,
+					"len after = " + alarmDataArrayList.getValue().size());
 				break;
 			}
 		}
@@ -482,6 +494,7 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 
 		// Toggle the alarm status in the alarmDataArrayList:
 		int index = isAlarmInTheList(hour, mins);
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "index = " + index);
 		AlarmData alarmData = Objects.requireNonNull(alarmDataArrayList.getValue())
 			.get(index);
 		alarmData.setSwitchedOn(newAlarmState == 1);
@@ -570,6 +583,7 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 	 * @return The {@link AlarmEntity} object for the alarm specified by {@code hour} and
 	 *    {@code mins}.
 	 */
+	@NonNull
 	public AlarmEntity getAlarmEntity(@NonNull AlarmDatabase alarmDatabase, int hour,
 		int mins) {
 
@@ -603,6 +617,8 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 		if (alarmDataArrayList.getValue() != null &&
 			alarmDataArrayList.getValue().size() > 0) {
 			for (AlarmData alarmData : alarmDataArrayList.getValue()) {
+				Log.e(ConstantsAndStatics.DEBUG_TAG,
+					"Alarm data: " + alarmData.toString());
 				if (alarmData.getAlarmTime().equals(LocalTime.of(hour, mins))) {
 					return alarmDataArrayList.getValue().indexOf(alarmData);
 				}

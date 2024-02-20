@@ -279,7 +279,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	 * @param repeatDays The days on which the alarm is to repeat. Can be {@code null} is
 	 * 	repeat is OFF.
 	 */
-	private void addOrActivateAlarm(int mode, AlarmEntity alarmEntity,
+	private void addOrActivateAlarm(int mode, @NonNull AlarmEntity alarmEntity,
 		@Nullable ArrayList<Integer> repeatDays) {
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
@@ -305,6 +305,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 		if (mode == MODE_ADD_NEW_ALARM) {
 
+			// Add the alarm to the database
 			int[] result = viewModel.addAlarm(alarmDatabase, alarmEntity, repeatDays);
 
 			alarmEntity.alarmID = result[0];
@@ -387,6 +388,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 			int pos = viewModel.removeAlarm(alarmDatabase, hour, mins);
 			alarmAdapter.notifyItemRemoved(pos);
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm removed at position " + pos);
 
 			toastText = getString(R.string.toast_alarmDeleted,
 				alarmTime.format(formatter));
@@ -735,6 +737,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 				if (result.getResultCode() == RESULT_OK) {
 
+					Log.e(ConstantsAndStatics.DEBUG_TAG, "Result OK");
+
 					Intent intent = result.getData();
 
 					if (intent != null) {
@@ -743,9 +747,24 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 							.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
 						assert data != null;
 
+						Log.e(ConstantsAndStatics.DEBUG_TAG, "Deleting old alarm...");
+
 						deleteOrDeactivateAlarm(MODE_DELETE_ALARM,
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_OLD_ALARM_HOUR),
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_OLD_ALARM_MINUTE));
+
+						if (viewModel.getAlarmId(alarmDatabase,
+							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE)) !=
+							0) {
+
+							Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm exists in " +
+								"database, deleting that alarm...");
+
+							deleteOrDeactivateAlarm(MODE_DELETE_ALARM,
+								data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+								data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+						}
 
 						AlarmEntity alarmEntity = new AlarmEntity(
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
@@ -766,6 +785,8 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 							data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE),
 							data.getBoolean(
 								ConstantsAndStatics.BUNDLE_KEY_HAS_USER_CHOSEN_DATE));
+
+						Log.e(ConstantsAndStatics.DEBUG_TAG, "Adding new alarm...");
 
 						addOrActivateAlarm(MODE_ADD_NEW_ALARM, alarmEntity,
 							data.getIntegerArrayList(
