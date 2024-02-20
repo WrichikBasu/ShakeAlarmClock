@@ -388,7 +388,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 			int pos = viewModel.removeAlarm(alarmDatabase, hour, mins);
 			alarmAdapter.notifyItemRemoved(pos);
-			Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm removed at position " + pos);
 
 			toastText = getString(R.string.toast_alarmDeleted,
 				alarmTime.format(formatter));
@@ -737,8 +736,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 				if (result.getResultCode() == RESULT_OK) {
 
-					Log.e(ConstantsAndStatics.DEBUG_TAG, "Result OK");
-
 					Intent intent = result.getData();
 
 					if (intent != null) {
@@ -746,8 +743,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 						Bundle data = Objects.requireNonNull(intent.getExtras())
 							.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS);
 						assert data != null;
-
-						Log.e(ConstantsAndStatics.DEBUG_TAG, "Deleting old alarm...");
 
 						deleteOrDeactivateAlarm(MODE_DELETE_ALARM,
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_OLD_ALARM_HOUR),
@@ -757,9 +752,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE)) !=
 							0) {
-
-							Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm exists in " +
-								"database, deleting that alarm...");
 
 							deleteOrDeactivateAlarm(MODE_DELETE_ALARM,
 								data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
@@ -785,8 +777,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 							data.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE),
 							data.getBoolean(
 								ConstantsAndStatics.BUNDLE_KEY_HAS_USER_CHOSEN_DATE));
-
-						Log.e(ConstantsAndStatics.DEBUG_TAG, "Adding new alarm...");
 
 						addOrActivateAlarm(MODE_ADD_NEW_ALARM, alarmEntity,
 							data.getIntegerArrayList(
