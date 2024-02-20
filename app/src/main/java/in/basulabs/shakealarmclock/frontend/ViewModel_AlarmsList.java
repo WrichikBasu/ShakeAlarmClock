@@ -437,6 +437,7 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 
 		for (int i = 0;
 		     i < Objects.requireNonNull(alarmDataArrayList.getValue()).size(); i++) {
+
 			AlarmData alarmData = alarmDataArrayList.getValue().get(i);
 
 			if (alarmData.getAlarmTime().equals(LocalTime.of(hour, mins))) {
@@ -570,6 +571,7 @@ public class ViewModel_AlarmsList extends ViewModel implements LifecycleObserver
 	 * @return The {@link AlarmEntity} object for the alarm specified by {@code hour} and
 	 *    {@code mins}.
 	 */
+	@NonNull
 	public AlarmEntity getAlarmEntity(@NonNull AlarmDatabase alarmDatabase, int hour,
 		int mins) {
 

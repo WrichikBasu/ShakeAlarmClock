@@ -279,7 +279,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	 * @param repeatDays The days on which the alarm is to repeat. Can be {@code null} is
 	 * 	repeat is OFF.
 	 */
-	private void addOrActivateAlarm(int mode, AlarmEntity alarmEntity,
+	private void addOrActivateAlarm(int mode, @NonNull AlarmEntity alarmEntity,
 		@Nullable ArrayList<Integer> repeatDays) {
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
@@ -305,6 +305,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 		if (mode == MODE_ADD_NEW_ALARM) {
 
+			// Add the alarm to the database
 			int[] result = viewModel.addAlarm(alarmDatabase, alarmEntity, repeatDays);
 
 			alarmEntity.alarmID = result[0];
@@ -746,6 +747,16 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 						deleteOrDeactivateAlarm(MODE_DELETE_ALARM,
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_OLD_ALARM_HOUR),
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_OLD_ALARM_MINUTE));
+
+						if (viewModel.getAlarmId(alarmDatabase,
+							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE)) !=
+							0) {
+
+							deleteOrDeactivateAlarm(MODE_DELETE_ALARM,
+								data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+								data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+						}
 
 						AlarmEntity alarmEntity = new AlarmEntity(
 							data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
