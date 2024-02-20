@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package in.basulabs.shakealarmclock.backend;
 
 import static android.content.Context.POWER_SERVICE;
+import static android.content.Context.USER_SERVICE;
 import static android.content.res.Configuration.UI_MODE_NIGHT_MASK;
 import static android.content.res.Configuration.UI_MODE_NIGHT_YES;
 
@@ -28,6 +29,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.PowerManager;
+import android.os.UserManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -419,30 +421,37 @@ public final class ConstantsAndStatics {
 	 *
 	 * @param context The {@link Context} that is scheduling the work.
 	 */
-	public static void schedulePeriodicWork(Context context) {
+	public static void schedulePeriodicWork(@NonNull Context context) {
 
-		try {
-			WorkManager.initialize(context,
-				new Configuration.Builder()
-					.setMinimumLoggingLevel(Log.DEBUG)
-					.build());
-		} catch (Exception ignored) {
+		UserManager userManager = (UserManager) context.getSystemService(USER_SERVICE);
+
+		boolean shouldProceed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+			? userManager.isUserUnlocked() : true;
+
+		if (shouldProceed) {
+			try {
+				WorkManager.initialize(context,
+					new Configuration.Builder()
+						.setMinimumLoggingLevel(Log.DEBUG)
+						.build());
+			} catch (Exception ignored) {
+			}
+
+			Constraints constraint = new Constraints.Builder()
+				.setRequiresBatteryNotLow(true)
+				.build();
+
+			PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(
+				Worker_ActivateAlarms.class, 1, TimeUnit.HOURS)
+				.setInitialDelay(30, TimeUnit.MINUTES)
+				.setConstraints(constraint)
+				.build();
+
+			WorkManager.getInstance(context)
+				.enqueueUniquePeriodicWork(WORK_TAG_ACTIVATE_ALARMS,
+					ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+					periodicWorkRequest);
 		}
-
-		Constraints constraint = new Constraints.Builder()
-			.setRequiresBatteryNotLow(true)
-			.build();
-
-		PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(
-			Worker_ActivateAlarms.class, 1, TimeUnit.HOURS)
-			.setInitialDelay(30, TimeUnit.MINUTES)
-			.setConstraints(constraint)
-			.build();
-
-		WorkManager.getInstance(context)
-			.enqueueUniquePeriodicWork(WORK_TAG_ACTIVATE_ALARMS,
-				ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-				periodicWorkRequest);
 	}
 
 	//-----------------------------------------------------------------------------------
@@ -452,16 +461,23 @@ public final class ConstantsAndStatics {
 	 *
 	 * @param context The {@link Context} that is requesting the work to be cancelled.
 	 */
-	public static void cancelScheduledPeriodicWork(Context context) {
+	public static void cancelScheduledPeriodicWork(@NonNull Context context) {
 
-		try {
-			WorkManager.initialize(context,
-				new Configuration.Builder()
-					.setMinimumLoggingLevel(Log.DEBUG).build());
-		} catch (Exception ignored) {
+		UserManager userManager = (UserManager) context.getSystemService(USER_SERVICE);
+
+		boolean shouldProceed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+			? userManager.isUserUnlocked() : true;
+
+		if (shouldProceed) {
+			try {
+				WorkManager.initialize(context,
+					new Configuration.Builder()
+						.setMinimumLoggingLevel(Log.DEBUG).build());
+			} catch (Exception ignored) {
+			}
+
+			WorkManager.getInstance(context).cancelUniqueWork(WORK_TAG_ACTIVATE_ALARMS);
 		}
-
-		WorkManager.getInstance(context).cancelUniqueWork(WORK_TAG_ACTIVATE_ALARMS);
 	}
 
 	//-----------------------------------------------------------------------------------
