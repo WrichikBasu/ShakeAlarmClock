@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -106,11 +107,11 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 		setContentView(R.layout.activity_alarmslist);
 		setSupportActionBar(findViewById(R.id.toolbar));
 
+		moveToDeviceProtectedStorage();
+
 		sharedPref = getSharedPreferences(ConstantsAndStatics.SHARED_PREF_FILE_NAME,
 			MODE_PRIVATE);
 		sharedPrefEditor = sharedPref.edit();
-
-		moveDatabase();
 
 		alarmDatabase = AlarmDatabase.getInstance(this);
 		viewModel = new ViewModelProvider(this).get(ViewModel_AlarmsList.class);
@@ -886,28 +887,23 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 	}
 
-	private void moveDatabase(){
+	/**
+	 * Moves the database and the shared preferences file to device protected storage
+	 * in Android N and above to make the app Direct Boot compatible.
+	 */
+	private void moveToDeviceProtectedStorage(){
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
-			if (getDatabasePath(DATABASE_NAME).exists()) {
+			boolean var1 = createDeviceProtectedStorageContext().moveDatabaseFrom(
+				getApplicationContext(), DATABASE_NAME);
 
-				if (!sharedPref.getBoolean(
-					ConstantsAndStatics.SHARED_PREF_KEY_DATABASE_MOVED,
-					false)) {
+			boolean var2 =
+				createDeviceProtectedStorageContext().moveSharedPreferencesFrom(this,
+					ConstantsAndStatics.SHARED_PREF_FILE_NAME);
 
-					createDeviceProtectedStorageContext().moveDatabaseFrom(
-						getApplicationContext(), DATABASE_NAME);
-
-					sharedPrefEditor.putBoolean(
-							ConstantsAndStatics.SHARED_PREF_KEY_DATABASE_MOVED,	true)
-						.commit();
-
-					//todo remove:
-					Toast.makeText(this, "Moved database.", Toast.LENGTH_LONG).show();
-				}
-
-			}
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "Database moved? " + var1);
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "Shared Pref moved? " + var2);
 		}
 
 	}
