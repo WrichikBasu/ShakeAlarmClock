@@ -797,8 +797,6 @@ public class Activity_Settings extends AppCompatActivity implements
 
 		} else if (seekBar.getId() == R.id.shakeSensitivitySeekBar) {
 
-			Log.e(getClass().getSimpleName(),
-				"Sensitivity value = " + getSensitivityValue(seekBar.getProgress()));
 			prefEditor.remove(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY)
 				.putFloat(ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY,
 					getSensitivityValue(seekBar.getProgress()))

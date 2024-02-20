@@ -895,15 +895,11 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
-			boolean var1 = createDeviceProtectedStorageContext().moveDatabaseFrom(
+			createDeviceProtectedStorageContext().moveDatabaseFrom(
 				getApplicationContext(), DATABASE_NAME);
 
-			boolean var2 =
-				createDeviceProtectedStorageContext().moveSharedPreferencesFrom(this,
+			createDeviceProtectedStorageContext().moveSharedPreferencesFrom(this,
 					ConstantsAndStatics.SHARED_PREF_FILE_NAME);
-
-			Log.e(ConstantsAndStatics.DEBUG_TAG, "Database moved? " + var1);
-			Log.e(ConstantsAndStatics.DEBUG_TAG, "Shared Pref moved? " + var2);
 		}
 
 	}
