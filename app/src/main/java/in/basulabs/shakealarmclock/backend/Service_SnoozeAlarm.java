@@ -233,7 +233,9 @@ public class Service_SnoozeAlarm extends Service {
 
 		createNotificationChannel();
 
-		Intent intent = new Intent().setAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
+		Intent intent = new Intent();
+		intent.setAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
+		intent.setPackage(getPackageName());
 
 		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
 			?

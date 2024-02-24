@@ -618,6 +618,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 			}
 			Intent intent = new Intent(
 				ConstantsAndStatics.ACTION_DESTROY_RING_ALARM_ACTIVITY);
+			intent.setPackage(getPackageName());
 			sendBroadcast(intent);
 		}
 		audioFocusController.abandonFocus();

@@ -31,6 +31,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -46,7 +47,7 @@ public class Activity_RingAlarm extends AppCompatActivity implements
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
-		public void onReceive(Context context, Intent intent) {
+		public void onReceive(@NonNull Context context, @NonNull Intent intent) {
 			if (Objects.equals(intent.getAction(),
 				ConstantsAndStatics.ACTION_DESTROY_RING_ALARM_ACTIVITY)) {
 				finish();
@@ -138,13 +139,15 @@ public class Activity_RingAlarm extends AppCompatActivity implements
 	//----------------------------------------------------------------------------------
 
 	@Override
-	public void onClick(View view) {
+	public void onClick(@NonNull View view) {
 		if (view.getId() == R.id.snoozeButton) {
 			Intent intent = new Intent(ConstantsAndStatics.ACTION_SNOOZE_ALARM);
+			intent.setPackage(getPackageName());
 			sendBroadcast(intent);
 			finish();
 		} else if (view.getId() == R.id.cancelButton) {
 			Intent intent1 = new Intent(ConstantsAndStatics.ACTION_CANCEL_ALARM);
+			intent1.setPackage(getPackageName());
 			sendBroadcast(intent1);
 			finish();
 		}
