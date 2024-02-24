@@ -32,8 +32,10 @@ Tired of pressing the power button/swiping the screen every time an alarm rings?
 ## How to install?
 
 
-<a href="https://github.com/WrichikBasu/ShakeAlarmClock/releases/latest"><img src="github.png" alt="Download from Github icon" width="200"/></a>
-<a href='https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=200/></a>
+<a href="https://github.com/WrichikBasu/ShakeAlarmClock/releases/latest"><img src="github.png" alt="Download from Github!" width="200"/></a>
+<a href='https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock'><img alt='Get it on Google Play!' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="200" /></a>
+<a href='https://apt.izzysoft.de/fdroid/index/apk/in.basulabs.shakealarmclock/'><img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" width="200" /></a>
+
 
 
 ## How to contribute?
