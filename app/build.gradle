@@ -26,8 +26,8 @@ android {
         applicationId "in.basulabs.shakealarmclock"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 35
-        versionName "4.2.0"
+        versionCode 36
+        versionName "4.2.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,6 +48,7 @@ android {
     }
 
     dependenciesInfo {
+        // See #73 and #72. Credits: @IzzySoft.
         // Disables dependency metadata when building APKs.
         includeInApk = false
         // Disables dependency metadata when building Android App Bundles.
