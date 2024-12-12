@@ -344,7 +344,7 @@ public class Activity_AlarmDetails extends AppCompatActivity implements
 
 	@Override
 	public void onBackPressed() {
-
+		super.onBackPressed();
 		if (fragmentManager.getBackStackEntryCount() > 1) {
 			fragmentManager.popBackStackImmediate();
 			whichFragment = FRAGMENT_MAIN;

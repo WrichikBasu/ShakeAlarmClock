@@ -379,7 +379,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements
 
 	@Override
 	public void onBackPressed() {
-
+		super.onBackPressed();
 		if (viewModel.getPickedUri() == null) {
 			if (viewModel.getShowSilent()) {
 				Intent intent = new Intent().putExtra(EXTRA_RINGTONE_PICKED_URI,

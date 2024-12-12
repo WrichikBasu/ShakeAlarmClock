@@ -247,6 +247,7 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 
 	@Override
 	public void onBackPressed() {
+		super.onBackPressed();
 		if (viewModel.areEssentialPermsPresent()) {
 			setResult(RESULT_CANCELED);
 			finish();
