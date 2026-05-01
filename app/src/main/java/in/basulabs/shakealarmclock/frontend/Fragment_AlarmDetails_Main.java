@@ -43,6 +43,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -63,8 +65,6 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 	SeekBar.OnSeekBarChangeListener, TimePicker.OnTimeChangedListener,
 	AdapterView.OnItemSelectedListener {
 
-	private static final int RINGTONE_REQUEST_CODE = 5280;
-
 	private ViewModel_AlarmDetails viewModel;
 
 	private FragmentGUIListener listener;
@@ -73,7 +73,7 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 	private ImageView alarmVolumeImageView;
 	private boolean isSavedInstanceStateNull;
 
-	//----------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------
 
 	public interface FragmentGUIListener {
 
@@ -495,34 +495,27 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 					Settings.System.DEFAULT_ALARM_ALERT_URI)
 				.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI,
 					viewModel.getAlarmToneUri());
-			startActivityForResult(intent, RINGTONE_REQUEST_CODE);
+
+            ActivityResultLauncher<Intent> alarmToneActLauncher = registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(), (result) -> {
+
+                        if (result.getResultCode() == RESULT_OK) {
+
+                            Intent data = result.getData();
+                            assert data != null;
+                            Uri uri = Objects.requireNonNull(data.getExtras())
+                                    .getParcelable(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                            assert uri != null;
+                            viewModel.setAlarmToneUri(uri);
+                        }
+                        displayAlarmTone();
+                    });
+			alarmToneActLauncher.launch(intent);
 
 		} else if (view.getId() == R.id.alarmMessageConstraintLayout) {
 			listener.onRequestMessageFragCreation();
 		}
 	}
-
-	//----------------------------------------------------------------------------------------------------
-
-	@Override
-	public void onActivityResult(int requestCode, int resultCode,
-		@Nullable Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-
-		if (requestCode == RINGTONE_REQUEST_CODE) {
-
-			if (resultCode == RESULT_OK) {
-
-				assert data != null;
-				Uri uri = Objects.requireNonNull(data.getExtras())
-					.getParcelable(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-				assert uri != null;
-				viewModel.setAlarmToneUri(uri);
-			}
-		}
-		displayAlarmTone();
-	}
-
 
 	//----------------------------------------------------------------------------------------------------
 
