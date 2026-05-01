@@ -37,7 +37,6 @@ import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS;
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY;
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS;
-import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_FILE_NAME;
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI;
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME;
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ;
@@ -52,6 +51,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.view.MenuItem;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -195,6 +195,14 @@ public class Activity_AlarmDetails extends AppCompatActivity implements
 		}
 
 		setActionBarTitle();
+
+		getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+			@Override
+			public void handleOnBackPressed() {
+				whenBackPressed();
+				finish();
+			}
+		});
 
 	}
 
@@ -342,9 +350,10 @@ public class Activity_AlarmDetails extends AppCompatActivity implements
 
 	//----------------------------------------------------------------------------------------------------
 
-	@Override
-	public void onBackPressed() {
-		super.onBackPressed();
+	/**
+	 * Handles the back button press.
+	 */
+	private void whenBackPressed() {
 		if (fragmentManager.getBackStackEntryCount() > 1) {
 			fragmentManager.popBackStackImmediate();
 			whichFragment = FRAGMENT_MAIN;
@@ -359,7 +368,7 @@ public class Activity_AlarmDetails extends AppCompatActivity implements
 	@Override
 	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 		if (item.getItemId() == android.R.id.home) {
-			onBackPressed();
+			whenBackPressed();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

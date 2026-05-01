@@ -51,6 +51,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -146,6 +147,14 @@ public class Activity_RingtonePicker extends AppCompatActivity implements
 						}
 					}
 				}).build();
+
+		getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+			@Override
+			public void handleOnBackPressed() {
+				whenBackPressed();
+				finish();
+			}
+		});
 	}
 
 	//----------------------------------------------------------------------------------------------------
@@ -351,7 +360,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements
 	@Override
 	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 		if (item.getItemId() == android.R.id.home) {
-			this.onBackPressed();
+			whenBackPressed();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -377,9 +386,8 @@ public class Activity_RingtonePicker extends AppCompatActivity implements
 
 	//----------------------------------------------------------------------------------------------------
 
-	@Override
-	public void onBackPressed() {
-		super.onBackPressed();
+
+	private void whenBackPressed() {
 		if (viewModel.getPickedUri() == null) {
 			if (viewModel.getShowSilent()) {
 				Intent intent = new Intent().putExtra(EXTRA_RINGTONE_PICKED_URI,
