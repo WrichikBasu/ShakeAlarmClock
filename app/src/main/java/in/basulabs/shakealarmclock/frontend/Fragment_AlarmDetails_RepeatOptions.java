@@ -86,7 +86,7 @@ public class Fragment_AlarmDetails_RepeatOptions extends Fragment implements
 	//----------------------------------------------------------------------------------------------------
 
 	@Override
-	public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+	public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean isChecked) {
 
 		CheckBox checkBox = (CheckBox) compoundButton;
 

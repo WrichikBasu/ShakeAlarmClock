@@ -35,6 +35,7 @@ import android.provider.Settings;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -120,6 +121,14 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 
 		viewModel.observePermsQueue().observe(this, this::observePermsQueue);
 
+		getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+			@Override
+			public void handleOnBackPressed() {
+				whenBackPressed();
+				finish();
+			}
+		});
+
 	}
 
 	@Override
@@ -190,7 +199,7 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 	@Override
 	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 		if (item.getItemId() == android.R.id.home) {
-			this.onBackPressed();
+			this.whenBackPressed();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -245,8 +254,8 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 		onPermissionDenied();
 	}
 
-	@Override
-	public void onBackPressed() {
+
+	private void whenBackPressed() {
 		if (viewModel.areEssentialPermsPresent()) {
 			setResult(RESULT_CANCELED);
 			finish();
@@ -258,7 +267,7 @@ public class Activity_ListReqPerm extends AppCompatActivity implements
 
 	private void observePermsQueue(ArrayList<Permission> permsQueue) {
 		if (permsQueue.isEmpty()) {
-			this.onBackPressed();
+			this.whenBackPressed();
 		}
 	}
 

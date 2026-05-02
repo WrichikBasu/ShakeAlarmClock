@@ -27,10 +27,6 @@ import androidx.core.content.ContextCompat;
 
 import java.util.Objects;
 
-import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
-import in.basulabs.shakealarmclock.backend.Service_RingAlarm;
-import in.basulabs.shakealarmclock.backend.Service_SetAlarmsPostBoot;
-
 public class AlarmBroadcastReceiver extends BroadcastReceiver {
 
 	@Override

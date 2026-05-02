@@ -36,7 +36,6 @@ import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -57,6 +56,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
 import net.cachapa.expandablelayout.ExpandableLayout;
@@ -582,7 +582,7 @@ public class Activity_Settings extends AppCompatActivity implements
 	@Override
 	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 		if (item.getItemId() == android.R.id.home) {
-			onBackPressed();
+			getOnBackPressedDispatcher().onBackPressed();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -696,14 +696,14 @@ public class Activity_Settings extends AppCompatActivity implements
 			snoozeIntvLabel.setEnabled(true);
 			snoozeFreqLabel.setEnabled(true);
 
-			snoozeIntvEditText.setTextColor(
-				getResources().getColor(R.color.defaultLabelColor));
+			snoozeIntvEditText.setTextColor(ContextCompat.getColor(this,
+					R.color.defaultLabelColor));
 			snoozeFreqEditText.setTextColor(
-				getResources().getColor(R.color.defaultLabelColor));
-			snoozeFreqLabel.setTextColor(
-				getResources().getColor(R.color.defaultLabelColor));
-			snoozeIntvLabel.setTextColor(
-				getResources().getColor(R.color.defaultLabelColor));
+					ContextCompat.getColor(this,	R.color.defaultLabelColor));
+			snoozeFreqLabel.setTextColor(ContextCompat.getColor(this,
+					R.color.defaultLabelColor));
+			snoozeIntvLabel.setTextColor(ContextCompat.getColor(this,
+					R.color.defaultLabelColor));
 
 		} else {
 
@@ -712,12 +712,14 @@ public class Activity_Settings extends AppCompatActivity implements
 			snoozeIntvLabel.setEnabled(false);
 			snoozeFreqLabel.setEnabled(false);
 
-			snoozeIntvEditText.setTextColor(
-				getResources().getColor(R.color.disabledColor));
-			snoozeFreqEditText.setTextColor(
-				getResources().getColor(R.color.disabledColor));
-			snoozeFreqLabel.setTextColor(getResources().getColor(R.color.disabledColor));
-			snoozeIntvLabel.setTextColor(getResources().getColor(R.color.disabledColor));
+			snoozeIntvEditText.setTextColor(ContextCompat.getColor(this,
+					R.color.disabledColor));
+			snoozeFreqEditText.setTextColor(ContextCompat.getColor(this,
+					R.color.disabledColor));
+			snoozeFreqLabel.setTextColor(ContextCompat.getColor(this,
+					R.color.disabledColor));
+			snoozeIntvLabel.setTextColor(ContextCompat.getColor(this,
+					R.color.disabledColor));
 		}
 	}
 

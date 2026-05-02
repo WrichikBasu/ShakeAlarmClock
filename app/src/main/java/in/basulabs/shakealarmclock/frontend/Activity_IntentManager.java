@@ -32,7 +32,6 @@ import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_ALARM_YEAR;
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON;
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS;
-import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_FILE_NAME;
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_TONE_URI;
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_ALARM_VOLUME;
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SNOOZE_FREQ;

@@ -43,9 +43,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -63,8 +66,6 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 	SeekBar.OnSeekBarChangeListener, TimePicker.OnTimeChangedListener,
 	AdapterView.OnItemSelectedListener {
 
-	private static final int RINGTONE_REQUEST_CODE = 5280;
-
 	private ViewModel_AlarmDetails viewModel;
 
 	private FragmentGUIListener listener;
@@ -73,7 +74,7 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 	private ImageView alarmVolumeImageView;
 	private boolean isSavedInstanceStateNull;
 
-	//----------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------
 
 	public interface FragmentGUIListener {
 
@@ -174,15 +175,10 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 		// Initialise the GUI
 		///////////////////////////////////////////
 		timePicker.setIs24HourView(DateFormat.is24HourFormat(requireContext()));
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			timePicker.setHour(viewModel.getAlarmDateTime().getHour());
-			timePicker.setMinute(viewModel.getAlarmDateTime().getMinute());
-		} else {
-			timePicker.setCurrentHour(viewModel.getAlarmDateTime().getHour());
-			timePicker.setCurrentMinute(viewModel.getAlarmDateTime().getMinute());
-		}
+        timePicker.setHour(viewModel.getAlarmDateTime().getHour());
+        timePicker.setMinute(viewModel.getAlarmDateTime().getMinute());
 
-		setDate();
+        setDate();
 
 		displayRepeatOptions();
 		displaySnoozeOptions();
@@ -228,8 +224,8 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 				} else {
 					amPmView = (ViewGroup) v2.getChildAt(3);
 				}
-				View.OnClickListener listener = v -> timePicker.setCurrentHour(
-					(timePicker.getCurrentHour() + 12) % 24);
+				View.OnClickListener listener = v -> timePicker.setHour(
+					(timePicker.getHour() + 12) % 24);
 
 				View am = amPmView.getChildAt(0);
 				View pm = amPmView.getChildAt(1);
@@ -270,12 +266,13 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 
 				alarmDateConstarintLayout.setEnabled(false);
 
-				alarmDateLabel.setTextColor(
-					getResources().getColor(R.color.disabledColor));
+				alarmDateLabel.setTextColor(ContextCompat.getColor(requireContext(),
+						R.color.disabledColor));
 				alarmDateLabel.setPaintFlags(
 					alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
-				alarmDateTV.setTextColor(getResources().getColor(R.color.disabledColor));
+				alarmDateTV.setTextColor(ContextCompat.getColor(requireContext(),
+						R.color.disabledColor));
 				alarmDateTV.setPaintFlags(
 					alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
@@ -283,13 +280,13 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 
 				alarmDateConstarintLayout.setEnabled(true);
 
-				alarmDateLabel.setTextColor(
-					getResources().getColor(R.color.defaultLabelColor));
+				alarmDateLabel.setTextColor(ContextCompat.getColor(requireContext(),
+						R.color.defaultLabelColor));
 				alarmDateLabel.setPaintFlags(
 					alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
 
-				alarmDateTV.setTextColor(
-					getResources().getColor(R.color.defaultLabelColor));
+				alarmDateTV.setTextColor(ContextCompat.getColor(requireContext(),
+						R.color.defaultLabelColor));
 				alarmDateTV.setPaintFlags(
 					alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
 			}
@@ -299,19 +296,20 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 
 			if (alarmType == ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY) {
 
-				alarmVolumeLabel.setTextColor(
-					getResources().getColor(R.color.disabledColor));
+				alarmVolumeLabel.setTextColor(ContextCompat.getColor(requireContext(),
+						R.color.disabledColor));
 				alarmVolumeLabel.setPaintFlags(
 					alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
 				alarmVolumeSeekbar.setEnabled(false);
 
-				alarmToneLabel.setTextColor(
-					getResources().getColor(R.color.disabledColor));
+				alarmToneLabel.setTextColor(ContextCompat.getColor(requireContext(),
+						R.color.disabledColor));
 				alarmToneLabel.setPaintFlags(
 					alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
-				alarmToneTV.setTextColor(getResources().getColor(R.color.disabledColor));
+				alarmToneTV.setTextColor(ContextCompat.getColor(requireContext(),
+						R.color.disabledColor));
 				alarmToneTV.setPaintFlags(
 					alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
@@ -319,20 +317,20 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 
 			} else {
 
-				alarmVolumeLabel.setTextColor(
-					getResources().getColor(R.color.defaultLabelColor));
+				alarmVolumeLabel.setTextColor(ContextCompat.getColor(requireContext(),
+						R.color.defaultLabelColor));
 				alarmVolumeLabel.setPaintFlags(
 					alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
 
 				alarmVolumeSeekbar.setEnabled(true);
 
-				alarmToneLabel.setTextColor(
-					getResources().getColor(R.color.defaultLabelColor));
+				alarmToneLabel.setTextColor(ContextCompat.getColor(requireContext(),
+						R.color.defaultLabelColor));
 				alarmToneLabel.setPaintFlags(
 					alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
 
-				alarmToneTV.setTextColor(
-					getResources().getColor(R.color.defaultLabelColor));
+				alarmToneTV.setTextColor(ContextCompat.getColor(requireContext(),
+						R.color.defaultLabelColor));
 				alarmToneTV.setPaintFlags(
 					alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
 
@@ -495,34 +493,27 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 					Settings.System.DEFAULT_ALARM_ALERT_URI)
 				.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI,
 					viewModel.getAlarmToneUri());
-			startActivityForResult(intent, RINGTONE_REQUEST_CODE);
+
+            ActivityResultLauncher<Intent> alarmToneActLauncher = registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(), (result) -> {
+
+                        if (result.getResultCode() == RESULT_OK) {
+
+                            Intent data = result.getData();
+                            assert data != null;
+                            Uri uri = Objects.requireNonNull(data.getExtras())
+                                    .getParcelable(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                            assert uri != null;
+                            viewModel.setAlarmToneUri(uri);
+                        }
+                        displayAlarmTone();
+                    });
+			alarmToneActLauncher.launch(intent);
 
 		} else if (view.getId() == R.id.alarmMessageConstraintLayout) {
 			listener.onRequestMessageFragCreation();
 		}
 	}
-
-	//----------------------------------------------------------------------------------------------------
-
-	@Override
-	public void onActivityResult(int requestCode, int resultCode,
-		@Nullable Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-
-		if (requestCode == RINGTONE_REQUEST_CODE) {
-
-			if (resultCode == RESULT_OK) {
-
-				assert data != null;
-				Uri uri = Objects.requireNonNull(data.getExtras())
-					.getParcelable(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-				assert uri != null;
-				viewModel.setAlarmToneUri(uri);
-			}
-		}
-		displayAlarmTone();
-	}
-
 
 	//----------------------------------------------------------------------------------------------------
 
