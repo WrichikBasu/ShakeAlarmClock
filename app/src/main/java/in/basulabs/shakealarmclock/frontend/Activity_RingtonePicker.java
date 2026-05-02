@@ -347,7 +347,7 @@ public class Activity_RingtonePicker extends AppCompatActivity implements
 
 		RadioButton radioButton = new RadioButton(this);
 		radioButton.setId(id);
-		radioButton.setTextColor(getResources().getColor(R.color.defaultLabelColor));
+		radioButton.setTextColor(ContextCompat.getColor(this, R.color.defaultLabelColor));
 		radioButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
 		radioButton.setLayoutParams(params);
 		radioButton.setText(text);

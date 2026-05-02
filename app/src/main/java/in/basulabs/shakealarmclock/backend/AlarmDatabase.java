@@ -52,7 +52,7 @@ public abstract class AlarmDatabase extends RoomDatabase {
 						: context.getApplicationContext(),
 					AlarmDatabase.class, ConstantsAndStatics.DATABASE_NAME)
 				.addMigrations(MIGRATION_1_2)
-				.fallbackToDestructiveMigrationOnDowngrade()
+				.fallbackToDestructiveMigration(true)
 				.build();
 		}
 		return instance;
