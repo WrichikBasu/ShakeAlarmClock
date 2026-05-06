@@ -5,7 +5,7 @@
 ![GitHub license](https://img.shields.io/github/license/WrichikBasu/ShakeAlarmClock?style=for-the-badge)   &nbsp; 
 ![GitHub All Releases](https://img.shields.io/github/downloads/WrichikBasu/ShakeAlarmClock/total?style=for-the-badge)
 
-![](https://img.shields.io/badge/Min_SDK-Lollipop_(SDK_21)-%2306486b?style=for-the-badge) &nbsp; 
+![](https://img.shields.io/badge/Min_SDK-Marshmallow_(SDK_23)-%2306486b?style=for-the-badge) &nbsp; 
 ![Target SDK version](https://img.shields.io/badge/target_SDK-Android%2014%20(API%2034)-9cf?style=for-the-badge)  
 
 ![GitHub Release](https://img.shields.io/github/v/release/WrichikBasu/ShakeAlarmClock?sort=date&display_name=tag&style=for-the-badge)
