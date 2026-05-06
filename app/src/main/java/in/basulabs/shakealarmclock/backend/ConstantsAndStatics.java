@@ -278,6 +278,12 @@ public final class ConstantsAndStatics {
 		"in.basulabs.shakealarmclock.OLD_ALARM_ID";
 
 	/**
+	 * Bundle key for the snooze count.
+	 */
+	public static final String BUNDLE_KEY_SNOOZE_COUNT =
+			"in.basulabs.shakealarmclock.SNOOZE_COUNT";
+
+	/**
 	 * Broadcast action: {@link Activity_RingAlarm} should now be destroyed.
 	 */
 	public static final String ACTION_DESTROY_RING_ALARM_ACTIVITY =
@@ -427,8 +433,7 @@ public final class ConstantsAndStatics {
 
 		UserManager userManager = (UserManager) context.getSystemService(USER_SERVICE);
 
-		boolean shouldProceed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
-			? userManager.isUserUnlocked() : true;
+		boolean shouldProceed = Build.VERSION.SDK_INT < Build.VERSION_CODES.N || userManager.isUserUnlocked();
 
 		if (shouldProceed) {
 			try {
@@ -467,8 +472,7 @@ public final class ConstantsAndStatics {
 
 		UserManager userManager = (UserManager) context.getSystemService(USER_SERVICE);
 
-		boolean shouldProceed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
-			? userManager.isUserUnlocked() : true;
+		boolean shouldProceed = Build.VERSION.SDK_INT < Build.VERSION_CODES.N || userManager.isUserUnlocked();
 
 		if (shouldProceed) {
 			try {
@@ -521,14 +525,10 @@ public final class ConstantsAndStatics {
 	//-----------------------------------------------------------------------------------
 
 	public static void killServices(Context context, int alarmID) {
-
-		if (Service_RingAlarm.isThisServiceRunning &&
-			Service_RingAlarm.alarmID == alarmID) {
+		if (!AlarmRingQueue.isEmpty() && Service_RingAlarm.isThisServiceRunning) {
+			AlarmRingQueue.clear();
+			Service_RingAlarm.isThisServiceRunning = false;
 			Intent intent1 = new Intent(context, Service_RingAlarm.class);
-			context.stopService(intent1);
-		} else if (Service_SnoozeAlarm.isThisServiceRunning &&
-			Service_SnoozeAlarm.alarmID == alarmID) {
-			Intent intent1 = new Intent(context, Service_SnoozeAlarm.class);
 			context.stopService(intent1);
 		}
 	}
@@ -553,7 +553,7 @@ public final class ConstantsAndStatics {
 
 		LocalDateTime alarmDateTime;
 
-		if (isRepeatOn && repeatDays != null && repeatDays.size() > 0) {
+		if (isRepeatOn && repeatDays != null && !repeatDays.isEmpty()) {
 
 			Collections.sort(repeatDays);
 
@@ -704,20 +704,17 @@ public final class ConstantsAndStatics {
 
 		ArrayList<String> permsList = new ArrayList<>();
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+		PowerManager powerManager =
+			(PowerManager) context.getSystemService(POWER_SERVICE);
+		if (!powerManager.isIgnoringBatteryOptimizations(context.getPackageName())) {
+			permsList.add(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+		}
 
-			PowerManager powerManager =
-				(PowerManager) context.getSystemService(POWER_SERVICE);
-			if (!powerManager.isIgnoringBatteryOptimizations(context.getPackageName())) {
-				permsList.add(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-			}
-
-			NotificationManager notifManager =
-				(NotificationManager) context.getSystemService(
-					Context.NOTIFICATION_SERVICE);
-			if (!notifManager.isNotificationPolicyAccessGranted()) {
-				permsList.add(Manifest.permission.ACCESS_NOTIFICATION_POLICY);
-			}
+		NotificationManager notifManager =
+			(NotificationManager) context.getSystemService(
+				Context.NOTIFICATION_SERVICE);
+		if (!notifManager.isNotificationPolicyAccessGranted()) {
+			permsList.add(Manifest.permission.ACCESS_NOTIFICATION_POLICY);
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

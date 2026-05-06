@@ -16,6 +16,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 package in.basulabs.shakealarmclock.backend;
 
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -41,12 +42,16 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.text.format.DateFormat;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
@@ -61,6 +66,9 @@ import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Objects;
 
 import in.basulabs.audiofocuscontroller.AudioFocusController;
@@ -68,15 +76,17 @@ import in.basulabs.shakealarmclock.R;
 import in.basulabs.shakealarmclock.frontend.Activity_AlarmsList;
 import in.basulabs.shakealarmclock.frontend.Activity_RingAlarm;
 
-public class Service_RingAlarm extends Service implements SensorEventListener,
-	AudioFocusController.OnAudioFocusChangeListener {
+public class Service_RingAlarm extends Service implements SensorEventListener {
 
-	private Bundle alarmDetails;
+	@Nullable
+	private Bundle currentAlarm;
 
+	@Nullable
 	private MediaPlayer mediaPlayer;
 
 	private AlarmDatabase alarmDatabase;
 
+	@Nullable
 	private CountDownTimer ringTimer;
 
 	private SensorManager snsMgr;
@@ -90,14 +100,10 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 
 	private int initialAlarmStreamVolume;
 
-	private int numberOfTimesTheAlarmHasBeenSnoozed;
-
-	private Uri alarmToneUri;
-
 	/**
-	 * The unique ID of the currently ringing alarm.
+	 * Keeps a count of number of snoozed alarms.
 	 */
-	public static int alarmID = -1;
+	private final Dictionary<Integer, Bundle> snoozedAlarms = new Hashtable<>();
 
 	/**
 	 * Indicates whether this service is running or not.
@@ -108,17 +114,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 
 	private boolean isShakeActive;
 
-	/**
-	 * Intent extra: Number of times this alarm has been snoozed.
-	 */
-	public static final String EXTRA_NO_OF_TIMES_SNOOZED
-		= "in.basulabs.shakealarmclock.NO_OF_TIMES_SNOOZED";
-
-	private boolean preMatureDeath;
-
-	private ArrayList<Integer> repeatDays;
-
-	private AudioFocusController audioFocusController;
+	private AudioFocusController.Builder afcBuilder;
+	private AudioFocusController afController;
 
 	/**
 	 * Indicates whether alarm ringing has already started, and prevents
@@ -131,22 +128,28 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 
 	private int powerBtnAction;
 
+	private static Service_RingAlarm self;
+
+	private PowerManager.WakeLock wakeLock;
+	private IntentFilter intentFilter;
+
 	//----------------------------------------------------------------------------------
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (Objects.equals(intent.getAction(),
-				ConstantsAndStatics.ACTION_SNOOZE_ALARM)) {
-				snoozeAlarm();
-			} else if (Objects.equals(intent.getAction(),
-				ConstantsAndStatics.ACTION_CANCEL_ALARM)) {
-				dismissAlarm();
-			} else if (Objects.equals(intent.getAction(), Intent.ACTION_SCREEN_OFF)) {
+
+			if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_SNOOZE_ALARM))
+				snoozeAlarm(Objects.requireNonNull(intent.getExtras()));
+
+			else if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_CANCEL_ALARM))
+				dismissAlarm(Objects.requireNonNull(intent.getExtras()));
+
+			else if (Objects.equals(intent.getAction(), Intent.ACTION_SCREEN_OFF)) {
 				if (powerBtnAction == ConstantsAndStatics.DISMISS) {
-					dismissAlarm();
+					dismissAlarm(currentAlarm);
 				} else if (powerBtnAction == ConstantsAndStatics.SNOOZE) {
-					snoozeAlarm();
+					snoozeAlarm(currentAlarm);
 				}
 			}
 		}
@@ -158,84 +161,48 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
 		notifID = UniqueNotifID.getID();
-
-		// Do NOT move this!!!!
-		alarmDetails = Objects.requireNonNull(Objects.requireNonNull(intent.getExtras())
-			.getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
+		self = this;
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-				startForeground(notifID, buildRingNotification(),
-					ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+				startForeground(notifID, buildRingNotification(null),
+				                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
 			} else {
-				startForeground(notifID, buildRingNotification(),
-					ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+				startForeground(notifID, buildRingNotification(null),
+				                ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
 			}
 		} else {
-			startForeground(notifID, buildRingNotification());
+			startForeground(notifID, buildRingNotification(null));
 		}
-		isThisServiceRunning = true;
-		preMatureDeath = true;
-		alarmRingingStarted = false;
+
+
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "Service started");
 
 		ConstantsAndStatics.cancelScheduledPeriodicWork(this);
 
+		PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+		                                    "in.basulabs.shakealarmclock::AlarmServiceWakeLock");
+		wakeLock.acquire();
+
 		sharedPreferences = ConstantsAndStatics.getSharedPref(this);
 
-		audioFocusController = new AudioFocusController.Builder(this)
-			.setAcceptsDelayedFocus(true)
-			.setAudioFocusChangeListener(this)
-			.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-			.setUsage(AudioAttributes.USAGE_ALARM)
-			.setPauseWhenAudioIsNoisy(false)
-			.setStream(AudioManager.STREAM_ALARM)
-			.setDurationHint(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
-			.build();
+		afcBuilder = new AudioFocusController.Builder(this)
+				.setAcceptsDelayedFocus(true)
+				.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+				.setUsage(AudioAttributes.USAGE_ALARM)
+				.setPauseWhenAudioIsNoisy(false)
+				.setStream(AudioManager.STREAM_ALARM)
+				.setDurationHint(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE);
 
 		isShakeActive = sharedPreferences.getInt(
-			ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
-			ConstantsAndStatics.SNOOZE) != ConstantsAndStatics.DO_NOTHING;
-
-		alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
-
-		// Kill Service_SnoozeAlarm if it is running for a different alarm.
-		if (Service_SnoozeAlarm.isThisServiceRunning &&
-			Service_SnoozeAlarm.alarmID != alarmID) {
-			stopService(new Intent(this, Service_SnoozeAlarm.class));
-		}
-
-		Uri chosenToneUri = alarmDetails.getParcelable(
-			ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI);
-		try (InputStream ignored = getContentResolver().openInputStream(
-			Objects.requireNonNull(chosenToneUri))) {
-			// Alarm tone file exists.
-			alarmToneUri = chosenToneUri;
-		} catch (Exception ex) {
-			// Tone file can either not be accessed, or not available in the file system.
-			// Fall back to default tone.
-			alarmToneUri = Settings.System.DEFAULT_ALARM_ALERT_URI;
-		}
-
-		numberOfTimesTheAlarmHasBeenSnoozed = intent.getExtras()
-			.getInt(EXTRA_NO_OF_TIMES_SNOOZED, 0);
-
-		ringTimer = new CountDownTimer(60000, 1000) {
-
-			@Override
-			public void onTick(long millisUntilFinished) {
-			}
-
-			@Override
-			public void onFinish() {
-				snoozeAlarm();
-			}
-		};
+				ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
+				ConstantsAndStatics.SNOOZE) != ConstantsAndStatics.DO_NOTHING;
 
 		snsMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
 		vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 		audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-		notificationManager = (NotificationManager) getSystemService(
-			NOTIFICATION_SERVICE);
+		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
 		assert snsMgr != null;
 		assert vibrator != null;
@@ -244,26 +211,37 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 
 		alarmDatabase = AlarmDatabase.getInstance(this);
 
-		initialAlarmStreamVolume = audioManager.getStreamVolume(
-			AudioManager.STREAM_ALARM);
+		initialAlarmStreamVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
 
 		powerBtnAction = sharedPreferences.getInt(
-			ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION,
-			ConstantsAndStatics.DISMISS);
+				ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_POWER_BTN_OPERATION,
+				ConstantsAndStatics.DISMISS);
 
-		IntentFilter intentFilter = new IntentFilter();
+		intentFilter = new IntentFilter();
 		intentFilter.addAction(ConstantsAndStatics.ACTION_SNOOZE_ALARM);
 		intentFilter.addAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
 		intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
 		intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-		ContextCompat.registerReceiver(this, broadcastReceiver, intentFilter,
-			ContextCompat.RECEIVER_NOT_EXPORTED);
 
-		audioFocusController.requestFocus();
+		isThisServiceRunning = true;
+		alarmRingingStarted = false;
 
-		loadRepeatDays();
+		tryRingNextAlarm();
 
 		return START_NOT_STICKY;
+	}
+
+	public static void tryRingNextAlarm() {
+
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In tryNextAlarm()");
+
+		if (!isThisServiceRunning)
+			return;
+
+		if (!AlarmRingQueue.isEmpty() && self.currentAlarm == null) {
+			self.ringAlarm();
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "Ringing alarm");
+		}
 	}
 
 	//----------------------------------------------------------------------------------
@@ -271,13 +249,25 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		isThisServiceRunning = false;
 
-		if (preMatureDeath) {
-			dismissAlarm();
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In onDestroy()");
+
+		if (ringTimer != null && currentAlarm != null)
+			dismissAlarm(currentAlarm);
+
+		if (!snoozedAlarms.isEmpty()) {
+			Enumeration<Integer> en = snoozedAlarms.keys();
+			while (en.hasMoreElements()) {
+				int i = en.nextElement();
+				dismissAlarm(snoozedAlarms.get(i));
+			}
 		}
 
 		try {
-			ringTimer.cancel();
+			if (ringTimer != null)
+				ringTimer.cancel();
+
 			vibrator.cancel();
 			if (mediaPlayer != null) {
 				mediaPlayer.stop();
@@ -288,15 +278,15 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		if (isShakeActive) {
 			snsMgr.unregisterListener(this);
 		}
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			if (notificationManager.isNotificationPolicyAccessGranted()) {
-				audioManager.setStreamVolume(AudioManager.STREAM_ALARM,
-					initialAlarmStreamVolume, 0);
-			}
+		if (notificationManager.isNotificationPolicyAccessGranted()) {
+			audioManager.setStreamVolume(AudioManager.STREAM_ALARM, initialAlarmStreamVolume, 0);
 		}
-		unregisterReceiver(broadcastReceiver);
+
 		isThisServiceRunning = false;
-		alarmID = -1;
+		ConstantsAndStatics.schedulePeriodicWork(this);
+
+		if (wakeLock.isHeld())
+			wakeLock.release();
 	}
 
 	//----------------------------------------------------------------------------------
@@ -307,34 +297,42 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 	 * I have received some crash reports from Google Play stating that
 	 * {@code NullPointerException} is being thrown in {@code dismissAlarm()} at the
 	 * statement {@code Collections.sort(repeatDays)}. It seems that even if repeat is
-	 * ON,
-	 * the repeat days list is null. That is why we are re-reading the repeat days from
+	 * ON, the repeat days list is null. That is why we are re-reading the repeat days from
 	 * the database as a temporary fix.
 	 * </p>
 	 */
-	private void loadRepeatDays() {
+	private void loadRepeatDays(@NonNull Bundle alarmDetails) {
+
 		if (alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON)) {
-			AlarmDatabase alarmDatabase = AlarmDatabase.getInstance(this);
-			Thread thread = new Thread(() -> repeatDays = new ArrayList<>(
-				alarmDatabase.alarmDAO()
-					.getAlarmRepeatDays(
-						alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID))));
+
+			Thread thread = new Thread(() -> {
+
+				ArrayList<Integer> repeatDays = new ArrayList<>(
+						alarmDatabase.alarmDAO().getAlarmRepeatDays(
+								alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID)));
+
+				Collections.sort(repeatDays);
+
+				alarmDetails.remove(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS);
+				alarmDetails.putIntegerArrayList(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS,
+				                                 repeatDays);
+			});
 			thread.start();
 		} else {
-			repeatDays = null;
+			alarmDetails.remove(ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS);
 		}
 	}
 
 	//----------------------------------------------------------------------------------
 
 	/**
-	 * Initialises the shake sensor.
+	 * Initializes the shake sensor.
 	 */
 	private void initialiseShakeSensor() {
 		if (isShakeActive) {
 			Sensor accelerometer = snsMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 			snsMgr.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI,
-				new Handler());
+			                        new Handler());
 			lastShakeTime = System.currentTimeMillis();
 		}
 	}
@@ -348,10 +346,10 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			int importance = NotificationManager.IMPORTANCE_HIGH;
 			NotificationChannel channel = new NotificationChannel(
-				Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM),
-				getString(R.string.notif_channel_name_ring_alarms), importance);
+					Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM),
+					getString(R.string.notif_channel_name_ring_alarms), importance);
 			NotificationManager notificationManager
-				= (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+					= (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			channel.setSound(null, null);
 			notificationManager.createNotificationChannel(channel);
 		}
@@ -368,46 +366,133 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 	 *
 	 * @return A {@link Notification} instance that can be displayed to the user.
 	 */
+	@SuppressLint("FullScreenIntentPolicy")
 	@NonNull
-	private Notification buildRingNotification() {
+	private Notification buildRingNotification(@Nullable Bundle alarmDetails) {
+
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In buildRingNotification()");
+
+		createNotificationChannel();
+		int flags = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
+
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
+		                                                                    Integer.toString(
+				                                                                    ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM))
+				.setContentTitle(getResources().getString(R.string.app_name))
+				.setPriority(NotificationCompat.PRIORITY_MAX)
+				.setCategory(NotificationCompat.CATEGORY_ALARM)
+				.setSmallIcon(R.drawable.ic_notif)
+				.setOnlyAlertOnce(true)
+				.setContentText(getString(R.string.notifContent_ring));
+
+		if (alarmDetails != null) {
+
+			Intent fullScreenIntent = new Intent(this, Activity_RingAlarm.class)
+					.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+					.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+					.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+					.putExtras(alarmDetails);
+
+			PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 3054,
+			                                                                  fullScreenIntent,
+			                                                                  flags);
+			builder.setContentIntent(fullScreenPendingIntent)
+			       .setFullScreenIntent(fullScreenPendingIntent, true);
+
+			String alarmMessage = alarmDetails.getString(
+					ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
+
+			if (alarmMessage != null) {
+				builder.setContentTitle(getString(R.string.app_name))
+				       .setContentText(alarmMessage)
+				       .setStyle(new NotificationCompat.BigTextStyle().bigText(alarmMessage));
+			}
+		}
+		return builder.build();
+	}
+
+	private Notification buildSnoozeNotification() {
+
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In buildSnoozeNotification()");
 
 		createNotificationChannel();
 
-		Intent fullScreenIntent = new Intent(this, Activity_RingAlarm.class)
-			.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-			.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-			.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-			.putExtras(alarmDetails);
+		Intent intent = new Intent();
+		intent.setAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
+		intent.setPackage(getPackageName());
 
-		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
-			?
-			PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
-			: PendingIntent.FLAG_UPDATE_CURRENT;
+		int flags = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
 
-		PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 3054,
-			fullScreenIntent, flags);
+		PendingIntent contentPendingIntent = PendingIntent.getBroadcast(this, 5017,
+		                                                                intent, flags);
 
-		String alarmMessage = alarmDetails.getString(
-			ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
+		NotificationCompat.Action notifAction = new NotificationCompat.Action.Builder(
+				R.drawable.ic_notif, getString(R.string.notifAction), contentPendingIntent).build();
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
-			Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM))
-			.setContentTitle(getResources().getString(R.string.app_name))
-			.setPriority(NotificationCompat.PRIORITY_MAX)
-			.setCategory(NotificationCompat.CATEGORY_ALARM)
-			.setSmallIcon(R.drawable.ic_notif)
-			.setContentIntent(fullScreenPendingIntent)
-			.setOnlyAlertOnce(true)
-			.setFullScreenIntent(fullScreenPendingIntent, true);
+		NotificationCompat.Builder builder
+				= new NotificationCompat.Builder(this,
+				                                 Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM))
+				.setContentTitle(getString(R.string.app_name))
+				.setContentText(getString(R.string.notifContent_snooze))
+				.setPriority(NotificationCompat.PRIORITY_HIGH)
+				.setCategory(NotificationCompat.CATEGORY_ALARM)
+				.setSmallIcon(R.drawable.ic_notif)
+				.setOnlyAlertOnce(true)
+				.addAction(notifAction);
 
-		if (alarmMessage != null) {
-			builder.setContentTitle(getString(R.string.app_name))
-				.setContentText(alarmMessage)
-				.setStyle(new NotificationCompat.BigTextStyle().bigText(alarmMessage));
-		} else {
-			builder.setContentText(getString(R.string.notifContent_ring));
+		StringBuilder alarmMessage = new StringBuilder();
+
+		if (!snoozedAlarms.isEmpty()) {
+
+			alarmMessage.append("Snoozed alarms:");
+
+			Enumeration<Integer> en = snoozedAlarms.keys();
+
+			while (en.hasMoreElements()) {
+
+				int key = en.nextElement();
+				String currentText = "";
+
+				LocalTime alarmTime = LocalTime.of(snoozedAlarms.get(key).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+				                                   snoozedAlarms.get(key).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+
+				if (DateFormat.is24HourFormat(this)) {
+					currentText =  getResources().getString(R.string.time_24hour,
+					                                                   alarmTime.getHour(),
+					                                                   alarmTime.getMinute());
+				} else {
+					String amPm = alarmTime.getHour() < 12 ? "AM" : "PM";
+
+					if ((alarmTime.getHour() <= 12) && (alarmTime.getHour() > 0)) {
+
+						currentText = getResources().getString(R.string.time_12hour,
+						                                                   alarmTime.getHour(),
+						                                                   alarmTime.getMinute(), amPm);
+
+					} else if (alarmTime.getHour() > 12 && alarmTime.getHour() <= 23) {
+
+						currentText = getResources().getString(R.string.time_12hour,
+						                                                   alarmTime.getHour() - 12,
+						                                                   alarmTime.getMinute(), amPm);
+
+					} else {
+						currentText = getResources().getString(R.string.time_12hour,
+						                                                   alarmTime.getHour() + 12,
+						                                                   alarmTime.getMinute(), amPm);
+					}
+					alarmMessage.append(currentText);
+				}
+
+
+			}
 		}
 
+		//noinspection SizeReplaceableByIsEmpty
+		if (alarmMessage.length() > 0) {
+			builder.setContentTitle(getString(R.string.app_name))
+			       .setContentText(alarmMessage.toString())
+			       .setStyle(new NotificationCompat.BigTextStyle().bigText(alarmMessage));
+		}
 		return builder.build();
 	}
 
@@ -418,49 +503,134 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 	 */
 	private void ringAlarm() {
 
-		notificationManager.notify(notifID, buildRingNotification());
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "in ringAlarm()");
+
+		Bundle alarmDetails = AlarmRingQueue.dequeue();
+		loadRepeatDays(alarmDetails);
+
+		Uri chosenToneUri = alarmDetails.getParcelable(
+				ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI);
+		Uri actualToneURI;
+		try (InputStream ignored = getContentResolver().openInputStream(
+				Objects.requireNonNull(chosenToneUri))) {
+			// Alarm tone file exists.
+			actualToneURI = chosenToneUri;
+		} catch (Exception ex) {
+			// Tone file can either not be accessed, or not available in the file system.
+			// Fall back to default tone.
+			actualToneURI = Settings.System.DEFAULT_ALARM_ALERT_URI;
+		}
+
+		CountDownTimer ringTimer = new CountDownTimer(60000, 1000) {
+
+			@Override
+			public void onTick(long millisUntilFinished) {
+				if (!isThisServiceRunning)
+					cancel();
+			}
+
+			@Override
+			public void onFinish() {
+				snoozeAlarm(alarmDetails);
+			}
+		};
+
+		notificationManager.notify(notifID, buildRingNotification(alarmDetails));
 		initialiseShakeSensor();
 
 		if (!(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) ==
-			ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY)) {
+				ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY)) {
 
 			mediaPlayer = new MediaPlayer();
 			AudioAttributes attributes = new AudioAttributes.Builder()
-				.setUsage(AudioAttributes.USAGE_ALARM)
-				.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-				.build();
-
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-				if (notificationManager.isNotificationPolicyAccessGranted()) {
-
-					audioManager.setStreamVolume(AudioManager.STREAM_ALARM,
-						alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME),
-						0);
-				}
-			} else {
-				audioManager.setStreamVolume(AudioManager.STREAM_ALARM,
-					alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME), 0);
-			}
+					.setUsage(AudioAttributes.USAGE_ALARM)
+					.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+					.build();
 
 			try {
-				mediaPlayer.setDataSource(this, alarmToneUri);
+				mediaPlayer.setDataSource(this, actualToneURI);
 				mediaPlayer.setAudioAttributes(attributes);
 				mediaPlayer.setLooping(true);
 				mediaPlayer.prepare();
 			} catch (IOException ignored) {
 			}
 
-			if (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) ==
-				ConstantsAndStatics.ALARM_TYPE_SOUND_AND_VIBRATE) {
-				alarmVibration();
-			}
-			mediaPlayer.start();
+			AudioFocusController.OnAudioFocusChangeListener afListener
+					= new AudioFocusController.OnAudioFocusChangeListener() {
+				@Override
+				public void decreaseVolume() {}
 
-		} else {
+				@Override
+				public void increaseVolume() {}
+
+				@Override
+				public void pause() {
+
+					if (!alarmRingingStarted)
+						return;
+
+					alarmRingingStarted = false;
+
+					if (mediaPlayer != null)
+						mediaPlayer.pause();
+
+					vibrator.cancel();
+				}
+
+				@Override
+				public void resume() {
+
+					Log.e(ConstantsAndStatics.DEBUG_TAG, "Focus received");
+
+					if (mediaPlayer == null)
+						return;
+
+					if (alarmRingingStarted)
+						return;
+
+					alarmRingingStarted = true;
+
+					currentAlarm = alarmDetails;
+
+					ContextCompat.registerReceiver(self, broadcastReceiver, intentFilter,
+					                               ContextCompat.RECEIVER_NOT_EXPORTED);
+
+					// Change volume of alarm stream, if permitted
+					if (notificationManager.isNotificationPolicyAccessGranted()) {
+						audioManager.setStreamVolume(AudioManager.STREAM_ALARM,
+						                             alarmDetails.getInt(
+								                             ConstantsAndStatics.BUNDLE_KEY_ALARM_VOLUME),
+						                             0);
+					}
+
+					// Start alarm sound
+					mediaPlayer.start();
+
+					Log.e(ConstantsAndStatics.DEBUG_TAG, "Ringing started");
+
+					// Start vibration
+					if (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) ==
+							ConstantsAndStatics.ALARM_TYPE_SOUND_AND_VIBRATE) {
+						alarmVibration();
+					}
+
+					// Now, start the timer
+					ringTimer.start();
+				}
+			};
+
+			afController = afcBuilder.setAudioFocusChangeListener(afListener).build();
+			afController.requestFocus();
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "Focus requested");
+
+		} else {  // Only vibration, no sound
+			currentAlarm = alarmDetails;
 			alarmVibration();
+			ringTimer.start();
+			ContextCompat.registerReceiver(this, broadcastReceiver, intentFilter,
+			                               ContextCompat.RECEIVER_NOT_EXPORTED);
 		}
 
-		ringTimer.start();
 	}
 
 	//----------------------------------------------------------------------------------
@@ -477,8 +647,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 		if (vibrator.hasVibrator()) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 				vibrator.vibrate(
-					VibrationEffect.createWaveform(vibrationPattern, vibrationAmplitudes,
-						0));
+						VibrationEffect.createWaveform(vibrationPattern, vibrationAmplitudes,
+						                               0));
 			} else {
 				vibrator.vibrate(vibrationPattern, 0);
 			}
@@ -489,34 +659,60 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 
 	/**
 	 * Snoozes the alarm. If snooze is off, or the snooze frequency has been reached, the
-	 * alarm will be cancelled by calling {@link #dismissAlarm()}.
+	 * alarm will be dismissed by calling {@link #dismissAlarm(Bundle)}.
 	 */
-	private void snoozeAlarm() {
+	private void snoozeAlarm(@NonNull Bundle alarmDetails) {
+
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In snoozeAlarm()");
+
+		if (currentAlarm == alarmDetails)
+			currentAlarm = null;
 
 		stopRinging();
 
+		int snoozeCount = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_COUNT, 0);
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "snoozeCount = " + snoozeCount);
+
 		if (alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
 
-			if (numberOfTimesTheAlarmHasBeenSnoozed <
-				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY)) {
+			if (snoozeCount < alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY)) {
 
-				numberOfTimesTheAlarmHasBeenSnoozed++;
+				alarmDetails.remove(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_COUNT);
+				alarmDetails.putInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_COUNT, snoozeCount + 1);
 
-				Intent intent = new Intent(this, Service_SnoozeAlarm.class)
-					.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails)
-					.putExtra(EXTRA_NO_OF_TIMES_SNOOZED,
-						numberOfTimesTheAlarmHasBeenSnoozed);
-				ContextCompat.startForegroundService(this, intent);
+				final int alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
 
-				preMatureDeath = false;
-				stopForeground(true);
-				stopSelf();
-			} else {
-				dismissAlarm();
-			}
-		} else {
-			dismissAlarm();
-		}
+				snoozedAlarms.put(alarmID, alarmDetails);
+
+				CountDownTimer snoozeTimer = new CountDownTimer(alarmDetails.getInt(
+								ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS) * 60000L, 1000) {
+
+					@Override
+					public void onTick(long millisUntilFinished) {
+						if (!isThisServiceRunning) {
+							cancel();
+							snoozedAlarms.remove(alarmID);
+						}
+					}
+
+					@Override
+					public void onFinish() {
+						Log.e(ConstantsAndStatics.DEBUG_TAG, "Snooze over");
+						AlarmRingQueue.enqueue(alarmDetails);
+						tryRingNextAlarm();
+						snoozedAlarms.remove(alarmID);
+					}
+				};
+				notificationManager.notify(notifID, buildSnoozeNotification());
+				snoozeTimer.start();
+				Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm snoozed");
+				tryRingNextAlarm();
+
+			} else  // Snooze frequency reached
+				dismissAlarm(alarmDetails);
+
+		} else // No snooze
+			dismissAlarm(alarmDetails);
 	}
 
 	//----------------------------------------------------------------------------------
@@ -524,27 +720,35 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 	/**
 	 * Dismisses the current alarm, and sets the next alarm if repeat is enabled.
 	 */
-	private void dismissAlarm() {
+	private void dismissAlarm(@NonNull Bundle alarmDetails) {
+
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In dismissAlarm()");
+
+		if (currentAlarm == alarmDetails)
+			currentAlarm = null;
 
 		stopRinging();
-		cancelPendingIntent();
+		cancelPendingIntent(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID));
 
 		Thread thread_toggleAlarm =
-			new Thread(() -> alarmDatabase.alarmDAO()
-				.toggleAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
-					0));
+				new Thread(() -> alarmDatabase.alarmDAO()
+				                              .toggleAlarm(alarmDetails.getInt(
+						                                           ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
+				                                           0));
+
+		ArrayList<Integer> repeatDays = alarmDetails.getIntegerArrayList(
+				ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS);
 
 		//////////////////////////////////////////////////////
-		// If repeat is on, set another alarm. Otherwise
+		// If repeat is on, set another alarm. Otherwise,
 		// toggle alarm state in database.
 		/////////////////////////////////////////////////////
-		if (alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON,
-			false) &&
-			repeatDays != null && repeatDays.size() > 0) {
+		if (alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_REPEAT_ON, false)
+				&& !Objects.requireNonNull(repeatDays).isEmpty()) {
 
 			LocalTime alarmTime = LocalTime.of(
-				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
-				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+					alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+					alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
 
 			Collections.sort(repeatDays);
 
@@ -562,17 +766,17 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 					// select that day and
 					// break from loop.
 					alarmDateTime = alarmDateTime.with(
-						TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(i))));
+							TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(i))));
 					break;
 				}
 				if (i == repeatDays.size() - 1) {
 					// No day possible in this week. Select the first available date
 					// from next week.
 					alarmDateTime = alarmDateTime.with(
-						TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(0))));
+							TemporalAdjusters.next(DayOfWeek.of(repeatDays.get(0))));
 				}
 			}
-			setAlarm(alarmDateTime);
+			setAlarm(alarmDateTime, alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID));
 
 		} else {
 
@@ -583,101 +787,97 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 			} catch (InterruptedException ignored) {
 			}
 		}
-
-		ConstantsAndStatics.schedulePeriodicWork(this);
-		preMatureDeath = false;
-		stopForeground(true);
-		stopSelf();
-
+		if (AlarmRingQueue.isEmpty() && snoozedAlarms.isEmpty() && currentAlarm == null) {
+			stopForeground(true);
+			stopSelf();
+		}
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm dismissed");
 	}
 
 	//----------------------------------------------------------------------------------
 
 	/**
 	 * Stops the ringing alarm. Also sends a broadcast to {@link Activity_RingAlarm} to
-	 * finish itsef.
+	 * finish itself.
 	 */
 	private void stopRinging() {
-		try {
-			ringTimer.cancel();
 
-			if ((alarmDetails
-				.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) ==
-				ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY) || (alarmDetails
-				.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) ==
-				ConstantsAndStatics.ALARM_TYPE_SOUND_AND_VIBRATE)) {
-				vibrator.cancel();
+		try {
+			unregisterReceiver(broadcastReceiver);
+		} catch (IllegalArgumentException ignored) {}
+
+		alarmRingingStarted = false;
+
+		try {
+			if (ringTimer != null) {
+				ringTimer.cancel();
+				ringTimer = null;
 			}
+
+			vibrator.cancel();
+
 			if (mediaPlayer != null) {
 				mediaPlayer.stop();
+				mediaPlayer = null;
 			}
 		} catch (Exception ignored) {
 		} finally {
 			if (isShakeActive) {
 				snsMgr.unregisterListener(this);
 			}
-			Intent intent = new Intent(
-				ConstantsAndStatics.ACTION_DESTROY_RING_ALARM_ACTIVITY);
+			Intent intent = new Intent(ConstantsAndStatics.ACTION_DESTROY_RING_ALARM_ACTIVITY);
 			intent.setPackage(getPackageName());
 			sendBroadcast(intent);
 		}
-		audioFocusController.abandonFocus();
+		afController.abandonFocus();
 	}
 
 	//----------------------------------------------------------------------------------
 
 	/**
-	 * Sets the next alarn in case of a repeat alarm.
+	 * Sets the next alarm in case of a repeat alarm.
 	 *
 	 * @param alarmDateTime The date and time when the alarm is to be set.
 	 */
-	private void setAlarm(@NonNull LocalDateTime alarmDateTime) {
+	private void setAlarm(@NonNull LocalDateTime alarmDateTime, int alarmID) {
 
-		AlarmManager alarmManager = (AlarmManager) getSystemService(
-			Context.ALARM_SERVICE);
+		AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
 		Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class)
-			.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM)
-			.setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-			.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
-
-		int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-			? PendingIntent.FLAG_IMMUTABLE
-			: 0;
+				.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM)
+				.setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+				.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, currentAlarm);
 
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
-			alarmID, intent, flags);
-
+		                                                         alarmID, intent,
+		                                                         PendingIntent.FLAG_IMMUTABLE);
 		ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime.withSecond(0),
-			ZoneId.systemDefault());
+		                                               ZoneId.systemDefault());
 
 		alarmManager.setAlarmClock(
-			new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
-				pendingIntent), pendingIntent);
+				new AlarmManager.AlarmClockInfo(zonedDateTime.toEpochSecond() * 1000,
+				                                pendingIntent), pendingIntent);
 	}
 
 	//----------------------------------------------------------------------------------
+
 	/**
 	 * While testing, we found that sometimes, the alarm was being reset at a later date
 	 * unintentionally. This function cancels such an unintentional alarm.
 	 */
-	private void cancelPendingIntent() {
+	private void cancelPendingIntent(int alarmID) {
 
-		AlarmManager alarmManager =
-			(AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
 		Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class)
-			.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM)
-			.setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-			.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, alarmDetails);
+				.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM)
+				.setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+				.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, currentAlarm);
 
-		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
-			?
-			PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_NO_CREATE
-			: PendingIntent.FLAG_NO_CREATE;
+		int flags = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_NO_CREATE;
 
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
-			alarmID, intent, flags);
+		                                                         alarmID, intent, flags);
 
 		if (pendingIntent != null) {
 			alarmManager.cancel(pendingIntent);
@@ -695,7 +895,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+		if (currentAlarm != null && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 			float x = event.values[0];
 			float y = event.values[1];
 			float z = event.values[2];
@@ -708,23 +908,25 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 			// gForce will be close to 1 when there is no movement.
 
 			if (gForce >= sharedPreferences.getFloat(
-				ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY,
-				ConstantsAndStatics.DEFAULT_SHAKE_SENSITIVITY)) {
+					ConstantsAndStatics.SHARED_PREF_KEY_SHAKE_SENSITIVITY,
+					ConstantsAndStatics.DEFAULT_SHAKE_SENSITIVITY)) {
+
 				long currTime = System.currentTimeMillis();
+
 				if (Math.abs(currTime - lastShakeTime) > MINIMUM_MILLIS_BETWEEN_SHAKES) {
+
 					lastShakeTime = currTime;
 					shakeVibration();
+
 					if (sharedPreferences.getInt(
-						ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
-						ConstantsAndStatics.SNOOZE)
-						== ConstantsAndStatics.SNOOZE && alarmDetails.getBoolean(
-						ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
-						snoozeAlarm();
+							ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
+							ConstantsAndStatics.SNOOZE) == ConstantsAndStatics.SNOOZE
+							&& currentAlarm.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
+						snoozeAlarm(currentAlarm);
 					} else {
-						dismissAlarm();
+						dismissAlarm(currentAlarm);
 					}
 				}
-
 			}
 		}
 	}
@@ -741,7 +943,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 			SystemClock.sleep(100);
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 				vibrator.vibrate(VibrationEffect.createOneShot(200,
-					VibrationEffect.DEFAULT_AMPLITUDE));
+				                                               VibrationEffect.DEFAULT_AMPLITUDE));
 			} else {
 				vibrator.vibrate(200);
 			}
@@ -753,37 +955,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener,
 
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int i) {
-	}
-
-	//----------------------------------------------------------------------------------
-
-	@Override
-	public void decreaseVolume() {
-		// No ducking.
-	}
-
-	//----------------------------------------------------------------------------------
-
-	@Override
-	public void increaseVolume() {
-		// No ducking.
-	}
-
-	//----------------------------------------------------------------------------------
-
-	@Override
-	public void pause() {
-		// No pause.
-	}
-
-	//----------------------------------------------------------------------------------
-
-	@Override
-	public void resume() {
-		if (!alarmRingingStarted) {
-			alarmRingingStarted = true;
-			ringAlarm();
-		}
 	}
 
 }

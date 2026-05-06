@@ -83,7 +83,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:authorities="in.basulabs.shakealarmclock.backend.MyWorkManagerInitializer"
             android:exported="false" />
 
-        <service
+        <!--<service
             android:name=".backend.Service_SnoozeAlarm"
             android:enabled="true"
             android:exported="false"
@@ -94,7 +94,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 android:value="Invoked when a ringing alarm is snoozed; stays foreground during the snooze duration,
                 starts Service_RingAlarm at the end of the snooze duration, and sets a repeat alarm if the alarm is
                 dismissed while being snoozed." />
-        </service>
+        </service>-->
 
         <service
             android:name=".backend.Service_RingAlarm"

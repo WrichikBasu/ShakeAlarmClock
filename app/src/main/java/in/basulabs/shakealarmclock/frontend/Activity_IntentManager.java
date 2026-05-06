@@ -68,7 +68,6 @@ import in.basulabs.shakealarmclock.backend.AlarmDatabase;
 import in.basulabs.shakealarmclock.backend.AlarmEntity;
 import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 import in.basulabs.shakealarmclock.backend.Service_RingAlarm;
-import in.basulabs.shakealarmclock.backend.Service_SnoozeAlarm;
 
 /**
  * An activity to manage activity actions for this app.
@@ -142,8 +141,7 @@ public class Activity_IntentManager extends AppCompatActivity {
 				}
 			}
 			case AlarmClock.ACTION_DISMISS_ALARM -> {
-				if (Service_RingAlarm.isThisServiceRunning ||
-					Service_SnoozeAlarm.isThisServiceRunning) {
+				if (Service_RingAlarm.isThisServiceRunning) {
 					sendBroadcast(new Intent(ConstantsAndStatics.ACTION_CANCEL_ALARM)
 						.setPackage(getPackageName()));
 				} else {

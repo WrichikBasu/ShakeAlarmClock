@@ -64,8 +64,7 @@ public class Worker_ActivateAlarms extends Worker {
 
 		stopExecuting = false;
 
-		if (Service_RingAlarm.isThisServiceRunning ||
-			Service_SnoozeAlarm.isThisServiceRunning) {
+		if (Service_RingAlarm.isThisServiceRunning) {
 			return Result.failure();
 		} else {
 			return activateAlarmsIfInactive();
@@ -86,7 +85,7 @@ public class Worker_ActivateAlarms extends Worker {
 
 		List<AlarmEntity> list = alarmDatabase.alarmDAO().getActiveAlarms();
 
-		if (list != null && list.size() > 0) {
+		if (list != null && !list.isEmpty()) {
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 				if (!ConstantsAndStatics.getEssentialPerms(context).isEmpty()) {
@@ -114,9 +113,7 @@ public class Worker_ActivateAlarms extends Worker {
 					repeatDays);
 				intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, data);
 
-				int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
-					PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE
-					: PendingIntent.FLAG_NO_CREATE;
+				int flags = PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE;
 
 				PendingIntent pendingIntent = PendingIntent.getBroadcast(
 					context.getApplicationContext(), alarmEntity.alarmID, intent, flags);
@@ -133,9 +130,7 @@ public class Worker_ActivateAlarms extends Worker {
 					ZonedDateTime zonedDateTime = ZonedDateTime.of(alarmDateTime,
 						ZoneId.systemDefault());
 
-					int flags2 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-						? PendingIntent.FLAG_IMMUTABLE
-						: 0;
+					int flags2 = PendingIntent.FLAG_IMMUTABLE;
 
 					PendingIntent pendingIntent1 = PendingIntent.getBroadcast(
 						context.getApplicationContext(), alarmEntity.alarmID, intent,
@@ -148,8 +143,7 @@ public class Worker_ActivateAlarms extends Worker {
 				}
 
 				if ((stopExecuting && !isStopped()) ||
-					Service_RingAlarm.isThisServiceRunning ||
-					Service_SnoozeAlarm.isThisServiceRunning) {
+					Service_RingAlarm.isThisServiceRunning) {
 					return Result.failure();
 				}
 			}
@@ -182,10 +176,7 @@ public class Worker_ActivateAlarms extends Worker {
 		Intent intent = new Intent(context.getApplicationContext(),
 			Activity_RequestPermIntro.class);
 
-		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
-			?
-			PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
-			: PendingIntent.FLAG_UPDATE_CURRENT;
+		int flags = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
 
 		PendingIntent pendingIntent = PendingIntent.getActivity(
 			context.getApplicationContext(), 255, intent, flags);

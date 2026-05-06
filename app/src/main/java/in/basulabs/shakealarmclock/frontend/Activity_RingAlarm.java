@@ -42,14 +42,15 @@ import java.util.Objects;
 import in.basulabs.shakealarmclock.R;
 import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 
-public class Activity_RingAlarm extends AppCompatActivity implements
-	View.OnClickListener {
+public class Activity_RingAlarm extends AppCompatActivity implements View.OnClickListener {
+
+	private Bundle extras;
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(@NonNull Context context, @NonNull Intent intent) {
 			if (Objects.equals(intent.getAction(),
-				ConstantsAndStatics.ACTION_DESTROY_RING_ALARM_ACTIVITY)) {
+			                   ConstantsAndStatics.ACTION_DESTROY_RING_ALARM_ACTIVITY)) {
 				finish();
 			}
 		}
@@ -61,9 +62,9 @@ public class Activity_RingAlarm extends AppCompatActivity implements
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
-			WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
-			WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-			WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+				                     WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+				                     WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+				                     WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
 			setTurnScreenOn(true);
@@ -72,6 +73,8 @@ public class Activity_RingAlarm extends AppCompatActivity implements
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_ringalarm);
+
+		extras = getIntent().getExtras();
 
 		TextView alarmTimeTextView = findViewById(R.id.alarmTimeTextView2);
 		TextView alarmMessageTextView = findViewById(R.id.alarmmessageTextView);
@@ -82,40 +85,43 @@ public class Activity_RingAlarm extends AppCompatActivity implements
 
 		if (DateFormat.is24HourFormat(this)) {
 			alarmTimeTextView.setText(getResources().getString(R.string.time_24hour,
-				localTime.getHour(), localTime.getMinute()));
+			                                                   localTime.getHour(),
+			                                                   localTime.getMinute()));
 		} else {
 			String amPm = localTime.getHour() < 12 ? "AM" : "PM";
 
 			if ((localTime.getHour() <= 12) && (localTime.getHour() > 0)) {
 
 				alarmTimeTextView.setText(getResources().getString(R.string.time_12hour,
-					localTime.getHour(), localTime.getMinute(), amPm));
+				                                                   localTime.getHour(),
+				                                                   localTime.getMinute(), amPm));
 
 			} else if (localTime.getHour() > 12 && localTime.getHour() <= 23) {
 
 				alarmTimeTextView.setText(getResources().getString(R.string.time_12hour,
-					localTime.getHour() - 12, localTime.getMinute(), amPm));
+				                                                   localTime.getHour() - 12,
+				                                                   localTime.getMinute(), amPm));
 
 			} else {
 				alarmTimeTextView.setText(getResources().getString(R.string.time_12hour,
-					localTime.getHour() + 12, localTime.getMinute(), amPm));
+				                                                   localTime.getHour() + 12,
+				                                                   localTime.getMinute(), amPm));
 			}
 		}
 
 		// Display the alarm message. Additionally, if the screen size is small, change
 		// the text size to 15sp.
-		if (getIntent().getExtras() != null) {
-			String message = getIntent().getExtras()
-				.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
+		if (extras != null) {
+			String message = extras.getString(ConstantsAndStatics.BUNDLE_KEY_ALARM_MESSAGE, null);
 			if (message != null) {
 				int screenSize = getResources().getConfiguration().screenLayout &
-					Configuration.SCREENLAYOUT_SIZE_MASK;
+						Configuration.SCREENLAYOUT_SIZE_MASK;
 				if (screenSize == Configuration.SCREENLAYOUT_SIZE_SMALL) {
 					alarmMessageTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 				}
 			}
 			alarmMessageTextView.setText(
-				message != null ? message : getString(R.string.alarmMessage));
+					message != null ? message : getString(R.string.alarmMessage));
 		}
 
 		snoozeButton.setOnClickListener(this);
@@ -124,7 +130,7 @@ public class Activity_RingAlarm extends AppCompatActivity implements
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ConstantsAndStatics.ACTION_DESTROY_RING_ALARM_ACTIVITY);
 		ContextCompat.registerReceiver(this, broadcastReceiver, intentFilter,
-			ContextCompat.RECEIVER_NOT_EXPORTED);
+		                               ContextCompat.RECEIVER_NOT_EXPORTED);
 
 	}
 
@@ -140,14 +146,19 @@ public class Activity_RingAlarm extends AppCompatActivity implements
 
 	@Override
 	public void onClick(@NonNull View view) {
+
 		if (view.getId() == R.id.snoozeButton) {
+
 			Intent intent = new Intent(ConstantsAndStatics.ACTION_SNOOZE_ALARM);
-			intent.setPackage(getPackageName());
+			intent.setPackage(getPackageName())
+			      .putExtras(extras);
 			sendBroadcast(intent);
 			finish();
+
 		} else if (view.getId() == R.id.cancelButton) {
+
 			Intent intent1 = new Intent(ConstantsAndStatics.ACTION_CANCEL_ALARM);
-			intent1.setPackage(getPackageName());
+			intent1.setPackage(getPackageName()).putExtras(extras);
 			sendBroadcast(intent1);
 			finish();
 		}
