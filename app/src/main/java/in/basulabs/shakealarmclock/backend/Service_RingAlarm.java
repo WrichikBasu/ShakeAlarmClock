@@ -665,6 +665,11 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		Log.e(ConstantsAndStatics.DEBUG_TAG, "In snoozeAlarm()");
 
+		if (snoozedAlarms.get(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID)) != null) {
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm already snoozed");
+			return;
+		}
+
 		if (currentAlarm == alarmDetails)
 			currentAlarm = null;
 
