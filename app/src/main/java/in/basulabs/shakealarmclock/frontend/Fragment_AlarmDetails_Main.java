@@ -74,6 +74,8 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 	private ImageView alarmVolumeImageView;
 	private boolean isSavedInstanceStateNull;
 
+	private ActivityResultLauncher<Intent> alarmToneActLauncher;
+
     //----------------------------------------------------------------------------------------------------
 
 	public interface FragmentGUIListener {
@@ -129,6 +131,21 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		isSavedInstanceStateNull = savedInstanceState == null;
+
+		alarmToneActLauncher = registerForActivityResult(
+				new ActivityResultContracts.StartActivityForResult(), (result) -> {
+
+					if (result.getResultCode() == RESULT_OK) {
+
+						Intent data = result.getData();
+						assert data != null;
+						Uri uri = Objects.requireNonNull(data.getExtras())
+						                 .getParcelable(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+						assert uri != null;
+						viewModel.setAlarmToneUri(uri);
+					}
+					displayAlarmTone();
+				});
 	}
 
 	//--------------------------------------------------------------------------------------------------
@@ -147,16 +164,11 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 		// Declare/initialise all variables
 		/////////////////////////////////////////////
 		TimePicker timePicker = view.findViewById(R.id.addAlarmTimePicker);
-		ConstraintLayout repeatConsLayout = view.findViewById(
-			R.id.repeatConstraintLayout);
-		ConstraintLayout snoozeConsLayout = view.findViewById(
-			R.id.snoozeConstraintLayout);
-		ConstraintLayout alarmDateConstarintLayout = view.findViewById(
-			R.id.alarmDateConstraintLayout);
-		ConstraintLayout alarmToneConstraintLayout = view.findViewById(
-			R.id.alarmToneConstraintLayout);
-		ConstraintLayout alarmMessageConstraintLayout = view.findViewById(
-			R.id.alarmMessageConstraintLayout);
+		ConstraintLayout repeatConsLayout = view.findViewById(R.id.repeatConstraintLayout);
+		ConstraintLayout snoozeConsLayout = view.findViewById(R.id.snoozeConstraintLayout);
+		ConstraintLayout alarmDateConstraintLayout = view.findViewById(R.id.alarmDateConstraintLayout);
+		ConstraintLayout alarmToneConstraintLayout = view.findViewById(R.id.alarmToneConstraintLayout);
+		ConstraintLayout alarmMessageConstraintLayout = view.findViewById(R.id.alarmMessageConstraintLayout);
 		currentRepeatOptionsTV = view.findViewById(R.id.currentRepeatOptionsTextView);
 		currentSnoozeOptionsTV = view.findViewById(R.id.currentSnoozeOptionTextView);
 		Spinner alarmTypeSpinner = view.findViewById(R.id.alarmTypeSpinner);
@@ -172,7 +184,7 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 		alarmMessageTV = view.findViewById(R.id.textView_alarmMessage);
 
 		////////////////////////////////////////////
-		// Initialise the GUI
+		// Initialize the GUI
 		///////////////////////////////////////////
 		timePicker.setIs24HourView(DateFormat.is24HourFormat(requireContext()));
         timePicker.setHour(viewModel.getAlarmDateTime().getHour());
@@ -218,12 +230,7 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 				ViewGroup amPmView;
 				ViewGroup v1 = (ViewGroup) timePicker.getChildAt(0);
 				ViewGroup v2 = (ViewGroup) v1.getChildAt(0);
-				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-					ViewGroup v3 = (ViewGroup) v2.getChildAt(0);
-					amPmView = (ViewGroup) v3.getChildAt(3);
-				} else {
-					amPmView = (ViewGroup) v2.getChildAt(3);
-				}
+				amPmView = (ViewGroup) v2.getChildAt(3);
 				View.OnClickListener listener = v -> timePicker.setHour(
 					(timePicker.getHour() + 12) % 24);
 
@@ -241,7 +248,7 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 
 		repeatConsLayout.setOnClickListener(this);
 		snoozeConsLayout.setOnClickListener(this);
-		alarmDateConstarintLayout.setOnClickListener(this);
+		alarmDateConstraintLayout.setOnClickListener(this);
 		alarmToneConstraintLayout.setOnClickListener(this);
 		alarmMessageConstraintLayout.setOnClickListener(this);
 
@@ -264,31 +271,23 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 
 			if (isRepeatOn) {
 
-				alarmDateConstarintLayout.setEnabled(false);
+				alarmDateConstraintLayout.setEnabled(false);
 
-				alarmDateLabel.setTextColor(ContextCompat.getColor(requireContext(),
-						R.color.disabledColor));
-				alarmDateLabel.setPaintFlags(
-					alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+				alarmDateLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.disabledColor));
+				alarmDateLabel.setPaintFlags(alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
-				alarmDateTV.setTextColor(ContextCompat.getColor(requireContext(),
-						R.color.disabledColor));
-				alarmDateTV.setPaintFlags(
-					alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+				alarmDateTV.setTextColor(ContextCompat.getColor(requireContext(), R.color.disabledColor));
+				alarmDateTV.setPaintFlags(alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
 			} else {
 
-				alarmDateConstarintLayout.setEnabled(true);
+				alarmDateConstraintLayout.setEnabled(true);
 
-				alarmDateLabel.setTextColor(ContextCompat.getColor(requireContext(),
-						R.color.defaultLabelColor));
-				alarmDateLabel.setPaintFlags(
-					alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+				alarmDateLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.defaultLabelColor));
+				alarmDateLabel.setPaintFlags(alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
 
-				alarmDateTV.setTextColor(ContextCompat.getColor(requireContext(),
-						R.color.defaultLabelColor));
-				alarmDateTV.setPaintFlags(
-					alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+				alarmDateTV.setTextColor(ContextCompat.getColor(requireContext(), R.color.defaultLabelColor));
+				alarmDateTV.setPaintFlags(alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
 			}
 		});
 
@@ -296,43 +295,31 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 
 			if (alarmType == ConstantsAndStatics.ALARM_TYPE_VIBRATE_ONLY) {
 
-				alarmVolumeLabel.setTextColor(ContextCompat.getColor(requireContext(),
-						R.color.disabledColor));
-				alarmVolumeLabel.setPaintFlags(
-					alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+				alarmVolumeLabel.setTextColor(ContextCompat.getColor(requireContext(),	R.color.disabledColor));
+				alarmVolumeLabel.setPaintFlags(alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
 				alarmVolumeSeekbar.setEnabled(false);
 
-				alarmToneLabel.setTextColor(ContextCompat.getColor(requireContext(),
-						R.color.disabledColor));
-				alarmToneLabel.setPaintFlags(
-					alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+				alarmToneLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.disabledColor));
+				alarmToneLabel.setPaintFlags(alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
-				alarmToneTV.setTextColor(ContextCompat.getColor(requireContext(),
-						R.color.disabledColor));
-				alarmToneTV.setPaintFlags(
-					alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+				alarmToneTV.setTextColor(ContextCompat.getColor(requireContext(),R.color.disabledColor));
+				alarmToneTV.setPaintFlags(alarmDateLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
 				alarmToneConstraintLayout.setEnabled(false);
 
 			} else {
 
-				alarmVolumeLabel.setTextColor(ContextCompat.getColor(requireContext(),
-						R.color.defaultLabelColor));
-				alarmVolumeLabel.setPaintFlags(
-					alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+				alarmVolumeLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.defaultLabelColor));
+				alarmVolumeLabel.setPaintFlags(alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
 
 				alarmVolumeSeekbar.setEnabled(true);
 
-				alarmToneLabel.setTextColor(ContextCompat.getColor(requireContext(),
-						R.color.defaultLabelColor));
-				alarmToneLabel.setPaintFlags(
-					alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+				alarmToneLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.defaultLabelColor));
+				alarmToneLabel.setPaintFlags(alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
 
-				alarmToneTV.setTextColor(ContextCompat.getColor(requireContext(),
-						R.color.defaultLabelColor));
-				alarmToneTV.setPaintFlags(
-					alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+				alarmToneTV.setTextColor(ContextCompat.getColor(requireContext(), R.color.defaultLabelColor));
+				alarmToneTV.setPaintFlags(alarmDateLabel.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
 
 				alarmToneConstraintLayout.setEnabled(true);
 			}
@@ -483,31 +470,14 @@ public class Fragment_AlarmDetails_Main extends Fragment implements View.OnClick
 
 			Intent intent = new Intent(requireContext(), Activity_RingtonePicker.class)
 				.setAction(RingtoneManager.ACTION_RINGTONE_PICKER)
-				.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE,
-					RingtoneManager.TYPE_ALARM)
+				.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
 				.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select alarm tone:")
 				.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
 				.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
 				.putExtra(ConstantsAndStatics.EXTRA_PLAY_RINGTONE, false)
-				.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI,
-					Settings.System.DEFAULT_ALARM_ALERT_URI)
-				.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI,
-					viewModel.getAlarmToneUri());
+				.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_ALARM_ALERT_URI)
+				.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, viewModel.getAlarmToneUri());
 
-            ActivityResultLauncher<Intent> alarmToneActLauncher = registerForActivityResult(
-                    new ActivityResultContracts.StartActivityForResult(), (result) -> {
-
-                        if (result.getResultCode() == RESULT_OK) {
-
-                            Intent data = result.getData();
-                            assert data != null;
-                            Uri uri = Objects.requireNonNull(data.getExtras())
-                                    .getParcelable(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-                            assert uri != null;
-                            viewModel.setAlarmToneUri(uri);
-                        }
-                        displayAlarmTone();
-                    });
 			alarmToneActLauncher.launch(intent);
 
 		} else if (view.getId() == R.id.alarmMessageConstraintLayout) {
