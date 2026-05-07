@@ -58,6 +58,7 @@ import androidx.core.content.ContextCompat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -115,6 +116,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	private boolean isShakeActive;
 
 	private AudioFocusController.Builder afcBuilder;
+	@Nullable
 	private AudioFocusController afController;
 
 	/**
@@ -431,7 +433,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		NotificationCompat.Builder builder
 				= new NotificationCompat.Builder(this,
-				                                 Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM))
+				                                 Integer.toString(
+						                                 ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM))
 				.setContentTitle(getString(R.string.app_name))
 				.setContentText(getString(R.string.notifContent_snooze))
 				.setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -453,36 +456,36 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				int key = en.nextElement();
 				String currentText = "";
 
-				LocalTime alarmTime = LocalTime.of(snoozedAlarms.get(key).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
-				                                   snoozedAlarms.get(key).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+				LocalTime alarmTime = LocalTime.of(
+						snoozedAlarms.get(key).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+						snoozedAlarms.get(key).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
 
 				if (DateFormat.is24HourFormat(this)) {
-					currentText =  getResources().getString(R.string.time_24hour,
-					                                                   alarmTime.getHour(),
-					                                                   alarmTime.getMinute());
+					currentText = getResources().getString(R.string.time_24hour,
+					                                       alarmTime.getHour(),
+					                                       alarmTime.getMinute());
 				} else {
 					String amPm = alarmTime.getHour() < 12 ? "AM" : "PM";
 
 					if ((alarmTime.getHour() <= 12) && (alarmTime.getHour() > 0)) {
 
 						currentText = getResources().getString(R.string.time_12hour,
-						                                                   alarmTime.getHour(),
-						                                                   alarmTime.getMinute(), amPm);
+						                                       alarmTime.getHour(),
+						                                       alarmTime.getMinute(), amPm);
 
 					} else if (alarmTime.getHour() > 12 && alarmTime.getHour() <= 23) {
 
 						currentText = getResources().getString(R.string.time_12hour,
-						                                                   alarmTime.getHour() - 12,
-						                                                   alarmTime.getMinute(), amPm);
+						                                       alarmTime.getHour() - 12,
+						                                       alarmTime.getMinute(), amPm);
 
 					} else {
 						currentText = getResources().getString(R.string.time_12hour,
-						                                                   alarmTime.getHour() + 12,
-						                                                   alarmTime.getMinute(), amPm);
+						                                       alarmTime.getHour() + 12,
+						                                       alarmTime.getMinute(), amPm);
 					}
-					alarmMessage.append(currentText);
 				}
-
+				alarmMessage.append("\n").append(currentText);
 
 			}
 		}
@@ -490,7 +493,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		//noinspection SizeReplaceableByIsEmpty
 		if (alarmMessage.length() > 0) {
 			builder.setContentTitle(getString(R.string.app_name))
-			       .setContentText(alarmMessage.toString())
+			       .setContentText(alarmMessage)
 			       .setStyle(new NotificationCompat.BigTextStyle().bigText(alarmMessage));
 		}
 		return builder.build();
@@ -503,7 +506,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	 */
 	private void ringAlarm() {
 
-		Log.e(ConstantsAndStatics.DEBUG_TAG, "in ringAlarm()");
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In ringAlarm()");
 
 		Bundle alarmDetails = AlarmRingQueue.dequeue();
 		loadRepeatDays(alarmDetails);
@@ -606,7 +609,10 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 					// Start alarm sound
 					mediaPlayer.start();
 
-					Log.e(ConstantsAndStatics.DEBUG_TAG, "Ringing started");
+					Log.e(ConstantsAndStatics.DEBUG_TAG, "RINGING: "
+							+ alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR)
+							+ ":" + alarmDetails.getInt(
+							ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
 
 					// Start vibration
 					if (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) ==
@@ -629,6 +635,9 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			ringTimer.start();
 			ContextCompat.registerReceiver(this, broadcastReceiver, intentFilter,
 			                               ContextCompat.RECEIVER_NOT_EXPORTED);
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "RINGING: "
+					+ alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR)
+					+ ":" + alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
 		}
 
 	}
@@ -665,7 +674,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		Log.e(ConstantsAndStatics.DEBUG_TAG, "In snoozeAlarm()");
 
-		if (snoozedAlarms.get(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID)) != null) {
+		if (snoozedAlarms.get(
+				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID)) != null) {
 			Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm already snoozed");
 			return;
 		}
@@ -680,17 +690,38 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		if (alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
 
-			if (snoozeCount < alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY)) {
+			if (snoozeCount < alarmDetails.getInt(
+					ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY)) {
 
 				alarmDetails.remove(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_COUNT);
-				alarmDetails.putInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_COUNT, snoozeCount + 1);
+				alarmDetails.putInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_COUNT, ++snoozeCount);
 
 				final int alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
 
 				snoozedAlarms.put(alarmID, alarmDetails);
 
-				CountDownTimer snoozeTimer = new CountDownTimer(alarmDetails.getInt(
-								ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS) * 60000L, 1000) {
+				// Calculate the remaining snooze time after subtracting the time
+				// for which the alarm was already ringing, so the next ring occurs
+				// at the correct minute.
+
+				ZonedDateTime alarmDateTime = ZonedDateTime.of(
+						LocalDateTime.of(
+								alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_YEAR),
+								alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MONTH),
+								alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_DAY),
+								alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+								alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE), 0,
+								0),
+						ZoneId.systemDefault());
+
+				ZonedDateTime newAlarmDateTime = alarmDateTime.plusMinutes(
+						(long) snoozeCount * alarmDetails.getInt(
+								ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS));
+
+				long millisInFuture = Math.abs(
+						Duration.between(ZonedDateTime.now(), newAlarmDateTime).toMillis());
+
+				CountDownTimer snoozeTimer = new CountDownTimer(millisInFuture, 1000) {
 
 					@Override
 					public void onTick(long millisUntilFinished) {
@@ -710,20 +741,28 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				};
 				notificationManager.notify(notifID, buildSnoozeNotification());
 				snoozeTimer.start();
-				Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm snoozed");
+				Log.e(ConstantsAndStatics.DEBUG_TAG, "SNOOZED: "
+						+ alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR) + ":"
+						+ alarmDetails.getInt(
+						ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE) + "duration: " + millisInFuture / 1000 + "s");
 				tryRingNextAlarm();
 
-			} else  // Snooze frequency reached
+			} else { // Snooze frequency reached
 				dismissAlarm(alarmDetails);
+				tryRingNextAlarm();
+			}
 
-		} else // No snooze
+		} else { // No snooze
 			dismissAlarm(alarmDetails);
+			tryRingNextAlarm();
+		}
 	}
 
 	//----------------------------------------------------------------------------------
 
 	/**
-	 * Dismisses the current alarm, and sets the next alarm if repeat is enabled.
+	 * Dismisses the current alarm, toggles the alarm state in the db (or, sets the next alarm if
+	 * repeat is enabled),
 	 */
 	private void dismissAlarm(@NonNull Bundle alarmDetails) {
 
@@ -792,11 +831,15 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			} catch (InterruptedException ignored) {
 			}
 		}
+
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "DISMISSED: "
+				+ alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR) + ":"
+				+ alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+
 		if (AlarmRingQueue.isEmpty() && snoozedAlarms.isEmpty() && currentAlarm == null) {
 			stopForeground(true);
 			stopSelf();
 		}
-		Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm dismissed");
 	}
 
 	//----------------------------------------------------------------------------------
@@ -834,7 +877,9 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			intent.setPackage(getPackageName());
 			sendBroadcast(intent);
 		}
-		afController.abandonFocus();
+		if (afController != null)
+			afController.abandonFocus();
+		afController = null;
 	}
 
 	//----------------------------------------------------------------------------------
@@ -926,7 +971,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 					if (sharedPreferences.getInt(
 							ConstantsAndStatics.SHARED_PREF_KEY_DEFAULT_SHAKE_OPERATION,
 							ConstantsAndStatics.SNOOZE) == ConstantsAndStatics.SNOOZE
-							&& currentAlarm.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
+							&& currentAlarm.getBoolean(
+							ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
 						snoozeAlarm(currentAlarm);
 					} else {
 						dismissAlarm(currentAlarm);
