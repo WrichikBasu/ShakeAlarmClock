@@ -120,9 +120,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	private AudioFocusController afController;
 
 	/**
-	 * Indicates whether alarm ringing has already started, and prevents
-	 * {@code ringAlarm()} to be called more than once by
-	 * {@link AudioFocusController.OnAudioFocusChangeListener#resume()}.
+	 * Indicates whether alarm ringing has already started, to avoid collision due to
+	 * repeated calls to {@link AudioFocusController.OnAudioFocusChangeListener#resume()}.
 	 */
 	private boolean alarmRingingStarted;
 
@@ -145,20 +144,22 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				snoozeAlarm(Objects.requireNonNull(intent.getExtras()));
 
 			else if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_CANCEL_ALARM))
-				dismissAlarm(Objects.requireNonNull(intent.getExtras()));
+				dismissAlarm(Objects.requireNonNull(intent.getExtras()), true);
 
 			else if (Objects.equals(intent.getAction(), Intent.ACTION_SCREEN_OFF)) {
-				if (powerBtnAction == ConstantsAndStatics.DISMISS) {
-					dismissAlarm(currentAlarm);
-				} else if (powerBtnAction == ConstantsAndStatics.SNOOZE) {
+
+				if (powerBtnAction == ConstantsAndStatics.DISMISS)
+					dismissAlarm(currentAlarm, true);
+
+				else if (powerBtnAction == ConstantsAndStatics.SNOOZE)
 					snoozeAlarm(currentAlarm);
-				}
 			}
 		}
 	};
 
 	//---------------------------------------------------------------------------------
 
+	@SuppressLint("WakelockTimeout")
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -176,7 +177,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		} else {
 			startForeground(notifID, buildRingNotification(null));
 		}
-
 
 		Log.e(ConstantsAndStatics.DEBUG_TAG, "Service started");
 
@@ -233,6 +233,9 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		return START_NOT_STICKY;
 	}
 
+	/**
+	 * Tries to ring the next alarm in the queue.
+	 */
 	public static void tryRingNextAlarm() {
 
 		Log.e(ConstantsAndStatics.DEBUG_TAG, "In tryNextAlarm()");
@@ -364,7 +367,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	 * <p>
 	 * Has a full screen intent to {@link Activity_RingAlarm}. The content intent points
 	 * to {@link Activity_AlarmsList}.
-	 * </p>
 	 *
 	 * @return A {@link Notification} instance that can be displayed to the user.
 	 */
@@ -413,6 +415,11 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		return builder.build();
 	}
 
+	/**
+	 * Builds and returns the notification with the (original) time for each snoozed alarm.
+	 *
+	 * @return A {@link Notification} instance that can be displayed to the user.
+	 */
 	private Notification buildSnoozeNotification() {
 
 		Log.e(ConstantsAndStatics.DEBUG_TAG, "In buildSnoozeNotification()");
@@ -454,7 +461,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			while (en.hasMoreElements()) {
 
 				int key = en.nextElement();
-				String currentText = "";
+				String currentText;
 
 				LocalTime alarmTime = LocalTime.of(
 						snoozedAlarms.get(key).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
@@ -486,7 +493,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 					}
 				}
 				alarmMessage.append("\n").append(currentText);
-
 			}
 		}
 
@@ -502,7 +508,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	//----------------------------------------------------------------------------------
 
 	/**
-	 * Initialises the {@link MediaPlayer}, and starts ringing the alarm.
+	 * Dequeues an alarm from {@link AlarmRingQueue}, and starts ringing the alarm.
 	 */
 	private void ringAlarm() {
 
@@ -656,8 +662,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		if (vibrator.hasVibrator()) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 				vibrator.vibrate(
-						VibrationEffect.createWaveform(vibrationPattern, vibrationAmplitudes,
-						                               0));
+						VibrationEffect.createWaveform(vibrationPattern, vibrationAmplitudes, 0));
 			} else {
 				vibrator.vibrate(vibrationPattern, 0);
 			}
@@ -669,6 +674,12 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	/**
 	 * Snoozes the alarm. If snooze is off, or the snooze frequency has been reached, the
 	 * alarm will be dismissed by calling {@link #dismissAlarm(Bundle)}.
+	 * <p>
+	 * Calls {@link Service_RingAlarm#tryRingNextAlarm()} after snoozing/dismissing the alarm.
+	 * <p>
+	 * NOTE: It is NECESSARY to calculate the duration of the snooze timer using {@link java.time.ZonedDateTime}
+	 * and {@link java.time.Duration} in order to ring the alarm again at the exact minute instead of
+	 * delaying by the time during which the alarm was ringing before being snoozed.
 	 */
 	private void snoozeAlarm(@NonNull Bundle alarmDetails) {
 
@@ -748,13 +759,11 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				tryRingNextAlarm();
 
 			} else { // Snooze frequency reached
-				dismissAlarm(alarmDetails);
-				tryRingNextAlarm();
+				dismissAlarm(alarmDetails, true);
 			}
 
 		} else { // No snooze
-			dismissAlarm(alarmDetails);
-			tryRingNextAlarm();
+			dismissAlarm(alarmDetails, true);
 		}
 	}
 
@@ -762,7 +771,10 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 	/**
 	 * Dismisses the current alarm, toggles the alarm state in the db (or, sets the next alarm if
-	 * repeat is enabled),
+	 * repeat is enabled), then stops the service itself if there are no snoozed alarms and
+	 * {@link AlarmRingQueue} is empty.
+	 *
+	 * @param alarmDetails The details of the alarm to be dismissed.
 	 */
 	private void dismissAlarm(@NonNull Bundle alarmDetails) {
 
@@ -777,8 +789,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		Thread thread_toggleAlarm =
 				new Thread(() -> alarmDatabase.alarmDAO()
 				                              .toggleAlarm(alarmDetails.getInt(
-						                                           ConstantsAndStatics.BUNDLE_KEY_ALARM_ID),
-				                                           0));
+						                                           ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), 0));
 
 		ArrayList<Integer> repeatDays = alarmDetails.getIntegerArrayList(
 				ConstantsAndStatics.BUNDLE_KEY_REPEAT_DAYS);
@@ -828,8 +839,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 			try {
 				thread_toggleAlarm.join();
-			} catch (InterruptedException ignored) {
-			}
+			} catch (InterruptedException ignored) {}
 		}
 
 		Log.e(ConstantsAndStatics.DEBUG_TAG, "DISMISSED: "
@@ -840,6 +850,23 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			stopForeground(true);
 			stopSelf();
 		}
+		if (AlarmRingQueue.isEmpty() && currentAlarm == null && !snoozedAlarms.isEmpty()) {
+			notificationManager.notify(notifID, buildSnoozeNotification());
+		}
+	}
+
+	/**
+	 * Same as {@link #dismissAlarm(Bundle)}, but optionally tries to ring the next alarm.
+	 *
+	 * @param alarmDetails Details of the alarm to be dismissed.
+	 * @param tryRingNextAlarm Whether to try ringing the next alarm.
+	 */
+	@SuppressWarnings("SameParameterValue")
+	private void dismissAlarm(@NonNull Bundle alarmDetails, boolean tryRingNextAlarm) {
+		dismissAlarm(alarmDetails);
+
+		if (tryRingNextAlarm)
+			tryRingNextAlarm();
 	}
 
 	//----------------------------------------------------------------------------------
@@ -888,6 +915,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	 * Sets the next alarm in case of a repeat alarm.
 	 *
 	 * @param alarmDateTime The date and time when the alarm is to be set.
+	 * @param alarmID       The internal ID of the alarm to be set, used as the request code for the {@link PendingIntent}.
 	 */
 	private void setAlarm(@NonNull LocalDateTime alarmDateTime, int alarmID) {
 
@@ -912,7 +940,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	//----------------------------------------------------------------------------------
 
 	/**
-	 * While testing, we found that sometimes, the alarm was being reset at a later date
+	 * While testing, we found that sometimes the alarm was being reset at a later date
 	 * unintentionally. This function cancels such an unintentional alarm.
 	 */
 	private void cancelPendingIntent(int alarmID) {
@@ -975,7 +1003,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 							ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
 						snoozeAlarm(currentAlarm);
 					} else {
-						dismissAlarm(currentAlarm);
+						dismissAlarm(currentAlarm, true);
 					}
 				}
 			}
