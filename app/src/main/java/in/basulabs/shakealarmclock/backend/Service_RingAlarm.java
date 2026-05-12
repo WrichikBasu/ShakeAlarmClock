@@ -778,6 +778,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		stopRinging();
 		cancelPendingIntent(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID));
+		AlarmRingDS.removeSnoozedAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID));
 
 		Thread thread_toggleAlarm =
 				new Thread(() -> alarmDatabase.alarmDAO()
