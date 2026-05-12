@@ -42,8 +42,10 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
 				PowerManager.PARTIAL_WAKE_LOCK,	"in.basulabs.shakealarmclock::AlarmBRWakeLock");
 			wakeLock.acquire(60000);
 
-			AlarmRingQueue.enqueue(Objects.requireNonNull(intent.getExtras())
-			                              .getBundle(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS));
+			AlarmRingDS.enqueueRingQ(
+					Objects.requireNonNull(Objects.requireNonNull(intent.getExtras())
+					                              .getBundle(
+							                              ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS)));
 
 			if (Service_RingAlarm.isThisServiceRunning) {
 				Service_RingAlarm.tryRingNextAlarm();

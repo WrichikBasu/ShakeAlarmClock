@@ -67,9 +67,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Objects;
 
 import in.basulabs.audiofocuscontroller.AudioFocusController;
@@ -102,14 +100,9 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	private int initialAlarmStreamVolume;
 
 	/**
-	 * Keeps a count of number of snoozed alarms.
-	 */
-	private final Dictionary<Integer, Bundle> snoozedAlarms = new Hashtable<>();
-
-	/**
 	 * Indicates whether this service is running or not.
 	 */
-	public static boolean isThisServiceRunning = false;
+	public static volatile boolean isThisServiceRunning = false;
 
 	private SharedPreferences sharedPreferences;
 
@@ -243,7 +236,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		if (!isThisServiceRunning)
 			return;
 
-		if (!AlarmRingQueue.isEmpty() && self.currentAlarm == null) {
+		if (!AlarmRingDS.isRingQEmpty() && self.currentAlarm == null) {
 			self.ringAlarm();
 			Log.e(ConstantsAndStatics.DEBUG_TAG, "Ringing alarm");
 		}
@@ -261,11 +254,11 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		if (ringTimer != null && currentAlarm != null)
 			dismissAlarm(currentAlarm);
 
-		if (!snoozedAlarms.isEmpty()) {
-			Enumeration<Integer> en = snoozedAlarms.keys();
+		if (!AlarmRingDS.isSnoozedAlarmsEmpty()) {
+			Enumeration<Integer> en = AlarmRingDS.getSnoozedAlarmIds();
 			while (en.hasMoreElements()) {
 				int i = en.nextElement();
-				dismissAlarm(snoozedAlarms.get(i));
+				dismissAlarm(AlarmRingDS.getSnoozedAlarm(i));
 			}
 		}
 
@@ -452,11 +445,11 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		StringBuilder alarmMessage = new StringBuilder();
 
-		if (!snoozedAlarms.isEmpty()) {
+		if (!AlarmRingDS.isSnoozedAlarmsEmpty()) {
 
 			alarmMessage.append("Snoozed alarms:");
 
-			Enumeration<Integer> en = snoozedAlarms.keys();
+			Enumeration<Integer> en = AlarmRingDS.getSnoozedAlarmIds();
 
 			while (en.hasMoreElements()) {
 
@@ -464,8 +457,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				String currentText;
 
 				LocalTime alarmTime = LocalTime.of(
-						snoozedAlarms.get(key).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
-						snoozedAlarms.get(key).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+						AlarmRingDS.getSnoozedAlarm(key).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+						AlarmRingDS.getSnoozedAlarm(key).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
 
 				if (DateFormat.is24HourFormat(this)) {
 					currentText = getResources().getString(R.string.time_24hour,
@@ -508,13 +501,13 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	//----------------------------------------------------------------------------------
 
 	/**
-	 * Dequeues an alarm from {@link AlarmRingQueue}, and starts ringing the alarm.
+	 * Dequeues an alarm from {@link AlarmRingDS}, and starts ringing the alarm.
 	 */
 	private void ringAlarm() {
 
 		Log.e(ConstantsAndStatics.DEBUG_TAG, "In ringAlarm()");
 
-		Bundle alarmDetails = AlarmRingQueue.dequeue();
+		Bundle alarmDetails = AlarmRingDS.dequeueRingQ();
 		loadRepeatDays(alarmDetails);
 
 		Uri chosenToneUri = alarmDetails.getParcelable(
@@ -685,7 +678,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		Log.e(ConstantsAndStatics.DEBUG_TAG, "In snoozeAlarm()");
 
-		if (snoozedAlarms.get(
+		if (AlarmRingDS.getSnoozedAlarm(
 				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID)) != null) {
 			Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm already snoozed");
 			return;
@@ -709,7 +702,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 				final int alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
 
-				snoozedAlarms.put(alarmID, alarmDetails);
+				AlarmRingDS.addSnoozedAlarm(alarmID, alarmDetails);
 
 				// Calculate the remaining snooze time after subtracting the time
 				// for which the alarm was already ringing, so the next ring occurs
@@ -738,16 +731,16 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 					public void onTick(long millisUntilFinished) {
 						if (!isThisServiceRunning) {
 							cancel();
-							snoozedAlarms.remove(alarmID);
+							AlarmRingDS.removeSnoozedAlarm(alarmID);
 						}
 					}
 
 					@Override
 					public void onFinish() {
 						Log.e(ConstantsAndStatics.DEBUG_TAG, "Snooze over");
-						AlarmRingQueue.enqueue(alarmDetails);
+						AlarmRingDS.enqueueRingQ(alarmDetails);
 						tryRingNextAlarm();
-						snoozedAlarms.remove(alarmID);
+						AlarmRingDS.removeSnoozedAlarm(alarmID);
 					}
 				};
 				notificationManager.notify(notifID, buildSnoozeNotification());
@@ -772,7 +765,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	/**
 	 * Dismisses the current alarm, toggles the alarm state in the db (or, sets the next alarm if
 	 * repeat is enabled), then stops the service itself if there are no snoozed alarms and
-	 * {@link AlarmRingQueue} is empty.
+	 * {@link AlarmRingDS} is empty.
 	 *
 	 * @param alarmDetails The details of the alarm to be dismissed.
 	 */
@@ -846,11 +839,11 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				+ alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR) + ":"
 				+ alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
 
-		if (AlarmRingQueue.isEmpty() && snoozedAlarms.isEmpty() && currentAlarm == null) {
+		if (AlarmRingDS.isRingQEmpty() && AlarmRingDS.isSnoozedAlarmsEmpty() && currentAlarm == null) {
 			stopForeground(true);
 			stopSelf();
 		}
-		if (AlarmRingQueue.isEmpty() && currentAlarm == null && !snoozedAlarms.isEmpty()) {
+		if (AlarmRingDS.isRingQEmpty() && currentAlarm == null && !AlarmRingDS.isSnoozedAlarmsEmpty()) {
 			notificationManager.notify(notifID, buildSnoozeNotification());
 		}
 	}

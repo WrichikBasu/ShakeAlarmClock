@@ -525,8 +525,8 @@ public final class ConstantsAndStatics {
 	//-----------------------------------------------------------------------------------
 
 	public static void killServices(Context context, int alarmID) {
-		if (!AlarmRingQueue.isEmpty() && Service_RingAlarm.isThisServiceRunning) {
-			AlarmRingQueue.clear();
+		if (!AlarmRingDS.isRingQEmpty() && Service_RingAlarm.isThisServiceRunning) {
+			AlarmRingDS.clearRingQ();
 			Service_RingAlarm.isThisServiceRunning = false;
 			Intent intent1 = new Intent(context, Service_RingAlarm.class);
 			context.stopService(intent1);
