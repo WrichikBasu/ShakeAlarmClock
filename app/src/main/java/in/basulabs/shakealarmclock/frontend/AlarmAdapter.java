@@ -134,7 +134,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.ViewHolder> 
 	@Override
 	public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 		View listItem = LayoutInflater.from(parent.getContext())
-			.inflate(R.layout.recyclerviewrow_alarmslist, parent, false);
+			.inflate(R.layout.card_alarms_list, parent, false);
 		return new ViewHolder(listItem);
 	}
 

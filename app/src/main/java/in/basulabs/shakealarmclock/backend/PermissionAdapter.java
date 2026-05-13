@@ -58,7 +58,7 @@ public class PermissionAdapter extends
 	@Override
 	public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 		View listItem = LayoutInflater.from(parent.getContext())
-			.inflate(R.layout.recyclerviewrow_reqperm, parent, false);
+			.inflate(R.layout.card_request_perms, parent, false);
 		return new PermissionAdapter.ViewHolder(listItem);
 	}
 
