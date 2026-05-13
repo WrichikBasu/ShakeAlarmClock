@@ -1,0 +1,27 @@
+<!--
+  ~ Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published
+  ~ by the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="640dp"
+    android:height="640dp"
+    android:viewportWidth="640"
+    android:viewportHeight="640">
+  <path
+      android:fillColor="@color/colorPrimary"
+      android:pathData="M598.6,297.4C611.1,309.9 611.1,330.2 598.6,342.7L470.6,470.7C461.4,479.9 447.7,482.6 435.7,477.6C423.7,472.6 416,460.9 416,448L416,384L80,384C53.5,384 32,362.5 32,336L32,304C32,277.5 53.5,256 80,256L416,256L416,192C416,179.1 423.8,167.4 435.8,162.4C447.8,157.4 461.5,160.2 470.7,169.3L598.7,297.3z"/>
+</vector>

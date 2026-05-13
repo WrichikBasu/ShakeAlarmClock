@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2024  Wrichik Basu (basulabs.developer@gmail.com)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
--->
+  ~ Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published
+  ~ by the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~
+  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="internalOnly">
@@ -83,19 +84,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:authorities="in.basulabs.shakealarmclock.backend.MyWorkManagerInitializer"
             android:exported="false" />
 
-        <!--<service
-            android:name=".backend.Service_SnoozeAlarm"
-            android:enabled="true"
-            android:exported="false"
-            android:directBootAware="true"
-            android:foregroundServiceType="specialUse">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Invoked when a ringing alarm is snoozed; stays foreground during the snooze duration,
-                starts Service_RingAlarm at the end of the snooze duration, and sets a repeat alarm if the alarm is
-                dismissed while being snoozed." />
-        </service>-->
-
         <service
             android:name=".backend.Service_RingAlarm"
             android:enabled="true"
@@ -142,6 +130,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:name=".frontend.Activity_AlarmDetails"
             android:enabled="true"
             android:exported="false"
+            android:parentActivityName=".frontend.Activity_AlarmsList" />
+
+        <activity
+            android:name=".frontend.Activity_SnoozedAlarms"
+            android:enabled="true"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
             android:parentActivityName=".frontend.Activity_AlarmsList" />
 
         <activity

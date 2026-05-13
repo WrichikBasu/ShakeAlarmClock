@@ -1,19 +1,20 @@
 /*
-Copyright (C) 2024  Wrichik Basu (basulabs.developer@gmail.com)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
 package in.basulabs.shakealarmclock.backend;
 
 import android.annotation.SuppressLint;
@@ -74,6 +75,7 @@ import in.basulabs.audiofocuscontroller.AudioFocusController;
 import in.basulabs.shakealarmclock.R;
 import in.basulabs.shakealarmclock.frontend.Activity_AlarmsList;
 import in.basulabs.shakealarmclock.frontend.Activity_RingAlarm;
+import in.basulabs.shakealarmclock.frontend.Activity_SnoozedAlarms;
 
 public class Service_RingAlarm extends Service implements SensorEventListener {
 
@@ -251,6 +253,10 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		Log.e(ConstantsAndStatics.DEBUG_TAG, "In onDestroy()");
 
+		try {
+			unregisterReceiver(broadcastReceiver);
+		} catch (IllegalArgumentException ignored) {}
+
 		if (ringTimer != null && currentAlarm != null)
 			dismissAlarm(currentAlarm);
 
@@ -419,17 +425,19 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		createNotificationChannel();
 
-		Intent intent = new Intent();
-		intent.setAction(ConstantsAndStatics.ACTION_CANCEL_ALARM);
-		intent.setPackage(getPackageName());
+		Intent intent = new Intent(this, Activity_SnoozedAlarms.class)
+				.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+				.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+				.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+				.setPackage(getPackageName());
 
 		int flags = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
 
-		PendingIntent contentPendingIntent = PendingIntent.getBroadcast(this, 5017,
+		PendingIntent contentPendingIntent = PendingIntent.getActivity(this, 5017,
 		                                                                intent, flags);
 
 		NotificationCompat.Action notifAction = new NotificationCompat.Action.Builder(
-				R.drawable.ic_notif, getString(R.string.notifAction), contentPendingIntent).build();
+				R.drawable.ic_notif, getString(R.string.dismiss_alarm), contentPendingIntent).build();
 
 		NotificationCompat.Builder builder
 				= new NotificationCompat.Builder(this,
@@ -441,7 +449,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				.setCategory(NotificationCompat.CATEGORY_ALARM)
 				.setSmallIcon(R.drawable.ic_notif)
 				.setOnlyAlertOnce(true)
-				.addAction(notifAction);
+				.addAction(notifAction)
+				.setContentIntent(contentPendingIntent);
 
 		StringBuilder alarmMessage = new StringBuilder();
 
@@ -871,9 +880,8 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	 */
 	private void stopRinging() {
 
-		try {
-			unregisterReceiver(broadcastReceiver);
-		} catch (IllegalArgumentException ignored) {}
+		// Do NOT unregister the receiver here, as we may still get dismiss broadcasts from
+		// Activity_RingAlarm.
 
 		alarmRingingStarted = false;
 

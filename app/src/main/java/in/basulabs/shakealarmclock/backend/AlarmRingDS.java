@@ -1,13 +1,31 @@
+/*
+ * Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+
 package in.basulabs.shakealarmclock.backend;
 
 import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -72,6 +90,16 @@ public final class AlarmRingDS {
 
     public static Bundle getSnoozedAlarm(int alarmID) {
         return Objects.requireNonNull(snoozedAlarms.getValue()).get(alarmID);
+    }
+
+    @NonNull
+    public static ArrayList<Bundle> getSnoozedAlarms() {
+        ArrayList<Bundle> snoozedAlarmsList = new ArrayList<>();
+        Enumeration<Integer> keys = Objects.requireNonNull(snoozedAlarms.getValue()).keys();
+        while (keys.hasMoreElements()) {
+            snoozedAlarmsList.add(snoozedAlarms.getValue().get(keys.nextElement()));
+        }
+        return snoozedAlarmsList;
     }
 
     public static LiveData<Dictionary<Integer, Bundle>> getSnoozedAlarmsLiveData() {
