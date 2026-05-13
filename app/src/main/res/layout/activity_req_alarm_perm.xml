@@ -70,7 +70,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
         <Button
             android:id="@+id/grant_perm_btn"
-            style="@style/normalButtonStyle"
+            style="@style/button_style_important"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"

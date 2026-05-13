@@ -36,11 +36,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     <Button
         android:id="@+id/addAlarmButton"
+        style="@style/button_style_default"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="24dp"
-        android:background="@drawable/button_border"
         android:textAllCaps="true"
         android:text="@string/addAlarm"
         app:layout_constraintEnd_toEndOf="parent"

@@ -19,6 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <color name="colorPrimary">#03A9F4</color>
     <color name="colorPrimaryDark">#2196F3</color>
     <color name="colorAccent">#3F51B5</color>
+    <color name="colorAccentTwo">#7B3FF2</color>
+    <color name="yellow">#FFD700</color>
+    <color name="red">#FF0000</color>
 
     <color name="colorBackgroundFragment">#F1EEEE</color>
     <color name="colorBackgroundButton">#FFFFFF</color>

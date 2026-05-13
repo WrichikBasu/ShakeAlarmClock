@@ -264,5 +264,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="original_time">Original Time</string>
+    <string name="next_ring">Next Ring</string>
+    <string name="nevermind">Nevermind</string>
 
 </resources>

@@ -17,7 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -38,7 +38,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <item name="android:layout_height">wrap_content</item>
     </style>
 
-    <style name="normalButtonStyle">
+    <style name="button_style_default" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:clickable">true</item>
         <item name="android:linksClickable">false</item>
         <item name="android:longClickable">false</item>
@@ -47,7 +47,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <item name="android:textAlignment">center</item>
         <item name="android:textStyle">normal</item>
         <item name="android:layout_width">0dp</item>
+        <item name="strokeColor">@color/colorAccent</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="background">@android:color/transparent</item>
+        <item name="cornerRadius">10dp</item>
         <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="button_style_important" parent="button_style_default">
+        <item name="strokeColor">@color/red</item>
+        <item name="android:textColor">@color/red</item>
     </style>
 
     <style name="labelStyle">

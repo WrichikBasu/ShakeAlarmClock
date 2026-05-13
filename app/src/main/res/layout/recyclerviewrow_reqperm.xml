@@ -77,7 +77,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
             <Button
                 android:id="@+id/button_perm_grant_access"
-                style="@style/normalButtonStyle"
+                style="@style/button_style_important"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -90,12 +90,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
             <Button
                 android:id="@+id/button_perm_deny_access"
-                style="@style/normalButtonStyle"
+                style="@style/button_style_default"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_marginStart="8dp"
-                android:text="Nevermind"
+                android:text="@string/nevermind"
                 app:layout_constraintBottom_toTopOf="@+id/space"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView24"
