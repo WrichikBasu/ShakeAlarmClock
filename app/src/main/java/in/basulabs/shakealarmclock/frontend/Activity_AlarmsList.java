@@ -16,6 +16,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 package in.basulabs.shakealarmclock.frontend;
 
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.ACTION_CANCEL_ALARM;
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.DATABASE_NAME;
 
 import android.app.AlarmManager;
@@ -67,6 +68,7 @@ import in.basulabs.shakealarmclock.R;
 import in.basulabs.shakealarmclock.backend.AlarmBroadcastReceiver;
 import in.basulabs.shakealarmclock.backend.AlarmDatabase;
 import in.basulabs.shakealarmclock.backend.AlarmEntity;
+import in.basulabs.shakealarmclock.backend.AlarmRingDS;
 import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 import in.basulabs.shakealarmclock.backend.Service_RingAlarm;
 
@@ -360,10 +362,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 		int alarmID = viewModel.getAlarmId(alarmDatabase, hour, mins);
 
-		int flags =
-			android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ?
-				PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE :
-				PendingIntent.FLAG_NO_CREATE;
+		int flags =	PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE;
 
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
 			alarmID, intent, flags);
@@ -372,7 +371,11 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 			alarmManager.cancel(pendingIntent);
 		}
 
-		ConstantsAndStatics.killServices(this, alarmID);
+		// Dismiss any snoozed or ringing instance of the alarm
+		Bundle alarmDetails;
+		if ((alarmDetails = AlarmRingDS.getSnoozedAlarm(alarmID)) != null)
+			sendBroadcast(new Intent(ACTION_CANCEL_ALARM).putExtras(alarmDetails)
+					.setPackage(getPackageName()));
 
 		DateTimeFormatter formatter;
 		if (DateFormat.is24HourFormat(this)) {
@@ -414,8 +417,12 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	 */
 	private void toggleAlarmState(int hour, int mins, final int newAlarmState) {
 
-		ConstantsAndStatics.killServices(this,
-			viewModel.getAlarmId(alarmDatabase, hour, mins));
+		// Dismiss any ringing or snoozed alarm instance
+		int alarmID = viewModel.getAlarmId(alarmDatabase, hour, mins);
+		Bundle alarmDetails;
+		if ((alarmDetails = AlarmRingDS.getSnoozedAlarm(alarmID)) != null)
+			sendBroadcast(new Intent(ACTION_CANCEL_ALARM).putExtras(alarmDetails)
+					.setPackage(getPackageName()));
 
 		if (newAlarmState == 0) {
 			deleteOrDeactivateAlarm(MODE_DEACTIVATE_ONLY, hour, mins);

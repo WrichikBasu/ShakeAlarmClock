@@ -27,7 +27,6 @@ import android.Manifest;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -526,17 +525,6 @@ public final class ConstantsAndStatics {
 		}
 	}
 
-	//-----------------------------------------------------------------------------------
-
-	public static void killServices(Context context, int alarmID) {
-		if (!AlarmRingDS.isRingQEmpty() && Service_RingAlarm.isThisServiceRunning) {
-			AlarmRingDS.clearRingQ();
-			Service_RingAlarm.isThisServiceRunning = false;
-			Intent intent1 = new Intent(context, Service_RingAlarm.class);
-			context.stopService(intent1);
-		}
-	}
-
 	//---------------------------------------------------------------------------------------------------------
 
 	/**
@@ -605,11 +593,6 @@ public final class ConstantsAndStatics {
 	 * Notification ID for the channels used for ringing alarms.
 	 */
 	public static final int NOTIF_CHANNEL_ID_ALARM = 621;
-
-	/**
-	 * Notification ID for the channels used for snooze alarms.
-	 */
-	public static final int NOTIF_CHANNEL_ID_SNOOZE = 622;
 
 	/**
 	 * Notification ID for error channel.

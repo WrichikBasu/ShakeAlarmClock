@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -99,6 +100,13 @@ public final class AlarmRingDS {
 		return Objects.requireNonNull(snoozedAlarms.getValue()).keys();
 	}
 
+	/**
+	 * Returns the snoozed alarm data for the given alarm ID.
+	 *
+	 * @param alarmID The ID of the alarm.
+	 * @return The snoozed alarm data as a {@link Bundle}, or {@code null} if the data is not found.
+	 */
+	@Nullable
 	public static Bundle getSnoozedAlarm(int alarmID) {
 		return Objects.requireNonNull(snoozedAlarms.getValue()).get(alarmID);
 	}

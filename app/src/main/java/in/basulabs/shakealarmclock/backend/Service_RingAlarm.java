@@ -141,7 +141,9 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			else if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_CANCEL_ALARM))
 				dismissAlarm(Objects.requireNonNull(intent.getExtras()), true);
 
-			else if (Objects.equals(intent.getAction(), Intent.ACTION_SCREEN_OFF)) {
+			else if (Objects.equals(intent.getAction(), Intent.ACTION_SCREEN_OFF) &&
+					 currentAlarm != null) {
+				// Listen to screen off action only if an alarm is currently ringing.
 
 				if (powerBtnAction == ConstantsAndStatics.DISMISS)
 					dismissAlarm(currentAlarm, true);
@@ -264,7 +266,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			Enumeration<Integer> en = AlarmRingDS.getSnoozedAlarmIds();
 			while (en.hasMoreElements()) {
 				int i = en.nextElement();
-				dismissAlarm(AlarmRingDS.getSnoozedAlarm(i));
+				dismissAlarm(Objects.requireNonNull(AlarmRingDS.getSnoozedAlarm(i)));
 			}
 		}
 
@@ -466,8 +468,10 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				String currentText;
 
 				LocalTime alarmTime = LocalTime.of(
-						AlarmRingDS.getSnoozedAlarm(key).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
-						AlarmRingDS.getSnoozedAlarm(key).getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+						Objects.requireNonNull(AlarmRingDS.getSnoozedAlarm(key))
+								.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+						Objects.requireNonNull(AlarmRingDS.getSnoozedAlarm(key))
+								.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
 
 				if (DateFormat.is24HourFormat(this)) {
 					currentText = getResources().getString(R.string.time_24hour,
@@ -734,13 +738,19 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				long millisInFuture = Math.abs(
 						Duration.between(ZonedDateTime.now(), newAlarmDateTime).toMillis());
 
-				CountDownTimer snoozeTimer = new CountDownTimer(millisInFuture, 1000) {
+				CountDownTimer snoozeTimer = new CountDownTimer(millisInFuture, 500) {
 
 					@Override
 					public void onTick(long millisUntilFinished) {
 						if (!isThisServiceRunning) {
 							cancel();
 							AlarmRingDS.removeSnoozedAlarm(alarmID, self);
+						}
+						if (AlarmRingDS.getSnoozedAlarm(alarmID) == null) {
+							// Implies that the alarm has been dismissed. The timer has to be cancelled.
+							// NO further actions will be taken, though, as they will be handled by the
+							// dismissAlarm() method.
+							cancel();
 						}
 					}
 

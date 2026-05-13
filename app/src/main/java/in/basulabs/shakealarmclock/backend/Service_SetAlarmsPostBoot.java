@@ -16,6 +16,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 package in.basulabs.shakealarmclock.backend;
 
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.ACTION_CANCEL_ALARM;
+
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -208,7 +210,10 @@ public class Service_SetAlarmsPostBoot extends Service {
 
 		for (AlarmEntity alarmEntity : alarmEntityArrayList) {
 
-			ConstantsAndStatics.killServices(this, alarmEntity.alarmID);
+			Bundle alarmDetails;
+			if ((alarmDetails = AlarmRingDS.getSnoozedAlarm(alarmEntity.alarmID)) != null)
+				sendBroadcast(new Intent(ACTION_CANCEL_ALARM).putExtras(alarmDetails)
+						.setPackage(getPackageName()));
 
 			Intent intent = new Intent(Service_SetAlarmsPostBoot.this,
 				AlarmBroadcastReceiver.class);
