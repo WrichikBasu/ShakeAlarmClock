@@ -196,6 +196,9 @@ public final class ConstantsAndStatics {
 	public static final String BUNDLE_KEY_HAS_USER_CHOSEN_DATE =
 		"in.basulabs.shakealarmclock.HAS_USER_CHOSEN_DATE";
 
+	public static final String ACTION_SNOOZED_ALARMS_MODIFIED =
+		"in.basulabs.shakealarmclock.SNOOZED_ALARMS_MODIFIED";
+
 	/**
 	 * Intent action delivered to {@link android.content.BroadcastReceiver} in
 	 * {@link Service_RingAlarm} instructing it to snooze the alarm.

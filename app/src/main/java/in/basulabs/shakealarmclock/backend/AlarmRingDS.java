@@ -18,6 +18,8 @@
 
 package in.basulabs.shakealarmclock.backend;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -35,75 +37,84 @@ import java.util.ArrayDeque;
 
 public final class AlarmRingDS {
 
-    private static final Queue<Bundle> ringQueue = new ArrayDeque<>();
-    private static final Object lock = new Object();
+	private static final Queue<Bundle> ringQueue = new ArrayDeque<>();
+	private static final Object lock = new Object();
 
-    private static final MutableLiveData<Dictionary<Integer, Bundle>> snoozedAlarms
-            = new MutableLiveData<>(new Hashtable<>());
+	private static final MutableLiveData<Dictionary<Integer, Bundle>> snoozedAlarms
+			= new MutableLiveData<>(new Hashtable<>());
 
-    public static void enqueueRingQ(@NonNull Bundle alarmData) {
-        synchronized (lock) {
-            ringQueue.add(alarmData);
-            Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm added to queue");
-        }
-    }
+	public static void enqueueRingQ(@NonNull Bundle alarmData) {
+		synchronized (lock) {
+			ringQueue.add(alarmData);
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm added to queue");
+		}
+	}
 
-    @NonNull
-    public static Bundle dequeueRingQ() {
-        synchronized (lock) {
-            Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm removed from queue");
-            return ringQueue.remove();
-        }
-    }
+	@NonNull
+	public static Bundle dequeueRingQ() {
+		synchronized (lock) {
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm removed from queue");
+			return ringQueue.remove();
+		}
+	}
 
-    public static boolean isRingQEmpty() {
-        synchronized (lock) {
-            return ringQueue.isEmpty();
-        }
-    }
+	public static boolean isRingQEmpty() {
+		synchronized (lock) {
+			return ringQueue.isEmpty();
+		}
+	}
 
-    public static void clearRingQ() {
-        synchronized (lock) {
-            ringQueue.clear();
-        }
-    }
+	public static void clearRingQ() {
+		synchronized (lock) {
+			ringQueue.clear();
+		}
+	}
 
-    public static void addSnoozedAlarm(int alarmId, @NonNull Bundle alarmData) {
-        Objects.requireNonNull(snoozedAlarms.getValue()).put(alarmId, alarmData);
-    }
+	public static void addSnoozedAlarm(int alarmId, @NonNull Bundle alarmData,
+	                                   @NonNull Context context) {
 
-    public static void removeSnoozedAlarm(int alarmId) {
-        Objects.requireNonNull(snoozedAlarms.getValue()).remove(alarmId);
-    }
+		Objects.requireNonNull(snoozedAlarms.getValue()).put(alarmId, alarmData);
 
-    public static void clearSnoozedAlarms() {
-        snoozedAlarms.setValue(new Hashtable<>());
-    }
+		context.sendBroadcast(new Intent(ConstantsAndStatics.ACTION_SNOOZED_ALARMS_MODIFIED)
+				.setPackage(context.getPackageName()));
 
-    public static boolean isSnoozedAlarmsEmpty() {
-        return Objects.requireNonNull(snoozedAlarms.getValue()).isEmpty();
-    }
+	}
 
-    public static Enumeration<Integer> getSnoozedAlarmIds() {
-        return Objects.requireNonNull(snoozedAlarms.getValue()).keys();
-    }
+	public static void removeSnoozedAlarm(int alarmId, @NonNull Context context) {
 
-    public static Bundle getSnoozedAlarm(int alarmID) {
-        return Objects.requireNonNull(snoozedAlarms.getValue()).get(alarmID);
-    }
+		Objects.requireNonNull(snoozedAlarms.getValue()).remove(alarmId);
+		context.sendBroadcast(new Intent(ConstantsAndStatics.ACTION_SNOOZED_ALARMS_MODIFIED)
+				.setPackage(context.getPackageName()));
+	}
 
-    @NonNull
-    public static ArrayList<Bundle> getSnoozedAlarms() {
-        ArrayList<Bundle> snoozedAlarmsList = new ArrayList<>();
-        Enumeration<Integer> keys = Objects.requireNonNull(snoozedAlarms.getValue()).keys();
-        while (keys.hasMoreElements()) {
-            snoozedAlarmsList.add(snoozedAlarms.getValue().get(keys.nextElement()));
-        }
-        return snoozedAlarmsList;
-    }
+	public static void clearSnoozedAlarms() {
+		snoozedAlarms.setValue(new Hashtable<>());
+	}
 
-    public static LiveData<Dictionary<Integer, Bundle>> getSnoozedAlarmsLiveData() {
-        return snoozedAlarms;
-    }
+	public static boolean isSnoozedAlarmsEmpty() {
+		return Objects.requireNonNull(snoozedAlarms.getValue()).isEmpty();
+	}
+
+	public static Enumeration<Integer> getSnoozedAlarmIds() {
+		return Objects.requireNonNull(snoozedAlarms.getValue()).keys();
+	}
+
+	public static Bundle getSnoozedAlarm(int alarmID) {
+		return Objects.requireNonNull(snoozedAlarms.getValue()).get(alarmID);
+	}
+
+	@NonNull
+	public static ArrayList<Bundle> getSnoozedAlarms() {
+		ArrayList<Bundle> snoozedAlarmsList = new ArrayList<>();
+		Enumeration<Integer> keys = Objects.requireNonNull(snoozedAlarms.getValue()).keys();
+		while (keys.hasMoreElements()) {
+			snoozedAlarmsList.add(snoozedAlarms.getValue().get(keys.nextElement()));
+		}
+		return snoozedAlarmsList;
+	}
+
+	public static LiveData<Dictionary<Integer, Bundle>> getSnoozedAlarmsLiveData() {
+		return snoozedAlarms;
+	}
 }
 

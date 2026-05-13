@@ -711,7 +711,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 				final int alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
 
-				AlarmRingDS.addSnoozedAlarm(alarmID, alarmDetails);
+				AlarmRingDS.addSnoozedAlarm(alarmID, alarmDetails, self);
 
 				// Calculate the remaining snooze time after subtracting the time
 				// for which the alarm was already ringing, so the next ring occurs
@@ -740,7 +740,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 					public void onTick(long millisUntilFinished) {
 						if (!isThisServiceRunning) {
 							cancel();
-							AlarmRingDS.removeSnoozedAlarm(alarmID);
+							AlarmRingDS.removeSnoozedAlarm(alarmID, self);
 						}
 					}
 
@@ -749,7 +749,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 						Log.e(ConstantsAndStatics.DEBUG_TAG, "Snooze over");
 						AlarmRingDS.enqueueRingQ(alarmDetails);
 						tryRingNextAlarm();
-						AlarmRingDS.removeSnoozedAlarm(alarmID);
+						AlarmRingDS.removeSnoozedAlarm(alarmID, self);
 					}
 				};
 				notificationManager.notify(notifID, buildSnoozeNotification());
@@ -787,7 +787,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		stopRinging();
 		cancelPendingIntent(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID));
-		AlarmRingDS.removeSnoozedAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID));
+		AlarmRingDS.removeSnoozedAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), this);
 
 		Thread thread_toggleAlarm =
 				new Thread(() -> alarmDatabase.alarmDAO()

@@ -18,17 +18,22 @@
 
 package in.basulabs.shakealarmclock.frontend;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.Dictionary;
+import java.util.Objects;
 
 import in.basulabs.shakealarmclock.R;
 import in.basulabs.shakealarmclock.backend.AlarmRingDS;
@@ -40,6 +45,21 @@ public class Activity_SnoozedAlarms extends AppCompatActivity implements
 	private RecyclerView snoozedAlarmsRecyclerView;
 	private SnoozedAlarmAdapter snoozedAlarmAdapter;
 
+	private final BroadcastReceiver snoozedAlarmDismissedReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (Objects.equals(intent.getAction(),
+					ConstantsAndStatics.ACTION_SNOOZED_ALARMS_MODIFIED)) {
+				Log.e(ConstantsAndStatics.DEBUG_TAG,
+						"In onReceive() of snoozedAlarmDismissedReceiver");
+				onSnoozedAlarmDictModified();
+			}
+		}
+	};
+
+	// --------------------------------------------------------------------------------------------
+
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -49,11 +69,26 @@ public class Activity_SnoozedAlarms extends AppCompatActivity implements
 
 		snoozedAlarmsRecyclerView = findViewById(R.id.snoozed_alarms_recyclerView);
 		snoozedAlarmsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-		snoozedAlarmAdapter = new SnoozedAlarmAdapter(AlarmRingDS.getSnoozedAlarms(),this, this);
+		snoozedAlarmAdapter = new SnoozedAlarmAdapter(AlarmRingDS.getSnoozedAlarms(), this, this);
 		snoozedAlarmsRecyclerView.setAdapter(snoozedAlarmAdapter);
 
-		AlarmRingDS.getSnoozedAlarmsLiveData().observe(this, this::onSnoozedAlarmDictModified);
+		ContextCompat.registerReceiver(this, snoozedAlarmDismissedReceiver,
+				new IntentFilter(ConstantsAndStatics.ACTION_SNOOZED_ALARMS_MODIFIED),
+				ContextCompat.RECEIVER_NOT_EXPORTED);
 	}
+
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+
+		try {
+			unregisterReceiver(snoozedAlarmDismissedReceiver);
+		} catch (Exception ignored) {}
+	}
+
+	// --------------------------------------------------------------------------------------------
 
 	@Override
 	public void onDismissed(int rowNumber, @NonNull Bundle alarmData) {
@@ -65,29 +100,23 @@ public class Activity_SnoozedAlarms extends AppCompatActivity implements
 		sendBroadcast(intent);
 
 		Log.e(ConstantsAndStatics.DEBUG_TAG, "In onDismissed() after sending broadcast");
-
-		if (AlarmRingDS.isSnoozedAlarmsEmpty()) {
-			Log.e(ConstantsAndStatics.DEBUG_TAG, "No further alarms, finishing activity");
-			finish();
-		}
-		else {
-			snoozedAlarmAdapter = new SnoozedAlarmAdapter(AlarmRingDS.getSnoozedAlarms(),this, this);
-			snoozedAlarmsRecyclerView.swapAdapter(snoozedAlarmAdapter, true);
-			Log.e(ConstantsAndStatics.DEBUG_TAG, "Adapter updated");
-		}
-//		snoozedAlarmAdapter.notifyItemRemoved(rowNumber);
 	}
 
-	private void onSnoozedAlarmDictModified(@NonNull Dictionary<Integer, Bundle> integerBundleDictionary) {
+	// --------------------------------------------------------------------------------------------
+
+	protected void onSnoozedAlarmDictModified() {
 
 		Log.e(ConstantsAndStatics.DEBUG_TAG, "In onSnoozedAlarmDictModified()");
 
 		if (AlarmRingDS.isSnoozedAlarmsEmpty()) {
 			Log.e(ConstantsAndStatics.DEBUG_TAG, "No further alarms, finishing activity");
+			Toast.makeText(this, "No snoozed alarms", Toast.LENGTH_SHORT).show();
 			finish();
 		} else {
-			Log.e(ConstantsAndStatics.DEBUG_TAG, "In onSnoozedAlarmDictModified(), Adapter updated");
-			snoozedAlarmAdapter = new SnoozedAlarmAdapter(AlarmRingDS.getSnoozedAlarms(),this, this);
+			Log.e(ConstantsAndStatics.DEBUG_TAG,
+					"In onSnoozedAlarmDictModified(), Adapter updated");
+			snoozedAlarmAdapter = new SnoozedAlarmAdapter(AlarmRingDS.getSnoozedAlarms(), this,
+					this);
 			snoozedAlarmsRecyclerView.swapAdapter(snoozedAlarmAdapter, false);
 		}
 	}
