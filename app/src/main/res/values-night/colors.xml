@@ -20,7 +20,9 @@
     <color name="colorBackgroundFragment">@android:color/transparent</color>
     <color name="colorBackgroundButton">@android:color/transparent</color>
     <color name="defaultLabelColor">#FFFFFF</color>
+    <color name="colorAccent">#64DD17</color>
     <color name="colorAccentTwo">#FFC107</color>
+    <color name="colorAccentThree">#AEEA00</color>
 
     <color name="surface">#000000</color>
 </resources>

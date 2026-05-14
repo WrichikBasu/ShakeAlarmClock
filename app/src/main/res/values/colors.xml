@@ -21,6 +21,8 @@
     <color name="colorPrimaryDark">#2196F3</color>
     <color name="colorAccent">#3F51B5</color>
     <color name="colorAccentTwo">#7B3FF2</color>
+    <color name="colorAccentThree">#608108</color>
+
     <color name="yellow">#FFD700</color>
     <color name="red">#FF0000</color>
 
