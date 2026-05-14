@@ -200,7 +200,6 @@ public class Activity_AlarmDetails extends AppCompatActivity implements
 			@Override
 			public void handleOnBackPressed() {
 				whenBackPressed();
-				finish();
 			}
 		});
 
