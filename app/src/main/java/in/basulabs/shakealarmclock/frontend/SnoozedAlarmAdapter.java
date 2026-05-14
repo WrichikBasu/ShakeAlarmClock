@@ -35,6 +35,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 import in.basulabs.shakealarmclock.R;
@@ -49,7 +52,7 @@ public class SnoozedAlarmAdapter extends RecyclerView.Adapter<SnoozedAlarmAdapte
 
 	private Context context;
 
-	//---------------------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------
 
 	/**
 	 * An interface to listen to user action on each item of the RecyclerView.
@@ -65,7 +68,7 @@ public class SnoozedAlarmAdapter extends RecyclerView.Adapter<SnoozedAlarmAdapte
 		void onDismissed(int rowNumber, @NonNull Bundle alarmData);
 	}
 
-	//---------------------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------
 
 	public static class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -97,7 +100,7 @@ public class SnoozedAlarmAdapter extends RecyclerView.Adapter<SnoozedAlarmAdapte
 		}
 	}
 
-	//---------------------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------
 
 	/**
 	 * A constructor.
@@ -115,13 +118,13 @@ public class SnoozedAlarmAdapter extends RecyclerView.Adapter<SnoozedAlarmAdapte
 		this.context = context;
 	}
 
-	//---------------------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------
 
 	public void setContext(Context context) {
 		this.context = context;
 	}
 
-	//---------------------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------
 
 	@NonNull
 	@Override
@@ -131,7 +134,7 @@ public class SnoozedAlarmAdapter extends RecyclerView.Adapter<SnoozedAlarmAdapte
 		return new ViewHolder(listItem);
 	}
 
-	//---------------------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------
 
 	@SuppressLint("SetTextI18n")
 	@Override
@@ -141,27 +144,26 @@ public class SnoozedAlarmAdapter extends RecyclerView.Adapter<SnoozedAlarmAdapte
 
 		final int alarmHour = alarmData.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR);
 		final int alarmMinute = alarmData.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE);
+		final int snoozeCount = alarmData.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_COUNT, 0);
 
-		if (DateFormat.is24HourFormat(context)) {
-			holder.originalTimeTextView.setText(
-					context.getResources().getString(R.string.time_24hour, alarmHour, alarmMinute));
-		} else {
-			String amPm = alarmHour < 12 ? "AM" : "PM";
+		holder.originalTimeTextView.setText(getFormattedDate(alarmHour, alarmMinute));
 
-			int displayHour;
+		ZonedDateTime alarmDateTime = ZonedDateTime.of(
+				LocalDateTime.of(
+						alarmData.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_YEAR),
+						alarmData.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MONTH),
+						alarmData.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_DAY),
+						alarmData.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR),
+						alarmData.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE), 0,
+						0),
+				ZoneId.systemDefault());
 
-			if ((alarmHour > 0) && (alarmHour <= 12)) {
-				displayHour = alarmHour;
-			} else if (alarmHour > 12 && alarmHour <= 23) {
-				displayHour = alarmHour - 12;
-			} else {
-				displayHour = alarmHour + 12;
-			}
+		ZonedDateTime newAlarmDateTime = alarmDateTime.plusMinutes(
+				(long) snoozeCount * alarmData.getInt(
+						ConstantsAndStatics.BUNDLE_KEY_SNOOZE_TIME_IN_MINS));
 
-			holder.originalTimeTextView.setText(
-					context.getResources().getString(R.string.time_12hour, displayHour,
-							alarmMinute, amPm));
-		}
+		holder.snoozedTimeTextView.setText(getFormattedDate(newAlarmDateTime.getHour(),
+				newAlarmDateTime.getMinute()));
 
 		ArrayList<Integer> repeatDays;
 
@@ -200,7 +202,30 @@ public class SnoozedAlarmAdapter extends RecyclerView.Adapter<SnoozedAlarmAdapte
 				view -> listener.onDismissed(holder.getLayoutPosition(), alarmData));
 	}
 
-	//---------------------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------
+
+	private String getFormattedDate(int hour, int mins) {
+
+		if (DateFormat.is24HourFormat(context)) {
+			return context.getResources().getString(R.string.time_24hour, hour, mins);
+		} else {
+			String amPm = hour < 12 ? "AM" : "PM";
+
+			int displayHour;
+
+			if ((hour > 0) && (hour <= 12)) {
+				displayHour = hour;
+			} else if (hour > 12 && hour <= 23) {
+				displayHour = hour - 12;
+			} else {
+				displayHour = hour + 12;
+			}
+
+			return context.getResources().getString(R.string.time_12hour, displayHour, mins, amPm);
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
 
 	private int getChipTextID(int day) {
 		return day == 1 ? R.string.sunday : day == 2 ? R.string.monday :
@@ -209,7 +234,7 @@ public class SnoozedAlarmAdapter extends RecyclerView.Adapter<SnoozedAlarmAdapte
 								day == 6 ? R.string.friday : R.string.saturday;
 	}
 
-	//---------------------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------
 
 	/**
 	 * Get the number of items in the current instance of the adapter.

@@ -707,15 +707,14 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		if (alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
 
-			if (snoozeCount < alarmDetails.getInt(
-					ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY)) {
+			if (snoozeCount < alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_FREQUENCY)) {
 
 				alarmDetails.remove(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_COUNT);
 				alarmDetails.putInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_COUNT, ++snoozeCount);
 
 				final int alarmID = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
 
-				AlarmRingDS.addSnoozedAlarm(alarmID, alarmDetails, self);
+				AlarmRingDS.addSnoozedAlarm(alarmID, alarmDetails, this);
 
 				// Calculate the remaining snooze time after subtracting the time
 				// for which the alarm was already ringing, so the next ring occurs
