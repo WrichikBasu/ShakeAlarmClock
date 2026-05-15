@@ -25,10 +25,10 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -36,6 +36,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+
+import com.google.android.material.button.MaterialButton;
 
 import java.time.LocalTime;
 import java.util.Objects;
@@ -79,7 +81,7 @@ public class Activity_RingAlarm extends AppCompatActivity implements View.OnClic
 
 		TextView alarmTimeTextView = findViewById(R.id.alarmTimeTextView2);
 		TextView alarmMessageTextView = findViewById(R.id.alarmmessageTextView);
-		Button snoozeButton = findViewById(R.id.snoozeButton);
+		MaterialButton snoozeButton = findViewById(R.id.snoozeButton);
 		ImageButton cancelButton = findViewById(R.id.cancelButton);
 
 		LocalTime localTime = LocalTime.now();
@@ -149,15 +151,15 @@ public class Activity_RingAlarm extends AppCompatActivity implements View.OnClic
 	public void onClick(@NonNull View view) {
 
 		if (view.getId() == R.id.snoozeButton) {
-
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "In onClick() - SNOOZE_ALARM");
 			Intent intent = new Intent(ConstantsAndStatics.ACTION_SNOOZE_ALARM);
-			intent.setPackage(getPackageName())
-			      .putExtras(extras);
+			intent.setPackage(getPackageName()).putExtras(extras);
 			sendBroadcast(intent);
 			finish();
 
 		} else if (view.getId() == R.id.cancelButton) {
 
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "In onClick() - CANCEL_ALARM");
 			Intent intent1 = new Intent(ConstantsAndStatics.ACTION_CANCEL_ALARM);
 			intent1.setPackage(getPackageName()).putExtras(extras);
 			sendBroadcast(intent1);

@@ -37,8 +37,8 @@
         <item name="android:layout_width">0dp</item>
         <item name="strokeColor">@color/colorAccent</item>
         <item name="strokeWidth">2dp</item>
+        <item name="android:backgroundTint">@android:color/transparent</item>
         <item name="android:textColor">@color/colorAccent</item>
-        <item name="background">@android:color/transparent</item>
         <item name="cornerRadius">10dp</item>
         <item name="android:layout_height">wrap_content</item>
     </style>
@@ -64,18 +64,13 @@
         <item name="android:textColor">@color/defaultLabelColor</item>
     </style>
 
-    <style name="Theme.AppCompat.Translucent">
+    <style name="Theme.RingAlarm" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="windowNoTitle">true</item>
-        <item name="android:windowNoDisplay">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowAnimationStyle">@android:style/Animation</item>
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowActionBarOverlay">false</item>
-        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSurface">@color/surface</item>
     </style>
 
 

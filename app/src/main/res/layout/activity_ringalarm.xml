@@ -56,7 +56,7 @@
         app:layout_constraintTop_toBottomOf="@+id/alarmmessageTextView"
         tools:ignore="HardcodedText" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/snoozeButton"
         style="@style/button_style_default"
         app:strokeColor="@color/yellow"
@@ -65,8 +65,8 @@
         android:paddingHorizontal="40sp"
         android:paddingVertical="20sp"
         android:textSize="30sp"
-        app:strokeWidth="5sp"
-        app:cornerRadius="50sp"
+        app:strokeWidth="5dp"
+        app:cornerRadius="50dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"

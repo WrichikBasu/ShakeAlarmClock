@@ -150,13 +150,13 @@
             android:screenOrientation="sensorPortrait"
             android:showOnLockScreen="true"
             android:taskAffinity=""
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/Theme.RingAlarm" />
 
         <activity
             android:name=".frontend.Activity_RingtonePicker"
             android:enabled="true"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.RINGTONE_PICKER" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -185,7 +185,7 @@
             android:configChanges="uiMode|orientation|keyboard|colorMode"
             android:enabled="true"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat.Translucent">
+            android:theme="@style/Theme.RingAlarm">
 
             <intent-filter>
                 <action android:name="android.intent.action.DISMISS_ALARM" />
