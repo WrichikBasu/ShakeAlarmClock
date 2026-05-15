@@ -25,6 +25,8 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar3"
         android:layout_width="0dp"
+        app:titleTextColor="@color/toolbarTextColor"
+        app:navigationIconTint="@color/toolbarTextColor"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"

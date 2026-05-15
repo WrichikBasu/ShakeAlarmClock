@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
   ~
@@ -17,14 +16,32 @@
   ~
   -->
 
-<shape
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="128dp"
+    android:height="128dp"
+    android:viewportWidth="128"
+    android:viewportHeight="128">
 
-    <solid
-        android:color="#FF0000"/>
+  <!-- Red Circle -->
+  <path
+      android:fillColor="#00000000"
+      android:strokeColor="#FF0000"
+      android:strokeWidth="8"
+      android:pathData="M64,8
+                          A56,56 0 1,1 63.9,8" />
 
-    <size
-        android:width="80dp"
-        android:height="80dp"/>
-</shape>
+  <!-- X Line 1 -->
+  <path
+      android:strokeColor="#FF0000"
+      android:strokeWidth="12"
+      android:strokeLineCap="round"
+      android:pathData="M36,36 L92,92" />
+
+  <!-- X Line 2 -->
+  <path
+      android:strokeColor="#FF0000"
+      android:strokeWidth="12"
+      android:strokeLineCap="round"
+      android:pathData="M92,36 L36,92" />
+
+</vector>

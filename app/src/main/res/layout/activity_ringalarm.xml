@@ -58,12 +58,20 @@
 
     <Button
         android:id="@+id/snoozeButton"
+        style="@style/button_style_default"
+        app:strokeColor="@color/yellow"
+        android:textColor="@color/yellow"
+        android:textStyle="bold"
+        android:paddingHorizontal="40sp"
+        android:paddingVertical="20sp"
+        android:textSize="30sp"
+        app:strokeWidth="5sp"
+        app:cornerRadius="50sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="16dp"
-        android:background="@drawable/button_border_ring"
         android:text="@string/snoozeAlarm"
         android:textAllCaps="true"
         app:layout_constraintBottom_toTopOf="@+id/cancelButton"
@@ -72,16 +80,18 @@
         app:layout_constraintTop_toBottomOf="@+id/alarmTimeTextView2" />
 
     <ImageButton
-        android:id="@+id/cancelButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="80dp"
-        android:background="@drawable/alarm_cancel_btn_background"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/ic_baseline_close_24"
-        tools:ignore="ContentDescription" />
+    android:id="@+id/cancelButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:src="@drawable/ic_cross_red"
+    android:background="@android:color/transparent"
+    android:scaleType="fitCenter"
+    android:adjustViewBounds="true"
+    android:padding="0dp"
+    android:layout_marginBottom="80dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

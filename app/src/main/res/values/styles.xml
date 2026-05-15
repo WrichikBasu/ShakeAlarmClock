@@ -26,19 +26,6 @@
         <item name="colorSurface">@color/surface</item>
     </style>
 
-    <style name="transparentButtonStyle">
-        <item name="android:clickable">true</item>
-        <item name="android:linksClickable">false</item>
-        <item name="android:longClickable">false</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:textSize">17sp</item>
-        <item name="android:textAlignment">viewStart</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:background">@android:color/transparent</item>
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-    </style>
-
     <style name="button_style_default" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:clickable">true</item>
         <item name="android:linksClickable">false</item>

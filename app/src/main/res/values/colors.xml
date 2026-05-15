@@ -30,6 +30,8 @@
     <color name="colorBackgroundButton">#FFFFFF</color>
     <color name="defaultLabelColor">#000000</color>
 
+    <color name="toolbarTextColor">#FFFFFF</color>
+
     <color name="disabledColor">#BDBCBC</color>
 
     <color name="surface">#FFFFFF</color>
