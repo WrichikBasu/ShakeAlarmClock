@@ -129,6 +129,11 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	private PowerManager.WakeLock wakeLock;
 	private IntentFilter intentFilter;
 
+	private String getAlarmTag(@NonNull Bundle alarmDetails) {
+		return (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR) + ":"
+				+ alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+	}
+
 	//----------------------------------------------------------------------------------
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -138,18 +143,24 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_SNOOZE_ALARM))
 				snoozeAlarm(Objects.requireNonNull(intent.getExtras()));
 
-			else if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_CANCEL_ALARM))
+			else if (Objects.equals(intent.getAction(), ConstantsAndStatics.ACTION_CANCEL_ALARM)) {
+				Log.e(ConstantsAndStatics.DEBUG_TAG, "In onReceive() - CANCEL_ALARM");
 				dismissAlarm(Objects.requireNonNull(intent.getExtras()), true);
+			}
 
 			else if (Objects.equals(intent.getAction(), Intent.ACTION_SCREEN_OFF) &&
 					 currentAlarm != null) {
 				// Listen to screen off action only if an alarm is currently ringing.
 
-				if (powerBtnAction == ConstantsAndStatics.DISMISS)
+				if (powerBtnAction == ConstantsAndStatics.DISMISS) {
+					Log.e(ConstantsAndStatics.DEBUG_TAG, "In onReceive() - SCREEN_OFF - DISMISS");
 					dismissAlarm(currentAlarm, true);
+				}
 
-				else if (powerBtnAction == ConstantsAndStatics.SNOOZE)
+				else if (powerBtnAction == ConstantsAndStatics.SNOOZE) {
+					Log.e(ConstantsAndStatics.DEBUG_TAG, "In onReceive() - SCREEN_OFF - SNOOZE");
 					snoozeAlarm(currentAlarm);
+				}
 			}
 		}
 	};
@@ -242,7 +253,6 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 		if (!AlarmRingDS.isRingQEmpty() && self.currentAlarm == null) {
 			self.ringAlarm();
-			Log.e(ConstantsAndStatics.DEBUG_TAG, "Ringing alarm");
 		}
 	}
 
@@ -380,9 +390,9 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 		createNotificationChannel();
 		int flags = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
-		                                                                    Integer.toString(
-				                                                                    ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM))
+		NotificationCompat.Builder builder
+				= new NotificationCompat.Builder(this,
+				Integer.toString(ConstantsAndStatics.NOTIF_CHANNEL_ID_ALARM))
 				.setContentTitle(getResources().getString(R.string.app_name))
 				.setPriority(NotificationCompat.PRIORITY_MAX)
 				.setCategory(NotificationCompat.CATEGORY_ALARM)
@@ -517,11 +527,10 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	 * Dequeues an alarm from {@link AlarmRingDS}, and starts ringing the alarm.
 	 */
 	private void ringAlarm() {
-
-		Log.e(ConstantsAndStatics.DEBUG_TAG, "In ringAlarm()");
-
 		Bundle alarmDetails = AlarmRingDS.dequeueRingQ();
 		loadRepeatDays(alarmDetails);
+
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In ringAlarm(): " + getAlarmTag(alarmDetails));
 
 		Uri chosenToneUri = alarmDetails.getParcelable(
 				ConstantsAndStatics.BUNDLE_KEY_ALARM_TONE_URI);
@@ -536,7 +545,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			actualToneURI = Settings.System.DEFAULT_ALARM_ALERT_URI;
 		}
 
-		CountDownTimer ringTimer = new CountDownTimer(60000, 1000) {
+		ringTimer = new CountDownTimer(60000, 1000) {
 
 			@Override
 			public void onTick(long millisUntilFinished) {
@@ -546,6 +555,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 			@Override
 			public void onFinish() {
+				Log.e(ConstantsAndStatics.DEBUG_TAG, "In onFinish() of ringTimer: " + getAlarmTag(alarmDetails));
 				snoozeAlarm(alarmDetails);
 			}
 		};
@@ -595,7 +605,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				@Override
 				public void resume() {
 
-					Log.e(ConstantsAndStatics.DEBUG_TAG, "Focus received");
+					Log.e(ConstantsAndStatics.DEBUG_TAG, "Focus received: " + getAlarmTag(alarmDetails));
 
 					if (mediaPlayer == null)
 						return;
@@ -621,10 +631,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 					// Start alarm sound
 					mediaPlayer.start();
 
-					Log.e(ConstantsAndStatics.DEBUG_TAG, "RINGING: "
-							+ alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR)
-							+ ":" + alarmDetails.getInt(
-							ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+					Log.e(ConstantsAndStatics.DEBUG_TAG, "RINGING: " + getAlarmTag(alarmDetails));
 
 					// Start vibration
 					if (alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_TYPE) ==
@@ -639,7 +646,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 
 			afController = afcBuilder.setAudioFocusChangeListener(afListener).build();
 			afController.requestFocus();
-			Log.e(ConstantsAndStatics.DEBUG_TAG, "Focus requested");
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "Focus requested: " + getAlarmTag(alarmDetails));
 
 		} else {  // Only vibration, no sound
 			currentAlarm = alarmDetails;
@@ -647,9 +654,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			ringTimer.start();
 			ContextCompat.registerReceiver(this, broadcastReceiver, intentFilter,
 			                               ContextCompat.RECEIVER_NOT_EXPORTED);
-			Log.e(ConstantsAndStatics.DEBUG_TAG, "RINGING: "
-					+ alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR)
-					+ ":" + alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "RINGING: " + getAlarmTag(alarmDetails));
 		}
 
 	}
@@ -689,21 +694,23 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	 */
 	private void snoozeAlarm(@NonNull Bundle alarmDetails) {
 
-		Log.e(ConstantsAndStatics.DEBUG_TAG, "In snoozeAlarm()");
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In snoozeAlarm(): " + getAlarmTag(alarmDetails));
 
 		if (AlarmRingDS.getSnoozedAlarm(
 				alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID)) != null) {
-			Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm already snoozed");
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "Alarm already snoozed: " + getAlarmTag(alarmDetails));
 			return;
 		}
 
-		if (currentAlarm == alarmDetails)
+		stopRinging(alarmDetails);
+		// IMPORTANT!! Keep this (↓) AFTER stopRinging() (↑)
+		if (currentAlarm != null &&
+				currentAlarm.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID) ==
+						alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID))
 			currentAlarm = null;
 
-		stopRinging();
-
 		int snoozeCount = alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_SNOOZE_COUNT, 0);
-		Log.e(ConstantsAndStatics.DEBUG_TAG, "snoozeCount = " + snoozeCount);
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "For " + getAlarmTag(alarmDetails) + ": snoozeCount = " + snoozeCount);
 
 		if (alarmDetails.getBoolean(ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
 
@@ -742,6 +749,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 					@Override
 					public void onTick(long millisUntilFinished) {
 						if (!isThisServiceRunning) {
+							Log.e(ConstantsAndStatics.DEBUG_TAG, "In snoozeTimer: " + getAlarmTag(alarmDetails) + " - SERVICE NOT RUNNING");
 							cancel();
 							AlarmRingDS.removeSnoozedAlarm(alarmID, self);
 						}
@@ -749,13 +757,14 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 							// Implies that the alarm has been dismissed. The timer has to be cancelled.
 							// NO further actions will be taken, though, as they will be handled by the
 							// dismissAlarm() method.
+							Log.e(ConstantsAndStatics.DEBUG_TAG, "In snoozeTimer: " + getAlarmTag(alarmDetails) + " - ALARM DISMISSED");
 							cancel();
 						}
 					}
 
 					@Override
 					public void onFinish() {
-						Log.e(ConstantsAndStatics.DEBUG_TAG, "Snooze over");
+						Log.e(ConstantsAndStatics.DEBUG_TAG, "Snooze over: " + getAlarmTag(alarmDetails));
 						AlarmRingDS.enqueueRingQ(alarmDetails);
 						tryRingNextAlarm();
 						AlarmRingDS.removeSnoozedAlarm(alarmID, self);
@@ -763,17 +772,16 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 				};
 				notificationManager.notify(notifID, buildSnoozeNotification());
 				snoozeTimer.start();
-				Log.e(ConstantsAndStatics.DEBUG_TAG, "SNOOZED: "
-						+ alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR) + ":"
-						+ alarmDetails.getInt(
-						ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE) + "duration: " + millisInFuture / 1000 + "s");
+				Log.e(ConstantsAndStatics.DEBUG_TAG, "SNOOZED: " + getAlarmTag(alarmDetails) + " duration: " + millisInFuture / 1000 + "s");
 				tryRingNextAlarm();
 
 			} else { // Snooze frequency reached
+				Log.e(ConstantsAndStatics.DEBUG_TAG, "In dismissAlarm(): " + getAlarmTag(alarmDetails) + " - SNOOZE FREQUENCY REACHED");
 				dismissAlarm(alarmDetails, true);
 			}
 
 		} else { // No snooze
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "In dismissAlarm(): " + getAlarmTag(alarmDetails) + " - NO SNOOZE");
 			dismissAlarm(alarmDetails, true);
 		}
 	}
@@ -789,12 +797,15 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	 */
 	private void dismissAlarm(@NonNull Bundle alarmDetails) {
 
-		Log.e(ConstantsAndStatics.DEBUG_TAG, "In dismissAlarm()");
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In dismissAlarm(): " + getAlarmTag(alarmDetails));
 
-		if (currentAlarm == alarmDetails)
+		stopRinging(alarmDetails);
+		// IMPORTANT!! Keep this (↓) AFTER stopRinging() (↑)
+		if (currentAlarm != null &&
+				currentAlarm.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID) ==
+						alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID))
 			currentAlarm = null;
 
-		stopRinging();
 		cancelPendingIntent(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID));
 		AlarmRingDS.removeSnoozedAlarm(alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID), this);
 
@@ -854,9 +865,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 			} catch (InterruptedException ignored) {}
 		}
 
-		Log.e(ConstantsAndStatics.DEBUG_TAG, "DISMISSED: "
-				+ alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_HOUR) + ":"
-				+ alarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_MINUTE));
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "DISMISSED: " + getAlarmTag(alarmDetails));
 
 		if (AlarmRingDS.isRingQEmpty() && AlarmRingDS.isSnoozedAlarmsEmpty() && currentAlarm == null) {
 			stopForeground(true);
@@ -875,6 +884,7 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	 */
 	@SuppressWarnings("SameParameterValue")
 	private void dismissAlarm(@NonNull Bundle alarmDetails, boolean tryRingNextAlarm) {
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In dismissAlarm2(): " + getAlarmTag(alarmDetails));
 		dismissAlarm(alarmDetails);
 
 		if (tryRingNextAlarm)
@@ -887,7 +897,17 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 	 * Stops the ringing alarm. Also sends a broadcast to {@link Activity_RingAlarm} to
 	 * finish itself.
 	 */
-	private void stopRinging() {
+	private void stopRinging(@NonNull Bundle callerAlarmDetails) {
+
+		// Only stop ringing if the caller is the currently ringing alarm.
+		// This prevents a stale ringTimer from a dismissed alarm from
+		// tearing down the media player of the next alarm.
+		if (currentAlarm == null ||
+				callerAlarmDetails.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID) !=
+						currentAlarm.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID)) {
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "In stopRinging(): caller is not current alarm");
+			return;
+		}
 
 		// Do NOT unregister the receiver here, as we may still get dismiss broadcasts from
 		// Activity_RingAlarm.
@@ -1012,8 +1032,10 @@ public class Service_RingAlarm extends Service implements SensorEventListener {
 							ConstantsAndStatics.SNOOZE) == ConstantsAndStatics.SNOOZE
 							&& currentAlarm.getBoolean(
 							ConstantsAndStatics.BUNDLE_KEY_IS_SNOOZE_ON)) {
+						Log.e(ConstantsAndStatics.DEBUG_TAG, "In onSensorChanged() - SNOOZE: " + getAlarmTag(currentAlarm));
 						snoozeAlarm(currentAlarm);
 					} else {
+						Log.e(ConstantsAndStatics.DEBUG_TAG, "In onSensorChanged() - DISMISS: " + getAlarmTag(currentAlarm));
 						dismissAlarm(currentAlarm, true);
 					}
 				}
