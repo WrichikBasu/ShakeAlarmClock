@@ -22,6 +22,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -29,6 +31,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -62,10 +65,26 @@ public class Activity_SnoozedAlarms extends AppCompatActivity implements
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_snoozed_alarms);
+		setSupportActionBar(findViewById(R.id.toolbar100));
 
 		Log.e(ConstantsAndStatics.DEBUG_TAG, "In onCreate()");
+
+		Objects.requireNonNull(getSupportActionBar()).setTitle("Snoozed alarms");
+
+		SharedPreferences sharedPref = ConstantsAndStatics.getSharedPref(this);
+
+		// Find and set the app theme:
+		int defaultTheme = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
+				ConstantsAndStatics.THEME_SYSTEM : ConstantsAndStatics.THEME_AUTO_TIME;
+		if (savedInstanceState == null) {
+			AppCompatDelegate
+					.setDefaultNightMode(ConstantsAndStatics.getTheme(
+							sharedPref.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME,
+									defaultTheme)));
+		}
 
 		snoozedAlarmsRecyclerView = findViewById(R.id.snoozed_alarms_recyclerView);
 		snoozedAlarmsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
