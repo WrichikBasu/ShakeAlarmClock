@@ -21,12 +21,12 @@ apply plugin: 'com.android.application'
 android {
     namespace 'in.basulabs.shakealarmclock'
 
-    compileSdk = 36 // https://stackoverflow.com/a/79737057/8387076
+    compileSdk = 37 // https://stackoverflow.com/a/79737057/8387076
 
     defaultConfig {
         applicationId "in.basulabs.shakealarmclock"
         minSdkVersion 23
-        targetSdkVersion 36
+        targetSdkVersion 37
         versionCode 38
         versionName "5.0.0-beta.2"
 
