@@ -5,8 +5,8 @@
 ![GitHub license](https://img.shields.io/github/license/WrichikBasu/ShakeAlarmClock?style=for-the-badge)   &nbsp; 
 ![GitHub All Releases](https://img.shields.io/github/downloads/WrichikBasu/ShakeAlarmClock/total?style=for-the-badge)
 
-![](https://img.shields.io/badge/Min_SDK-Marshmallow_(SDK_23)-%2306486b?style=for-the-badge) &nbsp; 
-![Target SDK version](https://img.shields.io/badge/target_SDK-Android%2014%20(API%2034)-9cf?style=for-the-badge)  
+![](https://img.shields.io/badge/Min_SDK-23%20(Marshmallow)-%2306486b?style=for-the-badge) &nbsp; 
+![Target SDK version](https://img.shields.io/badge/target_SDK-36%20(Baklava)-23029c?style=for-the-badge)  
 
 ![GitHub Release](https://img.shields.io/github/v/release/WrichikBasu/ShakeAlarmClock?sort=date&display_name=tag&style=for-the-badge)
  &nbsp;
@@ -18,16 +18,14 @@
 Tired of pressing the power button/swiping the screen every time an alarm rings? Does your phone's UI have a tendency to freeze, thereby making it impossible to dismiss an alarm? No worries! You have come to the right place. With this app, you can simply shake your phone and dismiss the alarm.
 
 
-## Salient features:
-1. Works offline.
-1. No advertisements.
+## Salient features
+1. Works completely offline.
+1. No advertisements, no tracking, no analytics.
 1. Alarms are unique by alarm time. This means that you cannot have two alarms at the same time, even if they are on different dates.
 1. Each alarm is independent of other alarms. This means that the alarm volume, ringtone, etc. will not be carried over to another alarm unless you do so manually.
-1. Inbuilt dark theme, even in phones that do not support it.
+1. Inbuilt dark theme, even in phones that do not support it natively.
 1. Snooze your alarm as many times as you want with custom snooze options.
-1. The alarm is handled by a Service which has almost no dependency on the UI. So, even if your UI freezes, the alarm will ring and can be dismissed.
-1. Uses latest Android Room database for storing alarms.
-1. Actively maintained app. Bug reports will be worked upon with high priority.
+1. The alarm is handled by a Service which has almost no dependency on the UI. So, even if your UI freezes, the alarm will ring and can be dismissed/snoozed.
 
 ## How to install?
 
@@ -36,7 +34,7 @@ Tired of pressing the power button/swiping the screen every time an alarm rings?
 <a href='https://play.google.com/store/apps/details?id=in.basulabs.shakealarmclock'><img alt='Get it on Google Play!' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="200" /></a>
 <a href='https://apt.izzysoft.de/fdroid/index/apk/in.basulabs.shakealarmclock/'><img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" width="200" /></a>
 
-
+✅ App package is registered on Google Play, so feel free to use the app from any source you like!
 
 ## How to contribute?
 ### Bug reports
