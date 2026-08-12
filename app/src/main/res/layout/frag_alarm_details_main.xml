@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2024  Wrichik Basu (basulabs.developer@gmail.com)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
--->
+  ~ Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published
+  ~ by the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~
+  -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -29,7 +30,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         android:layout_marginStart="5dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="5dp"
-        android:background="@drawable/button_border"
+        style="@style/button_style_default"
+        app:strokeColor="@color/colorAccentThree"
+        android:textColor="@color/colorAccentThree"
         android:text="@string/saveButton"
         android:textAllCaps="true"
         app:layout_constraintEnd_toStartOf="@+id/divider2"
@@ -39,12 +42,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     <Button
         android:id="@+id/cancelButton"
+        style="@style/button_style_default"
+        app:strokeColor="#3F51B5"
+        android:textColor="#3F51B5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="5dp"
-        android:background="@drawable/button_border"
         android:text="@string/cancelButton"
         android:textAllCaps="true"
         app:layout_constraintEnd_toEndOf="parent"

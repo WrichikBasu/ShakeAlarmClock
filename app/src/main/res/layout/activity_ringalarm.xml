@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2024  Wrichik Basu (basulabs.developer@gmail.com)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
--->
+  ~ Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published
+  ~ by the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~
+  -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -55,14 +56,22 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         app:layout_constraintTop_toBottomOf="@+id/alarmmessageTextView"
         tools:ignore="HardcodedText" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/snoozeButton"
+        style="@style/button_style_default"
+        app:strokeColor="@color/yellow"
+        android:textColor="@color/yellow"
+        android:textStyle="bold"
+        android:paddingHorizontal="40sp"
+        android:paddingVertical="20sp"
+        android:textSize="30sp"
+        app:strokeWidth="5dp"
+        app:cornerRadius="50dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="16dp"
-        android:background="@drawable/button_border_ring"
         android:text="@string/snoozeAlarm"
         android:textAllCaps="true"
         app:layout_constraintBottom_toTopOf="@+id/cancelButton"
@@ -71,16 +80,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         app:layout_constraintTop_toBottomOf="@+id/alarmTimeTextView2" />
 
     <ImageButton
-        android:id="@+id/cancelButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="80dp"
-        android:background="@drawable/alarm_cancel_btn_background"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/ic_baseline_close_24"
-        tools:ignore="ContentDescription" />
+    android:id="@+id/cancelButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:src="@drawable/ic_cross_red"
+    android:background="@android:color/transparent"
+    android:scaleType="fitCenter"
+    android:adjustViewBounds="true"
+    android:padding="0dp"
+    android:layout_marginBottom="80dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

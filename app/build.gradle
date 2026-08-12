@@ -1,18 +1,19 @@
 /*
-Copyright (C) 2024  Wrichik Basu (basulabs.developer@gmail.com)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
  */
 
 apply plugin: 'com.android.application'
@@ -20,14 +21,14 @@ apply plugin: 'com.android.application'
 android {
     namespace 'in.basulabs.shakealarmclock'
 
-    compileSdk = 36 // https://stackoverflow.com/a/79737057/8387076
+    compileSdk = 37 // https://stackoverflow.com/a/79737057/8387076
 
     defaultConfig {
         applicationId "in.basulabs.shakealarmclock"
         minSdkVersion 23
-        targetSdkVersion 36
-        versionCode 36
-        versionName "4.2.1"
+        targetSdkVersion 37
+        versionCode 38
+        versionName "5.0.0-beta.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -74,7 +75,7 @@ dependencies {
     annotationProcessor "androidx.room:room-compiler:2.8.4"
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
-    implementation 'com.google.android.material:material:1.13.0'
+    implementation 'com.google.android.material:material:1.14.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'com.github.cachapa:ExpandableLayout:2.9.2'
     implementation 'com.google.code.gson:gson:2.14.0'

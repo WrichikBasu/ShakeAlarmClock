@@ -1,19 +1,20 @@
 /*
-Copyright (C) 2024  Wrichik Basu (basulabs.developer@gmail.com)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
 package in.basulabs.shakealarmclock.backend;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -26,7 +27,6 @@ import android.Manifest;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -195,6 +195,9 @@ public final class ConstantsAndStatics {
 	public static final String BUNDLE_KEY_HAS_USER_CHOSEN_DATE =
 		"in.basulabs.shakealarmclock.HAS_USER_CHOSEN_DATE";
 
+	public static final String ACTION_SNOOZED_ALARMS_MODIFIED =
+		"in.basulabs.shakealarmclock.SNOOZED_ALARMS_MODIFIED";
+
 	/**
 	 * Intent action delivered to {@link android.content.BroadcastReceiver} in
 	 * {@link Service_RingAlarm} instructing it to snooze the alarm.
@@ -276,6 +279,12 @@ public final class ConstantsAndStatics {
 	 */
 	public static final String BUNDLE_KEY_ALARM_ID =
 		"in.basulabs.shakealarmclock.OLD_ALARM_ID";
+
+	/**
+	 * Bundle key for the snooze count.
+	 */
+	public static final String BUNDLE_KEY_SNOOZE_COUNT =
+			"in.basulabs.shakealarmclock.SNOOZE_COUNT";
 
 	/**
 	 * Broadcast action: {@link Activity_RingAlarm} should now be destroyed.
@@ -427,8 +436,7 @@ public final class ConstantsAndStatics {
 
 		UserManager userManager = (UserManager) context.getSystemService(USER_SERVICE);
 
-		boolean shouldProceed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
-			? userManager.isUserUnlocked() : true;
+		boolean shouldProceed = Build.VERSION.SDK_INT < Build.VERSION_CODES.N || userManager.isUserUnlocked();
 
 		if (shouldProceed) {
 			try {
@@ -467,8 +475,7 @@ public final class ConstantsAndStatics {
 
 		UserManager userManager = (UserManager) context.getSystemService(USER_SERVICE);
 
-		boolean shouldProceed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
-			? userManager.isUserUnlocked() : true;
+		boolean shouldProceed = Build.VERSION.SDK_INT < Build.VERSION_CODES.N || userManager.isUserUnlocked();
 
 		if (shouldProceed) {
 			try {
@@ -518,21 +525,6 @@ public final class ConstantsAndStatics {
 		}
 	}
 
-	//-----------------------------------------------------------------------------------
-
-	public static void killServices(Context context, int alarmID) {
-
-		if (Service_RingAlarm.isThisServiceRunning &&
-			Service_RingAlarm.alarmID == alarmID) {
-			Intent intent1 = new Intent(context, Service_RingAlarm.class);
-			context.stopService(intent1);
-		} else if (Service_SnoozeAlarm.isThisServiceRunning &&
-			Service_SnoozeAlarm.alarmID == alarmID) {
-			Intent intent1 = new Intent(context, Service_SnoozeAlarm.class);
-			context.stopService(intent1);
-		}
-	}
-
 	//---------------------------------------------------------------------------------------------------------
 
 	/**
@@ -553,7 +545,7 @@ public final class ConstantsAndStatics {
 
 		LocalDateTime alarmDateTime;
 
-		if (isRepeatOn && repeatDays != null && repeatDays.size() > 0) {
+		if (isRepeatOn && repeatDays != null && !repeatDays.isEmpty()) {
 
 			Collections.sort(repeatDays);
 
@@ -601,11 +593,6 @@ public final class ConstantsAndStatics {
 	 * Notification ID for the channels used for ringing alarms.
 	 */
 	public static final int NOTIF_CHANNEL_ID_ALARM = 621;
-
-	/**
-	 * Notification ID for the channels used for snooze alarms.
-	 */
-	public static final int NOTIF_CHANNEL_ID_SNOOZE = 622;
 
 	/**
 	 * Notification ID for error channel.
@@ -704,20 +691,17 @@ public final class ConstantsAndStatics {
 
 		ArrayList<String> permsList = new ArrayList<>();
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+		PowerManager powerManager =
+			(PowerManager) context.getSystemService(POWER_SERVICE);
+		if (!powerManager.isIgnoringBatteryOptimizations(context.getPackageName())) {
+			permsList.add(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+		}
 
-			PowerManager powerManager =
-				(PowerManager) context.getSystemService(POWER_SERVICE);
-			if (!powerManager.isIgnoringBatteryOptimizations(context.getPackageName())) {
-				permsList.add(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-			}
-
-			NotificationManager notifManager =
-				(NotificationManager) context.getSystemService(
-					Context.NOTIFICATION_SERVICE);
-			if (!notifManager.isNotificationPolicyAccessGranted()) {
-				permsList.add(Manifest.permission.ACCESS_NOTIFICATION_POLICY);
-			}
+		NotificationManager notifManager =
+			(NotificationManager) context.getSystemService(
+				Context.NOTIFICATION_SERVICE);
+		if (!notifManager.isNotificationPolicyAccessGranted()) {
+			permsList.add(Manifest.permission.ACCESS_NOTIFICATION_POLICY);
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

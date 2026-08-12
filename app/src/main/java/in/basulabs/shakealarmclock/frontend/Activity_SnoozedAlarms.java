@@ -1,0 +1,142 @@
+/*
+ * Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+
+package in.basulabs.shakealarmclock.frontend;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.os.Build;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.Objects;
+
+import in.basulabs.shakealarmclock.R;
+import in.basulabs.shakealarmclock.backend.AlarmRingDS;
+import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
+
+public class Activity_SnoozedAlarms extends AppCompatActivity implements
+		SnoozedAlarmAdapter.AdapterInterface {
+
+	private RecyclerView snoozedAlarmsRecyclerView;
+	private SnoozedAlarmAdapter snoozedAlarmAdapter;
+
+	private final BroadcastReceiver snoozedAlarmDismissedReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (Objects.equals(intent.getAction(),
+					ConstantsAndStatics.ACTION_SNOOZED_ALARMS_MODIFIED)) {
+				Log.e(ConstantsAndStatics.DEBUG_TAG,
+						"In onReceive() of snoozedAlarmDismissedReceiver");
+				onSnoozedAlarmDictModified();
+			}
+		}
+	};
+
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onCreate(@Nullable Bundle savedInstanceState) {
+
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_snoozed_alarms);
+		setSupportActionBar(findViewById(R.id.toolbar100));
+
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In onCreate()");
+
+		Objects.requireNonNull(getSupportActionBar()).setTitle("Snoozed alarms");
+
+		SharedPreferences sharedPref = ConstantsAndStatics.getSharedPref(this);
+
+		// Find and set the app theme:
+		int defaultTheme = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
+				ConstantsAndStatics.THEME_SYSTEM : ConstantsAndStatics.THEME_AUTO_TIME;
+		if (savedInstanceState == null) {
+			AppCompatDelegate
+					.setDefaultNightMode(ConstantsAndStatics.getTheme(
+							sharedPref.getInt(ConstantsAndStatics.SHARED_PREF_KEY_THEME,
+									defaultTheme)));
+		}
+
+		snoozedAlarmsRecyclerView = findViewById(R.id.snoozed_alarms_recyclerView);
+		snoozedAlarmsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+		snoozedAlarmAdapter = new SnoozedAlarmAdapter(AlarmRingDS.getSnoozedAlarms(), this, this);
+		snoozedAlarmsRecyclerView.setAdapter(snoozedAlarmAdapter);
+
+		ContextCompat.registerReceiver(this, snoozedAlarmDismissedReceiver,
+				new IntentFilter(ConstantsAndStatics.ACTION_SNOOZED_ALARMS_MODIFIED),
+				ContextCompat.RECEIVER_NOT_EXPORTED);
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+
+		try {
+			unregisterReceiver(snoozedAlarmDismissedReceiver);
+		} catch (Exception ignored) {}
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onDismissed(int rowNumber, @NonNull Bundle alarmData) {
+
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In onDismissed() rowNumber: " + rowNumber);
+
+		Intent intent = new Intent(ConstantsAndStatics.ACTION_CANCEL_ALARM);
+		intent.setPackage(getPackageName()).putExtras(alarmData);
+		sendBroadcast(intent);
+
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In onDismissed() after sending broadcast");
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	protected void onSnoozedAlarmDictModified() {
+
+		Log.e(ConstantsAndStatics.DEBUG_TAG, "In onSnoozedAlarmDictModified()");
+
+		if (AlarmRingDS.isSnoozedAlarmsEmpty()) {
+			Log.e(ConstantsAndStatics.DEBUG_TAG, "No further alarms, finishing activity");
+			Toast.makeText(this, "No snoozed alarms", Toast.LENGTH_SHORT).show();
+			finish();
+		} else {
+			Log.e(ConstantsAndStatics.DEBUG_TAG,
+					"In onSnoozedAlarmDictModified(), Adapter updated");
+			snoozedAlarmAdapter = new SnoozedAlarmAdapter(AlarmRingDS.getSnoozedAlarms(), this,
+					this);
+			snoozedAlarmsRecyclerView.swapAdapter(snoozedAlarmAdapter, false);
+		}
+	}
+}

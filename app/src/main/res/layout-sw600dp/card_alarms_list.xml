@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2024  Wrichik Basu (basulabs.developer@gmail.com)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
--->
+  ~ Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published
+  ~ by the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~
+  -->
 
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -22,11 +23,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     android:id="@+id/alarmCardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    app:cardElevation="6dp"
+    app:cardUseCompatPadding="true"
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
-    app:cardCornerRadius="10dp"
-    app:cardElevation="6dp"
-    app:cardUseCompatPadding="true">
+    app:cardCornerRadius="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -44,21 +45,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 android:id="@+id/alarmOnOffImgBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="24dp"
                 android:background="@android:color/transparent"
                 android:padding="15dp"
                 app:layout_constraintBottom_toTopOf="@+id/space"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.55"
-                app:srcCompat="@drawable/ic_alarm_off"
-                tools:ignore="ContentDescription" />
+                app:layout_constraintVertical_bias="0.56"
+                app:srcCompat="@drawable/ic_alarm_off" />
 
             <TextView
                 android:id="@+id/alarmTimeTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
+                android:layout_marginStart="24dp"
                 android:layout_marginEnd="32dp"
                 android:gravity="center"
                 android:text="00:00 AM"
@@ -67,74 +67,65 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 android:textSize="25sp"
                 app:layout_constraintBottom_toTopOf="@+id/space"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.2"
+                app:layout_constraintHorizontal_bias="0.43"
                 app:layout_constraintStart_toEndOf="@+id/alarmOnOffImgBtn"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.49"
-                tools:ignore="HardcodedText" />
+                app:layout_constraintVertical_bias="0.55" />
 
             <ImageButton
                 android:id="@+id/alarmDeleteBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="16dp"
                 android:background="@android:color/transparent"
                 android:padding="5sp"
                 app:layout_constraintBottom_toTopOf="@+id/alarmDateTextView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_alarm_delete"
-                tools:ignore="ContentDescription" />
+                app:srcCompat="@drawable/ic_alarm_delete" />
 
             <TextView
                 android:id="@+id/alarmDateTextView"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
                 android:layout_marginEnd="16dp"
                 android:text="Mon, Tue, Wed, Thu, Fri, Sat, Sun"
                 android:textAlignment="viewEnd"
                 android:textColor="@color/defaultLabelColor"
                 app:layout_constraintBottom_toTopOf="@+id/space"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toEndOf="@+id/alarmTimeTextView"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="HardcodedText" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/alarmTypeTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="8dp"
                 android:text="Sound &amp; Vibrate"
-                android:textAlignment="viewEnd"
                 android:textColor="@color/defaultLabelColor"
                 app:layout_constraintBottom_toTopOf="@id/space"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/alarmTimeTextView"
-                tools:ignore="HardcodedText" />
+                app:layout_constraintTop_toBottomOf="@+id/alarmTimeTextView" />
 
             <Space
                 android:id="@+id/space"
                 android:layout_width="0dp"
-                android:layout_height="12dp"
+                android:layout_height="16dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
                 android:id="@+id/recyclerView_alarmMessageTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="16dp"
                 android:layout_marginBottom="8dp"
                 android:gravity="start"
                 android:textColor="@color/defaultLabelColor"

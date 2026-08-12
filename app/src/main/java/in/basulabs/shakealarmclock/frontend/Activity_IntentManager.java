@@ -1,19 +1,20 @@
 /*
-Copyright (C) 2024  Wrichik Basu (basulabs.developer@gmail.com)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
 package in.basulabs.shakealarmclock.frontend;
 
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.ACTION_NEW_ALARM_FROM_INTENT;
@@ -68,7 +69,6 @@ import in.basulabs.shakealarmclock.backend.AlarmDatabase;
 import in.basulabs.shakealarmclock.backend.AlarmEntity;
 import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 import in.basulabs.shakealarmclock.backend.Service_RingAlarm;
-import in.basulabs.shakealarmclock.backend.Service_SnoozeAlarm;
 
 /**
  * An activity to manage activity actions for this app.
@@ -142,8 +142,7 @@ public class Activity_IntentManager extends AppCompatActivity {
 				}
 			}
 			case AlarmClock.ACTION_DISMISS_ALARM -> {
-				if (Service_RingAlarm.isThisServiceRunning ||
-					Service_SnoozeAlarm.isThisServiceRunning) {
+				if (Service_RingAlarm.isThisServiceRunning) {
 					sendBroadcast(new Intent(ConstantsAndStatics.ACTION_CANCEL_ALARM)
 						.setPackage(getPackageName()));
 				} else {

@@ -1,21 +1,23 @@
 /*
-Copyright (C) 2024  Wrichik Basu (basulabs.developer@gmail.com)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
 package in.basulabs.shakealarmclock.frontend;
 
+import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.ACTION_CANCEL_ALARM;
 import static in.basulabs.shakealarmclock.backend.ConstantsAndStatics.DATABASE_NAME;
 
 import android.app.AlarmManager;
@@ -67,9 +69,9 @@ import in.basulabs.shakealarmclock.R;
 import in.basulabs.shakealarmclock.backend.AlarmBroadcastReceiver;
 import in.basulabs.shakealarmclock.backend.AlarmDatabase;
 import in.basulabs.shakealarmclock.backend.AlarmEntity;
+import in.basulabs.shakealarmclock.backend.AlarmRingDS;
 import in.basulabs.shakealarmclock.backend.ConstantsAndStatics;
 import in.basulabs.shakealarmclock.backend.Service_RingAlarm;
-import in.basulabs.shakealarmclock.backend.Service_SnoozeAlarm;
 
 public class Activity_AlarmsList extends AppCompatActivity implements
 	AlarmAdapter.AdapterInterface {
@@ -361,10 +363,7 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 		int alarmID = viewModel.getAlarmId(alarmDatabase, hour, mins);
 
-		int flags =
-			android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ?
-				PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE :
-				PendingIntent.FLAG_NO_CREATE;
+		int flags =	PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE;
 
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
 			alarmID, intent, flags);
@@ -373,7 +372,11 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 			alarmManager.cancel(pendingIntent);
 		}
 
-		ConstantsAndStatics.killServices(this, alarmID);
+		// Dismiss any snoozed or ringing instance of the alarm
+		Bundle alarmDetails;
+		if ((alarmDetails = AlarmRingDS.getSnoozedAlarm(alarmID)) != null)
+			sendBroadcast(new Intent(ACTION_CANCEL_ALARM).putExtras(alarmDetails)
+					.setPackage(getPackageName()));
 
 		DateTimeFormatter formatter;
 		if (DateFormat.is24HourFormat(this)) {
@@ -415,8 +418,12 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	 */
 	private void toggleAlarmState(int hour, int mins, final int newAlarmState) {
 
-		ConstantsAndStatics.killServices(this,
-			viewModel.getAlarmId(alarmDatabase, hour, mins));
+		// Dismiss any ringing or snoozed alarm instance
+		int alarmID = viewModel.getAlarmId(alarmDatabase, hour, mins);
+		Bundle alarmDetails;
+		if ((alarmDetails = AlarmRingDS.getSnoozedAlarm(alarmID)) != null)
+			sendBroadcast(new Intent(ACTION_CANCEL_ALARM).putExtras(alarmDetails)
+					.setPackage(getPackageName()));
 
 		if (newAlarmState == 0) {
 			deleteOrDeactivateAlarm(MODE_DEACTIVATE_ONLY, hour, mins);
@@ -568,17 +575,14 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-		Intent intent = new Intent(getApplicationContext(),
-			AlarmBroadcastReceiver.class);
+		Intent intent = new Intent(getApplicationContext(),	AlarmBroadcastReceiver.class);
 		intent.setAction(ConstantsAndStatics.ACTION_DELIVER_ALARM);
 		intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 		intent.putExtra(ConstantsAndStatics.BUNDLE_KEY_ALARM_DETAILS, data);
 
 		int alarmID = data.getInt(ConstantsAndStatics.BUNDLE_KEY_ALARM_ID);
 
-		int flags = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
-			? PendingIntent.FLAG_IMMUTABLE
-			: 0;
+		int flags = PendingIntent.FLAG_IMMUTABLE;
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
 			alarmID, intent, flags);
 
@@ -851,10 +855,9 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 	 * session.
 	 * <p>
 	 * The following criteria have to be satisfied for requesting non-essential
-	 * permissions:<br> 1. {@link Service_RingAlarm} must NOT be running.<br> 2.
-	 * {@link Service_SnoozeAlarm} must NOT be running.<br> 3. The activity must NOT have
-	 * been launched by {@link Activity_IntentManager}.<br> 4. Permissions must not have
-	 * been asked in the last 100 app sessions.
+	 * permissions:<br> 1. {@link Service_RingAlarm} must NOT be running.
+	 * <br> 2. The activity must NOT have* been launched by {@link Activity_IntentManager}.<br>
+	 * 3. Permissions must not have been asked in the last 100 app sessions.
 	 */
 	private void setCanAskForNonEssentialPerms() {
 
@@ -879,7 +882,6 @@ public class Activity_AlarmsList extends AppCompatActivity implements
 
 				viewModel.setCanRequestNonEssentialPerms(
 					!Service_RingAlarm.isThisServiceRunning
-						&& !Service_SnoozeAlarm.isThisServiceRunning
 						&& (!(getIntent().getAction() != null
 						&& getIntent().getAction()
 						.equals(ConstantsAndStatics.ACTION_NEW_ALARM_FROM_INTENT)))

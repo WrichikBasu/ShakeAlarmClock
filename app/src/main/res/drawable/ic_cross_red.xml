@@ -1,0 +1,47 @@
+<!--
+  ~ Copyright (c) 2026. Wrichik Basu (basulabs.developer@gmail.com)
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published
+  ~ by the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="128dp"
+    android:height="128dp"
+    android:viewportWidth="128"
+    android:viewportHeight="128">
+
+  <!-- Red Circle -->
+  <path
+      android:fillColor="#00000000"
+      android:strokeColor="#FF0000"
+      android:strokeWidth="8"
+      android:pathData="M64,8
+                          A56,56 0 1,1 63.9,8" />
+
+  <!-- X Line 1 -->
+  <path
+      android:strokeColor="#FF0000"
+      android:strokeWidth="12"
+      android:strokeLineCap="round"
+      android:pathData="M36,36 L92,92" />
+
+  <!-- X Line 2 -->
+  <path
+      android:strokeColor="#FF0000"
+      android:strokeWidth="12"
+      android:strokeLineCap="round"
+      android:pathData="M92,36 L36,92" />
+
+</vector>
